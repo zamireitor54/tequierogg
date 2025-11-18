@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Feliz cumpleaños PRECIOSA </title>
+
+  <!-- Fuente: Poppins para cuerpo y Sacramento para títulos -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Sacramento&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero-content">
+        <h1 class="title">Feliz cumpleaños, mi amor</h1>
+        <p class="subtitle">Hoy celebramos tu vida. Te amo más de lo que las palabras pueden decir.</p>
+        <div class="hero-actions">
+          <button id="btn-random-bday" class="btn">100 razones por las que soy feliz contigo y una por la que no</button>
+        </div>
+      </div>
+
+      <figure class="hero-photo">
+        <!-- Reemplaza 'tu-foto.jpg' por el nombre de tu archivo -->
+        <img src="/img/miniña.jpg" alt="Foto de ella" id="main-photo">
+        <figcaption class="photo-caption">Para la persona que hace mis días mejores</figcaption>
+      </figure>
+    </header>
+
+    <section class="cards-section">
+      <article class="card">
+        <h2>Mensajitos para mi fresita</h2>
+        <p class="desc">Aquí unas palabras que quiero decirte.</p>
+        <div id="bday-list" class="message-list"></div>
+      </article>
+
+      <article class="card">
+        <h2>Lee esto cuando te sientas bajoneada, mi pinguinita</h2>
+        <p class="desc">No todos los días son felices y es normal, pero estos mensajitos pueden hacerte sentir mejor.</p>
+        <div id="comfort-list" class="message-list"></div>
+      </article>
+
+      <article class="card">
+        <h2>Mensajitos para mi niña</h2>
+        <p class="desc">Pequeños recordatorios de lo que siento por ti.</p>
+        <div id="love-list" class="message-list"></div>
+      </article>
+    </section>
+
+    <section class="extras">
+      <div class="extra-card">
+        <h3>Un mensaje para cada día hasta el proximo cumpleaños mi niña</h3>
+        <p>Selecciona un día para leer tu mensaje especial. Los días futuros se irán desbloqueando mientras pasa el tiempo. </p>
+        
+        <div class="calendar-toggle-row">
+          <button id="toggle-calendar" class="btn small">Abrir calendario 📖</button>
+          <span id="selected-date" class="selected-date">17/11/2025</span>
+          <button id="unlock-all" class="btn small outline">Desbloquear todos</button>
+        </div>
+        
+        <div id="calendar-container" class="calendar-wrapper calendar-hidden">
+          <div class="month-nav">
+            <button id="prev-month" class="btn small month-btn">← Anterior</button>
+            <div id="current-month" class="current-month">Noviembre 2025</div>
+            <button id="next-month" class="btn small month-btn">Siguiente →</button>
+          </div>
+          <div class="calendar-header">
+            <div class="calendar-header-day">Lu</div>
+            <div class="calendar-header-day">Ma</div>
+            <div class="calendar-header-day">Mi</div>
+            <div class="calendar-header-day">Ju</div>
+            <div class="calendar-header-day">Vi</div>
+            <div class="calendar-header-day">Sa</div>
+            <div class="calendar-header-day">Do</div>
+          </div>
+          <div id="calendar" class="calendar-grid"></div>
+        </div>
+        
+        <div id="message-display" class="message-display"></div>
+      </div>
+
+      <div class="extra-card">
+        <h3>Recuerdosdonde el tiempo se para</h3>
+        <p><strong>Algunos recuerdos lindos </strong></p>
+        <p style="font-style: italic; color: #7c49ff; margin-bottom: 16px;">No sabes lo feliz que soy contigo... cada foto muestra tu hermosura.</p>
+        <div id="print-gallery" class="print-gallery" aria-hidden="false">
+          <div class="photo-frame" id="photo-frame" role="button" tabindex="0" title="Haz clic para ver la siguiente foto">
+            <!-- Botón para expandir la imagen -->
+            <button id="photo-expand" class="photo-expand-btn" aria-label="Expandir foto">⤢</button>
+          </div>
+          <p style="text-align: center; font-size: 0.85rem; color: #999; margin-top: 8px;">Haz clic en la foto para ver la siguiente</p>
+        </div>
+      </div>
+    </section>
+
+    
+  </main>
+
+  <!-- Imagen de certificado a pantalla completa (coloca tu archivo en img/certificate.jpg) -->
+  <div class="certificate-full" aria-hidden="false">
+    <img id="certificate-img" src="img/Certificado de Adopción Perro Ilustrado Verde.png" alt="Certificado" />
+  </div>
+<footer class="footer">
+      <p>Hecho con cariño. Para la niña mas HERMOSOSOSOSOSOSISIMA</p>
+      <p class="muted">No olvides lo mucho que te quiero</p>
+    </footer>
+  <script src="app.js" defer></script>
+</body>
+</html>
