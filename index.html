@@ -8,6 +8,7 @@
   <!-- Fuente: Poppins para cuerpo y Sacramento para títulos -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Sacramento&display=swap" rel="stylesheet">
 
+  <!-- CSS Principal -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -81,10 +82,13 @@
       </div>
 
       <div class="extra-card">
-        <h3>Recuerdosdonde el tiempo se para</h3>
+        <h3>Recuerdos donde el tiempo se para</h3>
         <p><strong>Algunos recuerdos lindos </strong></p>
         <p style="font-style: italic; color: #7c49ff; margin-bottom: 16px;">No sabes lo feliz que soy contigo... cada foto muestra tu hermosura.</p>
-        <div id="print-gallery" class="print-gallery" aria-hidden="false">
+
+  
+
+		<div id="print-gallery" class="print-gallery" aria-hidden="false">
           <div class="photo-frame" id="photo-frame" role="button" tabindex="0" title="Haz clic para ver la siguiente foto">
             <!-- Botón para expandir la imagen -->
             <button id="photo-expand" class="photo-expand-btn" aria-label="Expandir foto">⤢</button>
@@ -98,6 +102,100 @@
   </main>
 
   <!-- Imagen de certificado a pantalla completa (coloca tu archivo en img/certificate.jpg) -->
+  <!-- Super-gallery full-bleed (moved here) -->
+  <section class="super-gallery full-bleed">
+    <div class="super-gallery-inner">
+      <div class="super-gallery-head">
+        <h4>Nuestra galería 💞</h4>
+        <p class="muted">Sube fotos con lugar y fecha. Se guardan solitas y aparecen aquí.</p>
+
+        <div class="super-gallery-actions">
+          <button id="btn-clear-filter" class="btn small outline" style="display:none;">✖ Quitar filtro</button>
+
+          <button id="btn-open-upload" class="btn small">➕ Subir recuerdo</button>
+
+          <select id="filter-place" class="select small">
+            <option value="">📍 Todos los lugares</option>
+          </select>
+
+          <input id="search-caption" class="input small" type="text" placeholder="Buscar (ej: playa, cine, noche...)">
+        </div>
+      </div>
+
+      <div id="super-gallery-grid" class="super-gallery-grid"></div>
+    </div>
+  </section>
+
+  <!-- Modal subir -->
+  <div id="upload-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card">
+      <h3>Subir recuerdo 💖</h3>
+      <p class="muted">Selecciona fotos y escribe dónde fue y qué recuerdas.</p>
+
+      <!-- Login box (solo aparece si no hay sesión) -->
+      <div id="auth-box" class="auth-box">
+        <div class="auth-row">
+          <input id="auth-email" class="input" type="email" placeholder="Tu correo" autocomplete="email">
+          <input id="auth-pass" class="input" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+        </div>
+        <div class="auth-actions">
+          <button id="btn-login" class="btn small">Iniciar sesión</button>
+          <button id="btn-logout" class="btn small outline" style="display:none;">Cerrar sesión</button>
+          <span id="auth-state" class="muted"></span>
+        </div>
+        <hr style="border:none;border-top:1px solid rgba(124,73,255,0.12); margin:12px 0;">
+      </div>
+
+      <label class="field">
+        <span>Fotos</span>
+        <input id="upload-files" type="file" accept="image/*" multiple>
+      
+      <div id="upload-preview" class="upload-preview"></div>
+      </label>
+
+      <div class="row">
+        <label class="field">
+          <span>📍 Lugar</span>
+          <input id="upload-place" class="input" type="text" placeholder="Ej: Medellín, Cartagena, Parque..." />
+        </label>
+
+        <label class="field">
+          <span>📅 Fecha</span>
+          <input id="upload-date" class="input" type="date" />
+        </label>
+      </div>
+
+      <label id="album-field" class="field">
+        <span id="album-label">🖼️ Nombre de la foto</span>
+        <input id="upload-album" class="input" type="text" placeholder="Ej: Mi princesa hermosa..." />
+      </label>
+
+      <label class="field">
+        <span>💌 Mensajito</span>
+        <textarea id="upload-caption" class="textarea" rows="3" placeholder="Ej: Ese día la pasamos demasiado lindo..."></textarea>
+      </label>
+
+      <div class="modal-actions">
+        <button id="btn-cancel-upload" class="btn small outline">Cancelar</button>
+        <button id="btn-do-upload" class="btn small">Guardar</button>
+      </div>
+
+      <div id="upload-status" class="muted" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox hidden" aria-hidden="true">
+    <button id="lightbox-close" class="lightbox-close">✕</button>
+    <button id="lightbox-prev" class="lightbox-nav prev">◀</button>
+    <button id="lightbox-next" class="lightbox-nav next">▶</button>
+
+    <figure class="lightbox-figure">
+      <img id="lightbox-img" alt="Recuerdo">
+      <figcaption id="lightbox-cap"></figcaption>
+    </figure>
+  </div>
+
   <div class="certificate-full" aria-hidden="false">
     <img id="certificate-img" src="img/Certificado de Adopción Perro Ilustrado Verde.png" alt="Certificado" />
   </div>
@@ -105,6 +203,51 @@
       <p>Hecho con cariño. Para la niña mas HERMOSOSOSOSOSOSISIMA</p>
       <p class="muted">No olvides lo mucho que te quiero</p>
     </footer>
+
+  <!-- FAB Notas -->
+  <button id="notes-fab" class="notes-fab" aria-label="Abrir notas">📝</button>
+
+  <!-- Modal Notas -->
+  <div id="notes-modal" class="notes-modal hidden" role="dialog" aria-modal="true">
+    <div class="notes-card">
+      <div class="notes-head">
+        <div>
+          <h3>Nuestras notas 💗</h3>
+          <p class="muted" style="margin:0;">3 cuadernos: General, Geral y Zamir.</p>
+        </div>
+        <button id="notes-close" class="notes-x" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="notes-tabs">
+        <button class="notes-tab active" data-cat="general">🌸 General</button>
+        <button class="notes-tab" data-cat="geral">💗 Para Geral</button>
+        <button class="notes-tab" data-cat="zamir">🖤 Para Zamir</button>
+      </div>
+
+      <div class="notes-compose">
+        <textarea id="notes-input" class="textarea" rows="3" placeholder="Escribe una nota..."></textarea>
+        <div class="notes-actions">
+          <button id="notes-add" class="btn small">Guardar</button>
+          <button id="notes-clear" class="btn small outline">Limpiar</button>
+          <span id="notes-status" class="muted"></span>
+        </div>
+      </div>
+
+      <div class="notes-list" id="notes-list"></div>
+    </div>
+  </div>
+</footer>
+  <!-- SDK de Supabase (debe cargarse SIN defer) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Módulos de la aplicación -->
+  <script src="js/messages.js" defer></script>
+  <script src="js/calendar.js" defer></script>
+  <script src="js/printGallery.js" defer></script>
+  <script src="js/gallery.js" defer></script>
+  <!-- Script principal de inicialización -->
   <script src="app.js" defer></script>
+  <!-- Script de notas -->
+  <script src="notes.js" defer></script>
 </body>
 </html>

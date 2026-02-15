@@ -1,0 +1,196 @@
+/* ===============================================
+   SUPER GALERÍA — DISEÑO PRO
+   =============================================== */
+
+.super-gallery.full-bleed {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  padding: 34px 18px 36px;
+  position: relative;
+  overflow: hidden;
+
+  background:
+    radial-gradient(900px 420px at 10% 15%, rgba(255,111,191,0.20), transparent 60%),
+    radial-gradient(820px 420px at 90% 20%, rgba(124,73,255,0.20), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));
+  border-top: 1px solid rgba(124,73,255,0.08);
+  border-bottom: 1px solid rgba(124,73,255,0.08);
+}
+
+.super-gallery.full-bleed::after {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  background: radial-gradient(600px 240px at 50% 0%, rgba(255,255,255,0.65), transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.super-gallery-inner {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  z-index: 1;
+}
+
+/* Header */
+.super-gallery-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.super-gallery-head h4 {
+  margin: 0;
+  font-size: 1.55rem;
+  letter-spacing: 0.2px;
+  color: #2c1437;
+  font-family: Sacramento, Poppins, serif;
+}
+
+.super-gallery-head .muted {
+  margin: 0;
+  color: rgba(44,20,55,0.68);
+  font-size: 0.98rem;
+}
+
+/* Action bar */
+.super-gallery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 6px;
+
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.62);
+  border: 1px solid rgba(124,73,255,0.10);
+  box-shadow: 0 14px 40px rgba(36,19,50,0.10);
+  backdrop-filter: blur(10px);
+}
+
+/* Masonry grid */
+.super-gallery-grid {
+  column-count: 4;
+  column-gap: 12px;
+  margin-top: 16px;
+}
+
+.sg-item {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 12px;
+  break-inside: avoid;
+
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid rgba(124,73,255,0.10);
+  box-shadow: 0 18px 60px rgba(36,19,50,0.10);
+  background: rgba(124,73,255,0.06);
+
+  transform: translateZ(0);
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+.sg-item.size-1,
+.sg-item.size-2,
+.sg-item.size-3,
+.sg-item.size-tall {
+  grid-column: auto !important;
+  aspect-ratio: auto !important;
+}
+
+.sg-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.02);
+  transition: transform .35s ease;
+  filter: saturate(1.02) contrast(1.03);
+}
+
+.sg-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(420px 180px at 50% 0%, rgba(255,255,255,0.35), transparent 60%);
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.sg-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,111,191,0.20);
+  box-shadow: 0 26px 80px rgba(36,19,50,0.18);
+}
+
+.sg-item:hover img {
+  transform: scale(1.07);
+}
+
+/* Meta overlay */
+.sg-meta {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 12px 12px 12px;
+  background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.62));
+  color: #fff;
+}
+
+.sg-meta .top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.86rem;
+}
+
+.sg-meta .cap {
+  margin-top: 6px;
+  font-weight: 500;
+  font-size: 0.90rem;
+  opacity: 0.96;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sg-pill {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+}
+
+/* Empty state message */
+.super-gallery-grid .msg {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.65);
+  border: 1px solid rgba(124,73,255,0.10);
+  box-shadow: 0 14px 40px rgba(36,19,50,0.08);
+}
+
+/* Responsive */
+@media (max-width: 980px) {
+  .super-gallery-grid { column-count: 3; }
+}
+
+@media (max-width: 640px) {
+  .super-gallery-grid { column-count: 2; }
+}

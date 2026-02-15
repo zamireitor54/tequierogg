@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Cumpleaños Mi Amor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Pantalla de bienvenida -->
+    <div id="welcome-screen" class="screen">
+        <div class="welcome-content">
+            <h1>Para Mi Amor</h1>
+            <p>Toca la pantalla para comenzar</p>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <div id="main-content" class="hidden">
+        <!-- Sección de felicitación -->
+        <section id="birthday-section" class="section active">
+            <div class="container">
+                <div class="photo-container">
+                    <img id="main-photo" src="placeholder.jpg" alt="Mi amor">
+                    <div class="photo-frame"></div>
+                </div>
+                <h1 class="title">¡Feliz Cumpleaños Mi Amor!</h1>
+                <div class="messages-container">
+                    <div class="message-card">
+                        <p>Hoy es un día muy especial porque el mundo recibió a la persona más maravillosa que he conocido. Eres la luz que ilumina mis días y la razón por la que mi corazón late con tanta fuerza.</p>
+                    </div>
+                    <div class="message-card">
+                        <p>Cada momento a tu lado es un regalo que atesoro profundamente. Tu sonrisa tiene el poder de cambiar mi día completo y tu amor transforma mi vida de maneras que nunca imaginé posibles.</p>
+                    </div>
+                    <div class="message-card">
+                        <p>En este día quiero recordarte lo increíblemente especial que eres. Tu bondad, tu inteligencia, tu forma única de ver el mundo... todo en ti me inspira a ser mejor persona cada día.</p>
+                    </div>
+                    <div class="message-card">
+                        <p>Que este nuevo año de vida te traiga toda la felicidad que mereces, que tus sueños se hagan realidad y que sigas siendo esa persona maravillosa que ilumina la vida de todos los que te rodean.</p>
+                    </div>
+                </div>
+                <button class="nav-button" onclick="showSection('support-section')">Siguiente</button>
+            </div>
+        </section>
+
+        <!-- Sección de apoyo -->
+        <section id="support-section" class="section">
+            <div class="container">
+                <h2 class="section-title">Para Cuando Te Sientas Mal</h2>
+                <div class="support-messages">
+                    <div class="support-card">
+                        <h3>Recuerda esto...</h3>
+                        <p>Eres más fuerte de lo que crees y más valiosa de lo que imaginas. Los momentos difíciles son temporales, pero tu fortaleza es permanente.</p>
+                    </div>
+                    <div class="support-card">
+                        <h3>Cuando dudes de ti</h3>
+                        <p>Quiero que sepas que eres increíblemente capaz. Has superado tantas cosas antes y esta no será la excepción. Confía en tu proceso.</p>
+                    </div>
+                    <div class="support-card">
+                        <h3>En días grises</h3>
+                        <p>Aunque hoy el cielo parezca nublado, el sol siempre está detrás de las nubes. Así como él, tu luz interior nunca se apaga completamente.</p>
+                    </div>
+                    <div class="support-card">
+                        <h3>Mi promesa</h3>
+                        <p>Estaré aquí para ti en cada paso del camino. No tienes que enfrentar nada solo porque cuentas conmigo incondicionalmente.</p>
+                    </div>
+                    <div class="support-card">
+                        <h3>Un recordatorio</h3>
+                        <p>Tus sentimientos son válidos, pero no definen quién eres. Eres esa persona maravillosa que ilumina mi vida, incluso en tus días más oscuros.</p>
+                    </div>
+                    <div class="support-card">
+                        <h3>Para tu corazón</h3>
+                        <p>El amor que siento por ti no depende de tus días buenos o malos. Te amo en tu totalidad, con tus luces y tus sombras.</p>
+                    </div>
+                </div>
+                <div class="navigation-buttons">
+                    <button class="nav-button" onclick="showSection('birthday-section')">Anterior</button>
+                    <button class="nav-button" onclick="showSection('love-section')">Siguiente</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de amor -->
+        <section id="love-section" class="section">
+            <div class="container">
+                <h2 class="section-title">Razones Por Las Que Te Amo</h2>
+                <div class="love-reasons">
+                    <div class="reason-item">
+                        <span class="reason-number">1</span>
+                        <p class="reason-text">Por tu sonrisa que ilumina cualquier lugar</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">2</span>
+                        <p class="reason-text">Por tu forma única de ver el mundo</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">3</span>
+                        <p class="reason-text">Por tu bondad hacia los demás</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">4</span>
+                        <p class="reason-text">Por cómo me haces sentir especial</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">5</span>
+                        <p class="reason-text">Por tu inteligencia que me inspira</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">6</span>
+                        <p class="reason-text">Por tu capacidad de superación</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">7</span>
+                        <p class="reason-text">Por los pequeños detalles que compartimos</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">8</span>
+                        <p class="reason-text">Por cómo me aceptas tal como soy</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">9</span>
+                        <p class="reason-text">Por tu sentido del humor</p>
+                    </div>
+                    <div class="reason-item">
+                        <span class="reason-number">10</span>
+                        <p class="reason-text">Porque contigo el mundo tiene más color</p>
+                    </div>
+                </div>
+                <div class="final-message">
+                    <p>Y sobre todo, te amo simplemente por ser tú. Por esa persona maravillosa que ha llegado a mi vida para quedarse, para enseñarme el verdadero significado del amor y para hacerme el hombre más afortunado del mundo.</p>
+                </div>
+                <div class="navigation-buttons">
+                    <button class="nav-button" onclick="showSection('support-section')">Anterior</button>
+                    <button class="nav-button" onclick="showSection('memories-section')">Siguiente</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de recuerdos -->
+        <section id="memories-section" class="section">
+            <div class="container">
+                <h2 class="section-title">Nuestros Momentos</h2>
+                <div class="memories-container">
+                    <div class="memory-card">
+                        <div class="memory-placeholder">Foto de recuerdo 1</div>
+                        <p>Ese primer momento especial que compartimos y que marcó el inicio de todo.</p>
+                    </div>
+                    <div class="memory-card">
+                        <div class="memory-placeholder">Foto de recuerdo 2</div>
+                        <p>Aquel día en que reímos sin parar por algo simple pero significativo.</p>
+                    </div>
+                    <div class="memory-card">
+                        <div class="memory-placeholder">Foto de recuerdo 3</div>
+                        <p>Esa ocasión en que superamos juntos un desafío y nos sentimos invencibles.</p>
+                    </div>
+                </div>
+                <div class="memory-message">
+                    <p>Cada recuerdo contigo es un tesoro que guardo en lo más profundo de mi corazón. Espero crear muchos más a tu lado.</p>
+                </div>
+                <div class="navigation-buttons">
+                    <button class="nav-button" onclick="showSection('love-section')">Anterior</button>
+                    <button class="nav-button" onclick="showSection('final-section')">Siguiente</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección final -->
+        <section id="final-section" class="section">
+            <div class="container">
+                <h2 class="section-title">Para Siempre</h2>
+                <div class="final-content">
+                    <div class="heart-animation">❤</div>
+                    <p class="closing-message">
+                        Mi amor, en este día tan especial quiero renovar mi promesa de amarte, cuidarte y apoyarte en cada paso del camino. Eres mi mayor regalo, mi inspiración constante y la razón por la que creo en el amor verdadero.
+                    </p>
+                    <p class="closing-message">
+                        Que este cumpleaños sea solo el comienzo de un año maravilloso lleno de alegrías, logros y momentos inolvidables. Estaré aquí para celebrar cada uno de ellos contigo.
+                    </p>
+                    <p class="signature">Con todo mi amor,<br>Tu novio</p>
+                </div>
+                <div class="navigation-buttons">
+                    <button class="nav-button" onclick="showSection('memories-section')">Anterior</button>
+                    <button class="nav-button" onclick="restartExperience()">Volver al inicio</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Efectos de confeti -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <script src="script.js"></script>
+</body>
+</html>

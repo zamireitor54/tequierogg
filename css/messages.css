@@ -1,0 +1,133 @@
+/* ===============================================
+   TARJETAS DE MENSAJES
+   =============================================== */
+
+/* Cards area */
+.cards-section {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.card {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 180px;
+  box-shadow: 0 8px 20px rgba(36,19,50,0.06);
+  border: 1px solid rgba(124,73,255,0.04);
+}
+
+.card h2 {
+  margin: 0 0 8px 0;
+  color: var(--dark-title);
+  font-size: 1.1rem;
+}
+
+.card .desc {
+  margin: 0 0 12px 0;
+  color: var(--neutral-text);
+  font-size: 0.95rem;
+}
+
+/* Message list */
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.msg {
+  background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.7));
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 0.95rem;
+  border: 1px solid rgba(124,73,255,0.05);
+  position: relative;
+}
+
+.msg .actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.small-action {
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(124,73,255,0.08);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all .2s ease;
+}
+
+.small-action:hover {
+  background: rgba(124,73,255,0.08);
+  border-color: rgba(124,73,255,0.16);
+}
+
+/* Extras */
+.extras {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.extra-card {
+  flex: 1;
+  min-width: 300px;
+  background: rgba(255,255,255,0.75);
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(124,73,255,0.04);
+  box-shadow: 0 6px 18px rgba(36,19,50,0.04);
+}
+
+.extra-card h3 {
+  margin: 0 0 8px 0;
+  color: var(--dark-title);
+  font-size: 1.1rem;
+}
+
+.extra-card p {
+  margin: 0 0 12px 0;
+  color: var(--neutral-text);
+  font-size: 0.95rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.field span {
+  display: block;
+  font-weight: 700;
+  color: rgba(44,20,55,0.74);
+  margin: 10px 0 6px;
+}
+
+.field input[type="url"] {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(124,73,255,0.08);
+}
+
+/* Responsive */
+@media (max-width: 1000px) {
+  .cards-section { grid-template-columns: repeat(2, 1fr); }
+  .extras { flex-direction: column; }
+  .extra-card { min-width: unset; }
+}
+
+@media (max-width: 700px) {
+  .cards-section { grid-template-columns: 1fr; }
+  .extra-card { padding: 12px; }
+}
