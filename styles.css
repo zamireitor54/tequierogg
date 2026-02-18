@@ -1675,5 +1675,114 @@ body {
   .lightbox-meta{ gap: 10px; }
 }
 
+/* =========================
+   LIGHTBOX: sin scroll + responsive
+   ========================= */
+
+.lightbox{
+  position: fixed;
+  inset: 0;
+  background: rgba(10,6,12,0.88);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index: 10000;
+  padding: 14px;
+}
+
+.lightbox.hidden{ display:none; }
+
+/* Mantén todo dentro de 92vh (sin scroll interno) */
+.lightbox-figure{
+  margin:0;
+  width: min(980px, 96vw);
+  height: min(92vh, 900px);
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+  gap: 10px;
+  overflow: hidden; /* <- clave: sin scroll */
+}
+
+/* La imagen se adapta dejando espacio fijo para la info */
+.lightbox-figure img{
+  max-width: 100%;
+  max-height: 66vh;          /* deja espacio para meta/texto */
+  width: auto;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 20px 70px rgba(0,0,0,0.65);
+  object-fit: contain;       /* no recorta, se ajusta */
+}
+
+/* Contenedor de info siempre visible */
+#lightbox-cap{
+  width: min(980px, 96vw);
+  max-width: 100%;
+  text-align:center;
+  color: rgba(255,255,255,0.92);
+  line-height: 1.35;
+  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  overflow: hidden;          /* <- sin scroll en info */
+}
+
+/* Si tu info usa estos bloques */
+.lightbox-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+  align-items:center;
+  margin-bottom: 8px;
+}
+
+/* En móviles: recortamos un poquito la imagen para que quepa todo */
+@media (max-width: 520px){
+  .lightbox{ padding: 10px; }
+
+  .lightbox-figure{
+    height: 92vh;
+    gap: 8px;
+  }
+
+  .lightbox-figure img{
+    max-height: 52vh; /* <- esto evita que la info se vaya abajo */
+    border-radius: 12px;
+  }
+
+  #lightbox-cap{
+    font-size: 0.92rem;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .lightbox-title{
+    font-size: 1.25rem; /* si usas título grande */
+  }
+}
+
+/* Editor encima de la foto, sin mover nada */
+.lb-edit{
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 14px;
+  background: rgba(10,6,12,0.60);
+  backdrop-filter: blur(8px);
+}
+
+.lb-edit.hidden{ display:none; }
+
+.lb-edit-card{
+  width: min(720px, 96vw);
+  max-height: 86vh;
+  overflow: auto; /* si el form es largo, scrollea SOLO el form */
+  border-radius: 16px;
+}
+
+
 
 
