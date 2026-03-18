@@ -40,6 +40,263 @@ body {
   padding: 24px;
 }
 
+/* ===============================
+   LIGHTBOX LAYOUT (imagen arriba, info abajo)
+   =============================== */
+
+.lightbox{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10,6,12,0.86);
+
+  /* 👇 si hay mucha info, scrollea TODO el overlay */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  padding: 18px 12px;
+}
+
+.lightbox.hidden{ display:none; }
+
+/* el figure ahora es columna */
+.lightbox-figure{
+  margin: 0 auto;
+  width: min(980px, 96vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+
+  /* para que nunca se corte por arriba en móviles */
+  min-height: calc(100dvh - 36px);
+  justify-content: center;
+}
+
+/* wrapper para la imagen (necesario para los botones) */
+.lb-img-wrapper{
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* imagen centrada y RESPONSIVE */
+#lightbox-img{
+  width: auto;
+  max-width: 96vw;
+  max-height: 68dvh;   /* 👈 clave: deja espacio para la info abajo */
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+  object-fit: contain;
+  background: rgba(255,255,255,0.03);
+}
+
+/* panel de info abajo */
+#lightbox-cap.lb-panel{
+  width: min(720px, 92vw);
+  padding: 14px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  text-align: center;
+
+  /* 👇 NUNCA se sale el texto */
+  overflow: hidden;
+}
+
+.lightbox-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+  align-items:center;
+  margin-bottom: 10px;
+}
+
+.lightbox-title{
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: .2px;
+  width: 100%;
+}
+
+.lightbox-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(124,73,255,0.22);
+  border: 1px solid rgba(124,73,255,0.35);
+  font-weight: 700;
+}
+
+.lightbox-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+/* texto del mensajito */
+.lightbox-text{
+  font-size: 0.98rem;
+  line-height: 1.35;
+  opacity: .95;
+
+  /* 👇 evita que palabras largas rompan */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  /* clamp bonito (y luego "ver más" expande) */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.lightbox-text.expanded{
+  -webkit-line-clamp: unset;
+}
+
+/* botón ver más */
+.lb-more{
+  margin-top: 10px;
+  display: inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.08);
+  color:#fff;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* ===== botones editar/eliminar ENCIMA de la foto ===== */
+.lb-admin-overlay{
+  position:absolute;
+  top: 10px;
+  left: 10px;
+  display:flex;
+  gap:10px;
+  z-index: 3;
+}
+
+.lb-fab{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(0,0,0,0.40);
+  color: #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: transform .15s ease, background .15s ease;
+}
+.lb-fab:hover{ transform: translateY(-1px); background: rgba(0,0,0,0.55); }
+
+.lb-fab.danger{
+  background: rgba(255,60,120,0.32);
+  border-color: rgba(255,60,120,0.42);
+}
+.lb-fab.danger:hover{ background: rgba(255,60,120,0.45); }
+
+/* Botones X / nav siempre visibles */
+.lightbox-close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 6;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(124,73,255,0.18);
+  background: #ffffff; /* ✅ blanco visible sobre la imagen */
+  color: #2c1437;
+  box-shadow: 0 14px 40px rgba(0,0,0,0.20);
+  display: grid;
+  place-items: center;
+}
+
+.lightbox-nav.prev,
+.lightbox-nav.next{
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10001;
+}
+
+/* Acciones (editar/eliminar) dentro de la card de info */
+#lightbox-cap{
+  position: relative;
+}
+
+/* ✅ X dentro del cuadro de la imagen (wrapper), arriba a la derecha */
+.lb-img-wrapper{ position: relative; }
+.lb-img-wrapper .lightbox-close{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+/* ✅ Regla final: fuerza la X dentro del cuadro de la imagen */
+.lb-img-wrapper > .lightbox-close{
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+
+.lb-cap-actions{
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.lb-cap-btn{
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.25);
+  color: #ffffff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform .15s ease, background .15s ease;
+}
+.lb-cap-btn:hover{ transform: translateY(-1px); background: rgba(0,0,0,0.40); }
+.lb-cap-btn.danger{
+  background: rgba(255,60,120,0.28);
+  border-color: rgba(255,60,120,0.38);
+}
+.lb-cap-btn.danger:hover{ background: rgba(255,60,120,0.42); }
+
+/* Extra: en pantallas bajitas, baja un poco max-height de la imagen */
+@media (max-height: 720px){
+  #lightbox-img{ max-height: 58dvh; }
+}
+
 .page {
   max-width: 1100px;
   margin: 0 auto;
@@ -187,46 +444,59 @@ body {
   gap: 18px;
 }
 
-/* Auth box in upload modal */
-.auth-box{ width:100%; }
-.auth-row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-@media (max-width:650px){ .auth-row{ grid-template-columns:1fr; } }
-.auth-actions{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:10px; }
+/* (old) auth-box styles removed: login moved to global auth modal */
 
-/* Upload preview thumbnails */
+/* Upload: fila de botón + contador */
+.upload-file-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:6px;
+  margin-bottom:6px;
+}
+
+/* Carrusel de previews */
 .upload-preview{
   display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-top:10px;
+  gap:12px;
+  margin-top:8px;
+  padding:4px 2px 4px 0;
+  overflow-x:auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124,73,255,0.35) transparent;
 }
-.upload-thumb{
-  width: 58px;
-  height: 58px;
-  border-radius: 12px;
+
+.upload-preview-card{
+  position:relative;
+  flex:0 0 140px;
+  height:140px;
+  border-radius:16px;
   overflow:hidden;
   border: 1px solid rgba(124,73,255,0.16);
   background: rgba(124,73,255,0.06);
   box-shadow: 0 10px 26px rgba(36,19,50,0.10);
-  position: relative;
 }
-.upload-thumb img{
+.upload-preview-card img{
   width:100%;
   height:100%;
   object-fit:cover;
   display:block;
 }
-.upload-thumb span{
+.upload-preview-remove{
   position:absolute;
-  bottom:4px; left:6px; right:6px;
-  font-size: 10px;
+  top:6px;
+  right:6px;
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  border:0;
+  background: rgba(10,6,12,0.70);
   color:#fff;
-  background: rgba(0,0,0,0.45);
-  border-radius: 999px;
-  padding: 2px 6px;
-  white-space: nowrap;
-  overflow:hidden;
-  text-overflow: ellipsis;
+  font-size:14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 /* Lightbox admin + edit UI */
@@ -317,18 +587,6 @@ body {
   margin-top: 12px;
 }
 
-/* Asegura que el contenedor del lightbox centre todo */
-.lightbox{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.lightbox-figure{
-  width: min(980px, 94vw);
-  margin: 0 auto;
-}
-
 /* --- EDIT CARD: centrado real --- */
 .lb-edit{
   width: 100%;
@@ -344,34 +602,6 @@ body {
   width: min(720px, 92vw);
   margin: 0 auto;
 }
-
-#lightbox-cap{
-  width: 100%;
-  max-width: min(980px, 94vw);
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-#lightbox-cap .lb-edit{
-  text-align: left; /* inputs no deben depender del centrado del caption */
-}
-
-/* Optional: edit card as overlay (uncomment to enable) */
-/*
-.lb-edit{
-  position: fixed;
-  inset: 0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 18px;
-  z-index: 10002;
-}
-
-.lb-edit-card{
-  width: min(760px, 92vw);
-}
-*/
 
 /* EDIT OVERLAY (encima de la foto) */
 .lb-edit{
@@ -729,6 +959,24 @@ body {
   color: var(--dark-title);
   font-size: 1.05rem;
   line-height: 1.6;
+}
+
+.special-message-banner {
+  margin: 14px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255,111,191,0.15), rgba(124,73,255,0.10));
+  border: 1px solid rgba(124,73,255,0.25);
+  padding: 16px;
+  color: #2c1437;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.06);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-align: left;
+  font-weight: 500;
+}
+
+.special-message-banner p {
+  margin: 0 0 8px;
 }
 
 .message-display.empty {
@@ -1411,8 +1659,44 @@ body {
     0 12px 32px rgba(255,77,184,0.18);
   transition: transform .18s ease, filter .18s ease;
 }
+.notes-fab.hidden{ display: none !important; }
 .notes-fab:hover{ transform: translateY(-2px) scale(1.02); filter: brightness(1.03); }
 .notes-fab:active{ transform: translateY(0) scale(0.99); }
+
+.notes-login-row {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 12000;
+}
+
+#btn-open-login-footer {
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.24);
+  background: #fff;
+  color: #4e2b76;
+  font-size: 0.82rem;
+  padding: 8px 10px;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.16);
+  transition: all .18s ease;
+}
+
+#btn-open-login-footer:hover {
+  transform: translateY(-1px);
+  background: #f8f2ff;
+}
+
+.notes-fab{
+  position: static;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0;
+}
 
 .notes-modal{
   position: fixed;
@@ -1669,119 +1953,937 @@ body {
 @media (max-width: 720px){
   .notes-card{ padding: 14px; border-radius: 18px; }
   .notes-compose{ grid-template-columns: 1fr; }
+}
+
+/* =========================
+   AUTH FAB + MODAL
+   ========================= */
+
+.auth-fab.hidden,
+.auth-modal.hidden { display: none !important; }
+
+.auth-fab{
+  position: fixed;
+  right: 18px;
+  bottom: 88px; /* encima del botón de notas (18 + 58 + 12) */
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border-radius: 999px; /* circulito */
+  border: 1px solid rgba(124,73,255,0.18);
+  background: #ffffff; /* ✅ blanco sólido */
+  color: #7c49ff;
+  cursor: pointer;
+  z-index: 12002; /* por encima del botón de notas */
+  box-shadow:
+    0 18px 60px rgba(36,19,50,0.18),
+    0 10px 28px rgba(124,73,255,0.16);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.auth-fab:hover{
+  transform: translateY(-2px);
+  background: #ffffff;
+  box-shadow:
+    0 22px 70px rgba(36,19,50,0.22),
+    0 14px 34px rgba(255,77,184,0.14);
+}
+.auth-fab:active{ transform: translateY(0px); }
+
+.auth-fab-icon{
+  display: block;
+}
+
+.auth-fab-text{
+  display: none;
+}
+
+.auth-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 13000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(10,6,12,0.58);
+  backdrop-filter: blur(10px);
+}
+
+.auth-card{
+  width: min(520px, 100%);
+  border-radius: 18px;
+  background: #ffffff; /* ✅ blanco sólido */
+  border: 1px solid rgba(124,73,255,0.14);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+  overflow: hidden;
+}
+
+.auth-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 16px 16px 12px;
+  background: linear-gradient(180deg, rgba(124,73,255,0.08), rgba(255,111,191,0.06));
+  border-bottom: 1px solid rgba(124,73,255,0.10);
+}
+
+.auth-head h3{
+  margin:0;
+  font-size: 1.15rem;
+  color: #2c1437;
+  letter-spacing: .2px;
+}
+
+.auth-body{ padding: 14px 16px 16px; }
+
+.auth-x{
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(124,73,255,0.16);
+  background: rgba(124,73,255,0.08);
+  color: #2c1437;
+  cursor: pointer;
+}
+.auth-x:hover{ background: rgba(124,73,255,0.12); }
+
+/* Texto secundario dentro del auth modal (p.muted) en oscuro */
+.auth-modal .muted{
+  color: rgba(44,20,55,0.70);
+}
+
+/* Inputs del auth modal más legibles */
+.auth-modal .input{
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(124,73,255,0.18);
+  color: #2c1437;
+}
+.auth-modal .input::placeholder{
+  color: rgba(44,20,55,0.45);
+}
+
+.auth-actions{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.auth-actions .muted{
+  flex: 1;
+  min-width: 180px;
+}
+
+@media (max-width: 520px){
+  .auth-fab{
+    right: 14px;
+    bottom: 82px; /* 14 + 58 + 10 aprox */
+    width: 54px;
+    height: 54px;
+  }
+}
   .notes-actions{ flex-direction: row; min-width: 0; justify-content:flex-end; }
   
   .lightbox-title{ font-size: 1.3rem; }
   .lightbox-meta{ gap: 10px; }
 }
 
+/* ===========================
+   LIGHTBOX (SUPER GALERÍA)
+   Fix: sin scroll + caption overlay
+   =========================== */
+
+.lightbox{
+  padding: 16px;
+}
+
+/* El figure ahora será el contenedor “pantalla completa” */
+.lightbox-figure{
+  margin: 0;
+  width: min(980px, 96vw);
+  height: min(92vh, 920px);
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+/* Wrapper relativo para imagen + botones admin */
+.lb-img-wrapper{
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+/* Imagen: nunca empuja el layout */
+.lb-img-wrapper img{
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 18px;
+  box-shadow: 0 22px 70px rgba(0,0,0,0.60);
+  object-fit: contain;
+  display: block;
+}
+
+/* Botones editar/eliminar flotando arriba a la derecha */
+.lb-admin-overlay{
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+}
+
+.lb-fab{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(20,14,24,0.55);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(10px);
+  transition: transform .15s ease, background .15s ease;
+}
+.lb-fab:hover{ transform: translateY(-1px); background: rgba(20,14,24,0.70); }
+.lb-fab.danger{ background: rgba(255,60,120,0.35); border-color: rgba(255,60,120,0.35); }
+.lb-fab.danger:hover{ background: rgba(255,60,120,0.50); }
+
+/* ✅ La info ahora es overlay abajo (no ocupa altura) */
+#lightbox-cap{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 14px;
+  width: min(740px, calc(100% - 24px));
+  z-index: 4;
+
+  background: rgba(18, 12, 22, 0.55);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 18px;
+  padding: 12px 12px 10px;
+  color: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 16px 55px rgba(0,0,0,0.45);
+
+  /* evita “desbordes raros” */
+  overflow: hidden;
+}
+
+/* Fila de pills/badges: siempre envuelve */
+.lightbox-meta{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.lightbox-pill, .lightbox-badge{
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  line-height: 1;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+  white-space: nowrap;
+}
+
+/* Título grande para foto individual (1 sola) */
+.lightbox-title{
+  width: 100%;
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: .2px;
+  font-size: 1.15rem;
+  margin-bottom: 4px;
+
+  /* evita que se salga */
+  overflow-wrap: anywhere;
+}
+
+/* Texto: que no se salga; por defecto clampa (sin scroll) */
+.lightbox-text{
+  text-align: center;
+  font-size: 0.98rem;
+  line-height: 1.35;
+  opacity: .95;
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;  /* ✅ sin scroll */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Cuando está expandido, se ve completo */
+.lightbox-text.expanded{
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* Botón “ver más” */
+.lb-more{
+  margin: 8px auto 0;
+  display: none; /* se activa por JS si hace falta */
+  border: 1px solid rgba(255,255,255,0.20);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: .92rem;
+}
+
+/* Mobile */
+@media (max-width: 520px){
+  .lightbox-figure{
+    height: 92vh;
+  }
+  #lightbox-cap{
+    bottom: 10px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+  .lightbox-pill, .lightbox-badge{
+    font-size: 0.90rem;
+    padding: 6px 9px;
+  }
+}
+
 /* =========================
-   LIGHTBOX: sin scroll + responsive
+   LIGHTBOX: layout + info abajo
+   ========================= */
+
+#lightbox {
+  /* asegúrate que tu overlay ya es fixed + inset:0 */
+  /* permitir que el overlay se desplaze verticalmente cuando el contenido es muy largo */
+  overflow-y: auto;
+}
+
+.lightbox-stage {
+  position: relative;
+  width: min(980px, 94vw);
+  /* sin límite de altura: si la descripción es muy larga la etapa se expande
+     y el overlay (#lightbox) se desplazará gracias a su overflow-y: auto */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* default; veremos en JS si debe centrarse */
+  gap: 14px;
+  margin: 0 auto;
+}
+
+/* centrar verticalmente la etapa cuando el contenido cabe en pantalla */
+.lightbox-stage.centered {
+  justify-content: center;
+}
+
+/* Imagen */
+.lb-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+#lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+}
+
+/* Botones editar/eliminar sobre la foto */
+.lb-admin-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+}
+
+.lb-fab {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(20,14,24,0.55);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(10px);
+  transition: transform .15s ease, background .15s ease;
+}
+
+.lb-fab:hover { transform: translateY(-1px); background: rgba(20,14,24,0.68); }
+.lb-fab.danger { background: rgba(255,60,120,0.25); border-color: rgba(255,60,120,0.35); }
+.lb-fab.danger:hover { background: rgba(255,60,120,0.34); }
+
+/* Panel de info: pegado abajo, centrado */
+#lightbox-cap.lb-panel {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 24px));
+  padding: 14px 14px 12px;
+  border-radius: 18px;
+  background: rgba(20,14,24,0.50);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+  color: #fff;
+  z-index: 4;
+}
+
+/* Meta badges */
+.lightbox-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.lightbox-title {
+  width: 100%;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  margin-bottom: 6px;
+}
+
+.lightbox-badge,
+.lightbox-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 13px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+/* Texto: SIN SCROLL, se corta con ... */
+.lightbox-text {
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.35;
+  opacity: .95;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* máximo 3 líneas */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Si quieres poder expandir (opcional) */
+.lightbox-text.expanded {
+  -webkit-line-clamp: initial;
+  overflow: visible;
+}
+
+/* En móvil: reducimos panel y dejamos más espacio a la foto */
+@media (max-width: 640px) {
+  .lightbox-stage {
+    width: 96vw;
+    height: 92vh;
+  }
+  #lightbox-cap.lb-panel {
+    bottom: 10px;
+    padding: 12px 12px 10px;
+  }
+  .lightbox-title { font-size: 16px; }
+  .lb-fab { width: 42px; height: 42px; }
+}
+
+/* =========================
+   LIGHTBOX LAYOUT FIX
+   - Caption abajo, centrado
+   - Sin scroll interno
+   - Responsive sin salirse
    ========================= */
 
 .lightbox{
   position: fixed;
   inset: 0;
-  background: rgba(10,6,12,0.88);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index: 10000;
-  padding: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(10,6,12,0.78);
+}
+
+/* ===========================
+   LIGHTBOX: imagen centrada + info abajo (sin recortes)
+   =========================== */
+
+.lightbox{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow-y: auto;          /* 👈 el scroll es del lightbox */
+  -webkit-overflow-scrolling: touch;
+  padding: 18px 12px 36px;   /* 👈 espacio abajo para que no corte texto */
+}
+
+.lightbox-figure{
+  margin: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;    /* 👈 imagen arriba, info abajo */
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  overflow: visible !important; /* 👈 evita recortes */
+}
+
+.lb-img-wrapper{
+  width: min(92vw, 520px);
+  position: relative;
+  overflow: visible;
+}
+
+#lightbox-img{
+  width: 100%;
+  height: auto;
+  max-height: 70vh;          /* 👈 evita que la imagen se salga por arriba */
+  object-fit: contain;
+  border-radius: 18px;
+  display: block;
+}
+
+/* panel de info abajo */
+#lightbox-cap.lb-panel,
+#lightbox-cap{
+  width: min(92vw, 560px);
+  margin: 0 auto;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(20, 12, 26, 0.55);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  overflow: visible !important; /* 👈 clave: que no recorte el texto */
+}
+
+.lightbox-text{
+  margin-top: 10px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;   /* 👈 palabras largas no rompen el layout */
+  word-break: break-word;
+}
+
+/* si quieres que el conjunto quepa y quede centrado cuando cabe */
+.lightbox-figure{ min-height: calc(100vh - 54px); }
+
+/* Desktop: dar un poco más de espacio abajo para poder bajar la card ligeramente */
+@media (min-width: 900px) {
+  .lightbox {
+    padding-top: 96px;
+    padding-bottom: 96px; /* aumenta el 'respiro' arriba y abajo */
+  }
+  .lightbox-figure {
+    min-height: calc(100vh - 192px);
+  }
 }
 
 .lightbox.hidden{ display:none; }
 
-/* Mantén todo dentro de 92vh (sin scroll interno) */
+/* El figure manda: columna (foto arriba, caption abajo) */
 .lightbox-figure{
-  margin:0;
   width: min(980px, 96vw);
-  height: min(92vh, 900px);
-  display:flex;
+  margin: 0;
+  display: flex;
   flex-direction: column;
-  align-items:center;
-  justify-content:center;
-  gap: 10px;
-  overflow: hidden; /* <- clave: sin scroll */
+  align-items: center;
+  gap: 14px;
+  /* clave: que TODO quepa en pantalla */
+  max-height: calc(100vh - 36px);
 }
 
-/* La imagen se adapta dejando espacio fijo para la info */
-.lightbox-figure img{
-  max-width: 100%;
-  max-height: 66vh;          /* deja espacio para meta/texto */
-  width: auto;
+/* La imagen NUNCA debe exceder el alto disponible */
+#lightbox-img{
+  width: 100%;
   height: auto;
-  border-radius: 14px;
-  box-shadow: 0 20px 70px rgba(0,0,0,0.65);
-  object-fit: contain;       /* no recorta, se ajusta */
+  max-height: calc(100vh - 230px); /* reserva espacio para caption + botones */
+  object-fit: contain;
+  border-radius: 18px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+  display: block;
 }
 
-/* Contenedor de info siempre visible */
+/* Caption siempre abajo, centrado, sin “salirse” */
 #lightbox-cap{
-  width: min(980px, 96vw);
-  max-width: 100%;
-  text-align:center;
-  color: rgba(255,255,255,0.92);
-  line-height: 1.35;
-  padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-  overflow: hidden;          /* <- sin scroll en info */
+  /* reset earlier absolute positioning */
+  position: static !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+
+  width: min(760px, 92vw);
+  text-align: center;
+  padding: 14px 14px;
+  border-radius: 18px;
+  background: rgba(25, 18, 30, 0.55);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 14px 50px rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  /* evita que el texto se salga */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
-/* Si tu info usa estos bloques */
-.lightbox-meta{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  justify-content:center;
-  align-items:center;
-  margin-bottom: 8px;
+/* Pills / badges dentro del caption: que envuelvan bonito */
+#lightbox-cap .lightbox-meta{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
 }
 
-/* En móviles: recortamos un poquito la imagen para que quepa todo */
+#lightbox-cap .lightbox-pill,
+#lightbox-cap .lightbox-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  line-height: 1;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+#lightbox-cap .lightbox-title{
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+#lightbox-cap .lightbox-text{
+  font-size: 1rem;
+  line-height: 1.25rem;
+  opacity: 0.95;
+}
+
+/* ============ ADMIN (editar/eliminar) SOBRE LA FOTO ============ */
+.lb-img-wrapper{
+  /* volvemos a flujo normal; el centrado se hace por la clase
+     `.centered` en el contenedor cuando no hay overflow */
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.lb-admin-overlay{
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 10px;
+  z-index: 4;
+}
+
+.lb-fab{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(20, 16, 25, 0.50);
+  color: #fff;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform .15s ease, background .15s ease;
+}
+
+.lb-fab:hover{ transform: translateY(-2px); background: rgba(20,16,25,0.65); }
+.lb-fab.danger{ background: rgba(255,60,120,0.25); border-color: rgba(255,60,120,0.35); }
+
+/* ============ Responsive: celulares muy pequeños ============ */
 @media (max-width: 520px){
-  .lightbox{ padding: 10px; }
+  .lightbox{ padding: 12px; }
 
-  .lightbox-figure{
-    height: 92vh;
-    gap: 8px;
-  }
-
-  .lightbox-figure img{
-    max-height: 52vh; /* <- esto evita que la info se vaya abajo */
-    border-radius: 12px;
+  #lightbox-img{
+    max-height: calc(100vh - 260px); /* más espacio para caption en móvil */
+    border-radius: 16px;
   }
 
   #lightbox-cap{
-    font-size: 0.92rem;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    width: 94vw;
+    padding: 12px;
+    border-radius: 16px;
   }
 
-  .lightbox-title{
-    font-size: 1.25rem; /* si usas título grande */
-  }
+  #lightbox-cap .lightbox-title{ font-size: 1.15rem; }
+  #lightbox-cap .lightbox-pill,
+  #lightbox-cap .lightbox-badge{ font-size: 0.88rem; padding: 7px 10px; }
+
+  .lb-fab{ width: 42px; height: 42px; }
 }
-
-/* Editor encima de la foto, sin mover nada */
-.lb-edit{
-  position: fixed;
-  inset: 0;
-  z-index: 11000;
+.lb-fab{
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(10,6,12,0.35);
+  color: #fff;
+  cursor: pointer;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 14px;
-  background: rgba(10,6,12,0.60);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
+  transition: transform .15s ease, background .15s ease;
+}
+.lb-fab:hover{ transform: scale(1.05); background: rgba(10,6,12,0.50); }
+.lb-fab:active{ transform: scale(0.98); }
+
+.lb-fab.danger{
+  border-color: rgba(255,60,120,0.30);
+  background: rgba(255,60,120,0.22);
+}
+.lb-fab.danger:hover{
+  background: rgba(255,60,120,0.30);
 }
 
-.lb-edit.hidden{ display:none; }
+/* En móvil baja un poco el tamaño */
+@media (max-width: 520px){
+  .lb-fab{ width: 38px; height: 38px; }
+  .lb-admin-overlay{ top: 8px; left: 8px; gap: 8px; }
+}
+
+/* ============================
+   EDIT CARD: overlay centered above everything
+   ============================ */
+
+/* Cuando se muestra, la card de edición aparece encima de todo y centrada */
+.lb-edit{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 10002;
+  background: rgba(0,0,0,0.35); /* ligero dim para destacar la card */
+  box-sizing: border-box;
+}
+
+.lb-edit.hidden{ display: none; }
 
 .lb-edit-card{
-  width: min(720px, 96vw);
-  max-height: 86vh;
-  overflow: auto; /* si el form es largo, scrollea SOLO el form */
-  border-radius: 16px;
+  width: min(760px, 92vw);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
+
+@media (max-width: 520px){
+  .lb-edit{ padding: 12px; }
+  .lb-edit-card{ width: 100%; }
+}
+
+/* ===============================================
+   AJUSTES FINALES SUPER GALERÍA / LIGHTBOX
+   - Mejor scroll en fotos largas
+   - Fondo de edición más limpio
+   - Botón "Cancelar" en blanco
+   =============================================== */
+
+/* La imagen nunca ocupa más del 60% del alto de la ventana,
+   así el texto de abajo no se esconde detrás del viewport */
+#lightbox-img{
+  max-height: 60vh;
+}
+
+/* Aseguramos que la figura pueda crecer y hacer scroll
+   dentro del overlay sin recortar el caption */
+.lightbox{
+  overflow-y: auto;
+}
+
+.lightbox-figure{
+  max-height: none;
+}
+
+/* Edit card: sin fondo oscuro de lado a lado;
+   solo la tarjeta se ve encima */
+.lb-edit{
+  background: transparent;
+}
+
+/* Dentro del editor, los botones outline usan texto blanco */
+.lb-edit .btn.outline{
+  color: #ffffff;
+  border-color: rgba(255,255,255,0.6);
+  background: transparent;
+}
+
+/* ==========================================================
+   MINIMAL POLISH (no rompe funcionalidad)
+   - overrides al final para un look más pro y limpio
+   ========================================================== */
+
+:root{
+  --ink: #241332;
+  --ink-2: rgba(36,19,50,0.76);
+  --ink-3: rgba(36,19,50,0.56);
+  --surface: #ffffff;
+  --surface-2: rgba(255,255,255,0.82);
+  --border: rgba(124,73,255,0.14);
+  --shadow-1: 0 10px 30px rgba(36,19,50,0.10);
+  --shadow-2: 0 18px 70px rgba(36,19,50,0.16);
+  --radius-xl: 22px;
+}
+
+body{
+  color: var(--ink);
+  line-height: 1.55;
+  background:
+    radial-gradient(800px 420px at 12% 10%, rgba(255,111,191,0.14), transparent 55%),
+    radial-gradient(900px 520px at 88% 22%, rgba(124,73,255,0.14), transparent 58%),
+    #fff;
+}
+
+.page{ gap: 22px; }
+
+/* Tipografía más “premium” */
+.title{
+  letter-spacing: .2px;
+  text-rendering: geometricPrecision;
+}
+.subtitle{ color: var(--ink-2); }
+
+/* Botones: más minimal */
+.btn{
+  border-radius: 14px;
+  box-shadow: var(--shadow-1);
+}
+.btn:hover{ box-shadow: var(--shadow-2); }
+.btn.outline{
+  border-color: var(--border);
+  color: var(--ink);
+}
+
+/* Inputs: más limpios */
+.select, .input, .textarea{
+  border-color: var(--border);
+  background: rgba(255,255,255,0.92);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+}
+
+/* Cards: vidrio sutil + borde */
+.hero,
+.card,
+.extra-card{
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(124,73,255,0.10);
+  box-shadow: var(--shadow-1);
+}
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.74));
+}
+.extra-card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.86), rgba(255,255,255,0.76));
+}
+
+/* Listas: scroll más bonito */
+.message-list{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(124,73,255,0.35) transparent;
+}
+
+/* SUPER GALERÍA: un poquito más “gallery app” */
+.super-gallery-actions{
+  border-radius: 18px;
+  border-color: rgba(124,73,255,0.12);
+  box-shadow: var(--shadow-1);
+}
+.sg-item{
+  border-radius: 20px;
+  box-shadow: var(--shadow-1);
+}
+
+/* LIGHTBOX: overlay más limpio */
+.lightbox{
+  background: rgba(10,6,12,0.78);
+}
+
+/* Caption/card: más sólido y legible */
+#lightbox-cap,
+#lightbox-cap.lb-panel{
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.16);
+}
+
+/* Edit overlay: elegante, sin “tira” infinita */
+.lb-edit{
+  background: rgba(10,6,12,0.42);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.lb-edit-card{
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(124,73,255,0.14);
+}
+.lb-edit .lb-edit-title{ color: var(--ink); }
+.lb-edit .lb-field span{ color: rgba(36,19,50,0.74); }
+.lb-edit .input, .lb-edit .textarea{
+  background: rgba(255,255,255,0.96);
+  color: var(--ink);
+  border-color: rgba(124,73,255,0.18);
+}
+.lb-edit .btn.outline{
+  color: var(--ink);
+  background: rgba(124,73,255,0.06);
+  border-color: rgba(124,73,255,0.18);
+}
+
+/* Modales (upload/auth): consistencia */
+.modal-card,
+/* auth modal usa .auth-card */
+.popup-content{
+  border-radius: 20px;
+  box-shadow: var(--shadow-2);
+}
+
 
 
 

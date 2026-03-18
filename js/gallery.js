@@ -157,6 +157,7 @@ function renderSuperGallery() {
       Aquí van tus recuerdos 💞<br>
       Pulsa <strong>"Subir recuerdo"</strong> para agregar fotos con lugar y fecha.
     </div>`;
+    emitSuperGalleryItems();
     return;
   }
 
@@ -186,6 +187,7 @@ function renderSuperGallery() {
       );
     } catch (e) { /* noop */ }
   }
+  emitSuperGalleryItems();
 }
 
 /**
@@ -193,6 +195,8 @@ function renderSuperGallery() {
  */
 function openLightbox(items, idx) {
   if (!lightbox) return;
+  // evitar que la página de fondo haga scroll mientras el overlay está abierto
+  document.body.style.overflow = 'hidden';
   lightbox.classList.remove('hidden');
   lightbox.setAttribute('aria-hidden', 'false');
   lightbox._items = items;
@@ -208,6 +212,38 @@ function paintLightbox() {
   const it = items[lightboxIndex];
   if (!it) return;
   lightboxImg.src = it.url;
+  // ✅ Asegurar wrapper dentro del figure para overlay de botones
+  const figure = lightbox.querySelector('.lightbox-figure');
+  if (!figure) return;
+
+  let wrapper = figure.querySelector('.lb-img-wrapper');
+  if (!wrapper) {
+    wrapper = document.createElement('div');
+    wrapper.className = 'lb-img-wrapper';
+    // Insertar wrapper antes del img y mover el img dentro
+    figure.insertBefore(wrapper, lightboxImg);
+    wrapper.appendChild(lightboxImg);
+  } else {
+    // si existe, asegurar que el img esté dentro
+    if (lightboxImg.parentElement !== wrapper) wrapper.appendChild(lightboxImg);
+  }
+
+  // ✅ asegurar que el caption esté debajo del wrapper
+  lightboxCap.classList.add('lb-panel');
+  if (lightboxCap.parentElement !== figure) figure.appendChild(lightboxCap);
+
+  // overlay admin flotante (editor/eliminar) sobre la imagen
+  let admin = wrapper.querySelector('#lb-admin-overlay');
+  if (!admin) {
+    admin = document.createElement('div');
+    admin.id = 'lb-admin-overlay';
+    admin.className = 'lb-admin-overlay';
+    wrapper.appendChild(admin);
+  }
+  admin.innerHTML = isAuthed ? `
+    <button id="btn-edit-photo" class="lb-fab" title="Editar">✏️</button>
+    <button id="btn-delete-photo" class="lb-fab danger" title="Eliminar">🗑️</button>
+  ` : '';
 
   const albumName = (it.album || '').trim();
   const niceDate = formatNiceDate(it.date) || '';
@@ -224,12 +260,7 @@ function paintLightbox() {
       </button>`
     : '';
 
-  const btnAdmin = isAuthed ? `
-    <div class="lb-admin">
-      <button id="btn-edit-photo" class="lb-icon" title="Editar">✏️</button>
-      <button id="btn-delete-photo" class="lb-icon danger" title="Eliminar">🗑️</button>
-    </div>
-  ` : '';
+  // (Se elimina el centrado JS; el layout ahora lo maneja CSS en .lightbox-figure)
 
   // Renderizar el album: título grande para foto individual, badge para bloque
   const albumDisplay = albumName
@@ -247,9 +278,8 @@ function paintLightbox() {
       ${activeAlbum ? `<button id="btn-volver-mezcla" class="btn small outline">Volver a mezclar</button>` : ''}
     </div>
 
-    <div class="lightbox-text">${it.caption || ''}</div>
-
-    ${btnAdmin}
+    <div id="lb-caption" class="lightbox-text">${it.caption || ''}</div>
+    <button id="lb-more" class="lb-more" type="button">Ver más</button>
 
     ${isAuthed ? `
       <div id="lb-edit-form" class="lb-edit hidden">
@@ -291,6 +321,23 @@ function paintLightbox() {
       </div>
     ` : ''}
   `;
+
+  // ✅ Ver más / Ver menos (solo si el texto se clampa)
+  const cap = document.getElementById('lb-caption');
+  const more = document.getElementById('lb-more');
+
+  if (cap && more) {
+    // Detecta si quedó clamped (overflow)
+    requestAnimationFrame(() => {
+      const isOverflowing = cap.scrollHeight > cap.clientHeight + 2;
+      more.style.display = isOverflowing ? 'inline-flex' : 'none';
+    });
+
+    more.addEventListener('click', () => {
+      const expanded = cap.classList.toggle('expanded');
+      more.textContent = expanded ? 'Ver menos' : 'Ver más';
+    });
+  }
 
   // Reunir por álbum
   const reunir = document.getElementById('btn-reunir-album');
@@ -428,6 +475,8 @@ function paintLightbox() {
 function closeLightbox() {
   lightbox.classList.add('hidden');
   lightbox.setAttribute('aria-hidden', 'true');
+  // devolver scroll al body
+  document.body.style.overflow = '';
 }
 
 /**
@@ -467,6 +516,8 @@ function initGallery() {
   superGrid = document.getElementById('super-gallery-grid');
   filterPlace = document.getElementById('filter-place');
   searchCaption = document.getElementById('search-caption');
+  const btnOpenLogin = document.getElementById('btn-open-login');
+  const btnOpenLoginFooter = document.getElementById('btn-open-login-footer');
   btnOpenUpload = document.getElementById('btn-open-upload');
   uploadModal = document.getElementById('upload-modal');
   btnCancelUpload = document.getElementById('btn-cancel-upload');
@@ -497,6 +548,8 @@ function initGallery() {
   });
   lightboxPrev?.addEventListener('click', () => navLightbox(-1));
   lightboxNext?.addEventListener('click', () => navLightbox(1));
+
+  // Nota: el centrado ya lo controla CSS; no hace falta listener aquí
 
   // Auth UI references inside modal
   const authEmail = document.getElementById('auth-email');
@@ -579,7 +632,9 @@ function initGallery() {
     renderSuperGallery();
   });
 
-  // Event listeners: modal upload
+  // Event listeners: login + modal upload
+  btnOpenLogin?.addEventListener('click', openUpload);
+  btnOpenLoginFooter?.addEventListener('click', openUpload);
   btnOpenUpload?.addEventListener('click', openUpload);
   btnCancelUpload?.addEventListener('click', closeUpload);
   uploadModal?.addEventListener('click', (e) => { if (e.target === uploadModal) closeUpload(); });
@@ -740,9 +795,18 @@ window.galleryModule = {
 };
 
 // Cargar desde la BD al final del archivo (siempre que el cliente exista)
+function emitSuperGalleryItems() {
+  window.dispatchEvent(new CustomEvent('superGallery:items', {
+    detail: { items: allItems }
+  }));
+}
+
 async function loadFromDB() {
   if (!supabaseClient) {
     console.warn('Supabase client no inicializado, no se cargará la BD.');
+    allItems = [];
+    renderSuperGallery();
+    emitSuperGalleryItems();
     return;
   }
 
@@ -754,14 +818,21 @@ async function loadFromDB() {
 
     if (error) {
       console.error("Error cargando fotos:", error.message || error);
+      allItems = [];
+      renderSuperGallery();
+      emitSuperGalleryItems();
       return;
     }
 
     allItems = data || [];
     shuffledOrder = null; // mezclar una sola vez por carga
     renderSuperGallery();
+    emitSuperGalleryItems();
   } catch (e) {
     console.error('Error en loadFromDB:', e);
+    allItems = [];
+    renderSuperGallery();
+    emitSuperGalleryItems();
   }
 }
 

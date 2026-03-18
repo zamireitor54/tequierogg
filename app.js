@@ -42,6 +42,38 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error("Error en printGallery module:", e);
   }
 
+  // Mostrar mensaje especial durante 3 días en un banner independiente
+  const MESSAGE_STORAGE_KEY = 'specialMessageExpireAt';
+  const specialMessageBanner = document.getElementById('special-message-banner');
+  const now = Date.now();
+  const durationMs = 3 * 24 * 60 * 60 * 1000;
+  const savedUntil = Number(localStorage.getItem(MESSAGE_STORAGE_KEY) || '0');
+  let expireAt = savedUntil > now ? savedUntil : now + durationMs;
+
+  if (savedUntil <= now) {
+    localStorage.setItem(MESSAGE_STORAGE_KEY, String(expireAt));
+  }
+
+  if (specialMessageBanner) {
+    if (now <= expireAt) {
+      specialMessageBanner.innerHTML = `
+        <div>
+          <p style="margin:0 0 8px; font-weight:600;">Si estás aquí es porque algo en ti todavía me da una oportunidad, y eso me importa más de lo que imaginas.</p>
+          <p style="margin:0 0 8px;">Este espacio lo hice para nosotros, para guardar todo lo bonito que hemos vivido. Y hoy más que nunca quiero que sepas que lo siento. De verdad. Me duele haberte fallado, me duele que hayas sufrido por algo relacionado conmigo, y ojalá pudiera quitarte ese dolor.</p>
+          <p style="margin:0 0 8px;">No te pido que todo vuelva a ser igual de un momento a otro. Solo quiero que sepas que te amo, que eres mi niña, mi amor, mi estrella, y que eso no cambia sin importar lo que pase.</p>
+          <p style="margin:0 0 8px;">Aquí estarán siempre nuestros momentos, porque para mí cada uno vale oro. Y aquí voy a estar yo también, esperándote con el corazón abierto.</p>
+          <div style="text-align:right;"><button id="close-special-message" class="btn small outline">Cerrar mensaje</button></div>
+        </div>
+      `;
+
+      document.getElementById('close-special-message')?.addEventListener('click', () => {
+        specialMessageBanner.innerHTML = '';
+      });
+    } else {
+      specialMessageBanner.innerHTML = '';
+    }
+  }
+
   // ==============================================
   // FUNCIONALIDAD AUXILIAR
   // ==============================================

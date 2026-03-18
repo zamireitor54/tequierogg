@@ -8,6 +8,7 @@ const startDate = new Date(2025, 10, 17, 0, 0, 0, 0); // Nov 17, 2025 medianoche
 const endDate = new Date(2026, 10, 17, 0, 0, 0, 0);   // Nov 17, 2026 medianoche local
 
 // Estado del calendario
+// Nota: se inicializa correctamente en initCalendar() según la fecha actual
 let currentDisplayMonth = new Date(2025, 10, 17);
 let unlockedAll = false;
 
@@ -348,6 +349,18 @@ function initCalendar() {
   calendarContainer = document.getElementById('calendar-container');
   selectedDateSpan = document.getElementById('selected-date');
   unlockAllBtn = document.getElementById('unlock-all');
+
+  // ✅ Al iniciar, mostrar el mes del día actual (si está dentro del rango).
+  // Si la fecha actual está fuera del rango, caer al inicio/fin.
+  const today = new Date();
+  const todayNormalized = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+  if (todayNormalized < startDate) {
+    currentDisplayMonth = new Date(startDate);
+  } else if (todayNormalized > endDate) {
+    currentDisplayMonth = new Date(endDate);
+  } else {
+    currentDisplayMonth = new Date(todayNormalized);
+  }
 
   // Event listeners: navegación de meses
   if (prevMonthBtn) {

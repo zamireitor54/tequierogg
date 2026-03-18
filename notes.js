@@ -101,12 +101,34 @@
     }
 
     data.forEach(n=>{
+      // Autor: preferimos correo si existe; si no, usamos el UUID para decidir "Tú" / "Otra persona"
+      const candidates = [
+        n.author_email,
+        n.user_email,
+        n.email,
+        n.created_by_email,
+        n.created_by
+      ].filter(Boolean).map(String);
+
+      const authorEmail = candidates.find(x => x.includes('@')) || '';
+      const authorId =
+        (n.author_id || n.user_id || (typeof n.created_by === 'string' ? n.created_by : null) || null);
+
+      const authorLabel = authorEmail
+        ? authorEmail
+        : (authorId
+            ? (authorId === session?.user?.id ? 'Tú' : 'Otra persona')
+            : '');
+
       const div = document.createElement('div');
       div.className = 'note-item';
       div.innerHTML = `
         <div class="note-text">${escapeHtml(n.content).replaceAll('\n','<br>')}</div>
         <div class="note-meta">
-          <div class="note-time">${niceTime(n.created_at)}</div>
+          <div class="note-time">
+            ${authorLabel ? `<span style="font-weight:800; color: rgba(43,22,54,0.85);">${escapeHtml(authorLabel)}</span> · ` : ''}
+            ${niceTime(n.created_at)}
+          </div>
           <div class="note-btns">
             <button class="note-btn" data-edit="${n.id}">✏️</button>
             <button class="note-btn danger" data-del="${n.id}">🗑️</button>
@@ -133,9 +155,25 @@
     if(!session){ status.textContent = 'Inicia sesión para guardar.'; return; }
 
     status.textContent = 'Guardando...';
-    const { error } = await sb
+    const author_email = session?.user?.email || null;
+    const author_id = session?.user?.id || null;
+
+    // Intento 1: guardar también autor (si tu tabla tiene columnas)
+    let { error } = await sb
       .from('notes')
-      .insert([{ content: text, category: activeCat }]);
+      .insert([{
+        content: text,
+        category: activeCat,
+        author_email,
+        author_id
+      }]);
+
+    // Fallback: si la tabla no tiene esas columnas, guarda sin autor (para no romper)
+    if (error && /column .*author_email|column .*author_id|schema cache|not exist/i.test(error.message || '')) {
+      ({ error } = await sb
+        .from('notes')
+        .insert([{ content: text, category: activeCat }]));
+    }
 
     if(error){ status.textContent = 'Error: ' + error.message; return; }
 

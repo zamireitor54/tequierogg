@@ -29,6 +29,8 @@
       </figure>
     </header>
 
+    <div id="special-message-banner" class="special-message-banner"></div>
+
     <section class="cards-section">
       <article class="card">
         <h2>Mensajitos para mi fresita</h2>
@@ -112,6 +114,7 @@
         <div class="super-gallery-actions">
           <button id="btn-clear-filter" class="btn small outline" style="display:none;">✖ Quitar filtro</button>
 
+          <button id="btn-open-login" class="btn small outline">🔐 Iniciar sesión</button>
           <button id="btn-open-upload" class="btn small">➕ Subir recuerdo</button>
 
           <select id="filter-place" class="select small">
@@ -204,8 +207,11 @@
       <p class="muted">No olvides lo mucho que te quiero</p>
     </footer>
 
-  <!-- FAB Notas -->
-  <button id="notes-fab" class="notes-fab" aria-label="Abrir notas">📝</button>
+  <!-- FAB Notas + Iniciar sesión -->
+  <div class="notes-login-row">
+    <button id="btn-open-login-footer" class="btn small outline">🔐 Iniciar sesión</button>
+    <button id="notes-fab" class="notes-fab" aria-label="Abrir notas">📝</button>
+  </div>
 
   <!-- Modal Notas -->
   <div id="notes-modal" class="notes-modal hidden" role="dialog" aria-modal="true">

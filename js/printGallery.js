@@ -14,59 +14,81 @@ function initPrintGallery() {
   const frame = document.getElementById('photo-frame');
   if (!frame) return;
 
-  // Lista de imágenes (rutas relativas)
-  const sourceList = [
-    'img/img 2.jpg',
-    'img/img 3.jpg',
-    'img/img 4.jpg',
-    'img/img 5.jpg',
-    'img/img 6.jpg',
-    'img/img 7.jpg',
-    'img/img 8.jpg',
-    'img/img 9.jpg',
-    'img/img 10.jpg',
-    'img/img 11.jpg',
-    'img/img 12.jpg',
-    'img/img 13.jpg',
-    'img/img 14.jpg',
-    'img/img 15.jpg',
-    'img/img 16.jpg',
-    'img/img 17.jpg',
-    'img/img 18.jpg',
-    'img/img 19.jpg',
-    'img/img 20.jpg',
-    'img/miniña.jpg'
-  ];
+  // Lista dinámica: se alimenta con fotos de la super-galería (BD).
+  // Fallback: si no hay nada, mostramos placeholder.
+  let sourceList = [];
 
   let idx = 0;
-  const imgs = sourceList.map((src, i) => {
-    const img = document.createElement('img');
-    img.src = encodeURI(src);
-    img.alt = `Foto ${i + 1}`;
-    img.tabIndex = 0;
-    if (i !== 0) img.classList.add('hidden');
+  let imgs = [];
+  let shuffled = [];
 
-    img.onerror = () => {
-      console.warn('Galería: error cargando imagen', src);
-      img.src = placeholders[0];
-      img.classList.remove('hidden');
-      img.setAttribute('data-errored', 'true');
-    };
+  function showPlaceholder() {
+    frame.innerHTML = '';
+    const placeholder = document.createElement('div');
+    placeholder.style.textAlign = 'center';
+    placeholder.style.padding = '14px';
+    placeholder.style.color = '#6a4bb3';
+    placeholder.style.fontWeight = '700';
+    placeholder.innerHTML = `
+      <div style="font-size: 18px;">📸 Galería vacía de recuerdos</div>
+      <div style="font-size: 13px; margin-top: 6px; color:#5d4a7f;">Pulsa "Subir recuerdo" para guardar un momento.</div>
+    `;
+    frame.appendChild(placeholder);
+  }
 
-    frame.appendChild(img);
-    return img;
-  });
+  function shuffleArray(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function buildImages(list) {
+    sourceList = (list || []).filter(Boolean);
+    idx = 0;
+    shuffled = shuffleArray(sourceList);
+
+    frame.innerHTML = '';
+
+    if (!shuffled.length) {
+      showPlaceholder();
+      imgs = [];
+      return;
+    }
+
+    imgs = shuffled.map((src, i) => {
+      const img = document.createElement('img');
+      // src puede ser URL pública (https://...) o ruta local
+      img.src = src.startsWith('http') ? src : encodeURI(src);
+      img.alt = `Foto ${i + 1}`;
+      img.tabIndex = 0;
+      if (i !== 0) img.classList.add('hidden');
+
+      img.onerror = () => {
+        console.warn('Galería: error cargando imagen', src);
+        img.src = placeholders[0];
+        img.classList.remove('hidden');
+        img.setAttribute('data-errored', 'true');
+      };
+
+      frame.appendChild(img);
+      return img;
+    });
+  }
 
   /**
    * Mostrar índice específico
    */
   function showIndex(n) {
+    if (!imgs.length) return;
     idx = ((n % imgs.length) + imgs.length) % imgs.length;
     imgs.forEach((im, i) => im.classList.toggle('hidden', i !== idx));
   }
 
   /**
-   * Siguiente foto
+   * Siguiente foto (en orden aleatorio, pero determinista por "shuffle")
    */
   function next() {
     showIndex(idx + 1);
@@ -87,11 +109,7 @@ function initPrintGallery() {
   setTimeout(() => {
     const allErrored = imgs.length && imgs.every(i => i.getAttribute('data-errored') === 'true' || (i.naturalWidth === 0 && i.complete));
     if (allErrored) {
-      frame.innerHTML = '';
-      const ph = document.createElement('img');
-      ph.src = placeholders[0];
-      ph.alt = 'Galería vacía';
-      frame.appendChild(ph);
+      showPlaceholder();
     }
   }, 1000);
 
@@ -130,6 +148,7 @@ function initPrintGallery() {
      * Mostrar foto grande
      */
     function showBig(i) {
+      if (!imgs.length) return;
       cur = ((i % imgs.length) + imgs.length) % imgs.length;
       bigImg.src = imgs[cur] ? imgs[cur].src : placeholders[0];
     }
@@ -166,6 +185,28 @@ function initPrintGallery() {
       openOverlay(idx);
     });
   }
+
+  // ====== Fuente: super-galería (BD) ======
+  function toUrlsFromItems(items) {
+    return (items || [])
+      .map(it => it?.url)
+      .filter(Boolean);
+  }
+
+  // 1) Intento inmediato (por si ya cargó)
+  try {
+    const existing = window.galleryModule?.allItems?.();
+    const urls = toUrlsFromItems(existing);
+    buildImages(urls);
+  } catch (e) {
+    buildImages([]);
+  }
+
+  // 2) Escuchar cuando `gallery.js` termine de cargar la BD
+  window.addEventListener('superGallery:items', (ev) => {
+    const urls = toUrlsFromItems(ev?.detail?.items);
+    buildImages(urls);
+  });
 }
 
 // Exportar para app.js
