@@ -14,13 +14,26 @@ function initPrintGallery() {
   const frame = document.getElementById('photo-frame');
   if (!frame) return;
 
-  // Lista dinámica: se alimenta con fotos de la super-galería (BD).
-  // Fallback: si no hay nada, mostramos placeholder.
+  // Lista dinámica: se alimenta con fotos de la super-galería (BD),
+  // pero solo usa recuerdos que sí tengan ubicación de mapa.
   let sourceList = [];
 
   let idx = 0;
   let imgs = [];
   let shuffled = [];
+  let autoAdvanceTimer = null;
+
+  function restartAutoAdvance() {
+    if (autoAdvanceTimer) {
+      clearInterval(autoAdvanceTimer);
+      autoAdvanceTimer = null;
+    }
+    if (imgs.length > 1) {
+      autoAdvanceTimer = setInterval(() => {
+        next();
+      }, 10000);
+    }
+  }
 
   function showPlaceholder() {
     frame.innerHTML = '';
@@ -45,10 +58,52 @@ function initPrintGallery() {
     return a;
   }
 
+  function updateMemoryPocketMeta(item) {
+    const pocket = frame.closest('.print-gallery') || frame.parentElement;
+    if (!pocket) return;
+
+    let placeNode = pocket.querySelector('#map-photo-place');
+    if (!placeNode) {
+      placeNode = document.createElement('div');
+      placeNode.id = 'map-photo-place';
+      placeNode.className = 'map-photo-place';
+      pocket.insertBefore(placeNode, pocket.querySelector('.print-gallery-hint') || null);
+    }
+
+    const place = String(item?.map_location || '').trim();
+    placeNode.textContent = place ? `📍 ${place}` : '';
+    placeNode.hidden = !place;
+
+    const mapCopy = document.querySelector('.map-placeholder-copy');
+    if (mapCopy) {
+      const caption = String(item?.caption || '').trim();
+      mapCopy.textContent = caption || 'Aquí irá apareciendo el recuerdo que está sonando en el mapa.';
+    }
+
+    const hint = pocket.querySelector('.print-gallery-hint');
+    if (hint) {
+      hint.textContent = '';
+      hint.hidden = true;
+    }
+  }
+
+  function emitSpotlight(item) {
+    if (!item?.map_location) return;
+    window.dispatchEvent(new CustomEvent('memory-map:spotlight-photo', {
+      detail: { item }
+    }));
+  }
+
   function buildImages(list) {
-    sourceList = (list || []).filter(Boolean);
+    sourceList = (list || [])
+      .filter(Boolean)
+      .filter(item => String(item?.map_location || '').trim());
     idx = 0;
     shuffled = shuffleArray(sourceList);
+    if (autoAdvanceTimer) {
+      clearInterval(autoAdvanceTimer);
+      autoAdvanceTimer = null;
+    }
 
     frame.innerHTML = '';
 
@@ -58,16 +113,17 @@ function initPrintGallery() {
       return;
     }
 
-    imgs = shuffled.map((src, i) => {
+    imgs = shuffled.map((item, i) => {
       const img = document.createElement('img');
-      // src puede ser URL pública (https://...) o ruta local
+      const src = item?.url || '';
       img.src = src.startsWith('http') ? src : encodeURI(src);
       img.alt = `Foto ${i + 1}`;
       img.tabIndex = 0;
+      img.dataset.itemIndex = String(i);
       if (i !== 0) img.classList.add('hidden');
 
       img.onerror = () => {
-        console.warn('Galería: error cargando imagen', src);
+        console.warn('Galería: error cargando imagen', item?.url);
         img.src = placeholders[0];
         img.classList.remove('hidden');
         img.setAttribute('data-errored', 'true');
@@ -76,6 +132,13 @@ function initPrintGallery() {
       frame.appendChild(img);
       return img;
     });
+
+    if (shuffled[0]) {
+      updateMemoryPocketMeta(shuffled[0]);
+      emitSpotlight(shuffled[0]);
+    }
+
+    restartAutoAdvance();
   }
 
   /**
@@ -85,6 +148,11 @@ function initPrintGallery() {
     if (!imgs.length) return;
     idx = ((n % imgs.length) + imgs.length) % imgs.length;
     imgs.forEach((im, i) => im.classList.toggle('hidden', i !== idx));
+    const currentItem = shuffled[idx];
+    if (currentItem) {
+      updateMemoryPocketMeta(currentItem);
+      emitSpotlight(currentItem);
+    }
   }
 
   /**
@@ -95,13 +163,17 @@ function initPrintGallery() {
   }
 
   // Click para siguiente
-  frame.addEventListener('click', next);
+  frame.addEventListener('click', () => {
+    next();
+    restartAutoAdvance();
+  });
 
   // Enter o Space para siguiente
   frame.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       next();
+      restartAutoAdvance();
     }
   });
 
@@ -187,25 +259,21 @@ function initPrintGallery() {
   }
 
   // ====== Fuente: super-galería (BD) ======
-  function toUrlsFromItems(items) {
-    return (items || [])
-      .map(it => it?.url)
-      .filter(Boolean);
+  function toItemsFromGallery(items) {
+    return (items || []).filter(Boolean);
   }
 
   // 1) Intento inmediato (por si ya cargó)
   try {
     const existing = window.galleryModule?.allItems?.();
-    const urls = toUrlsFromItems(existing);
-    buildImages(urls);
+    buildImages(toItemsFromGallery(existing));
   } catch (e) {
     buildImages([]);
   }
 
   // 2) Escuchar cuando `gallery.js` termine de cargar la BD
   window.addEventListener('superGallery:items', (ev) => {
-    const urls = toUrlsFromItems(ev?.detail?.items);
-    buildImages(urls);
+    buildImages(toItemsFromGallery(ev?.detail?.items));
   });
 }
 

@@ -6,7 +6,8 @@
   <title>Feliz cumpleaños PRECIOSA </title>
 
   <!-- Fuente: Poppins para cuerpo y Sacramento para títulos -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Sacramento&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Playfair+Display:wght@600;700;800&family=Sacramento&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
   <!-- CSS Principal -->
   <link rel="stylesheet" href="styles.css">
@@ -51,8 +52,8 @@
       </article>
     </section>
 
-    <section class="extras">
-      <div class="extra-card">
+    <section class="extras extras-layout">
+      <div class="extra-card extra-card--daily">
         <h3>Un mensaje para cada día hasta el proximo cumpleaños mi niña</h3>
         <p>Selecciona un día para leer tu mensaje especial. Los días futuros se irán desbloqueando mientras pasa el tiempo. </p>
         
@@ -83,19 +84,26 @@
         <div id="message-display" class="message-display"></div>
       </div>
 
-      <div class="extra-card">
-        <h3>Recuerdos donde el tiempo se para</h3>
-        <p><strong>Algunos recuerdos lindos </strong></p>
-        <p style="font-style: italic; color: #7c49ff; margin-bottom: 16px;">No sabes lo feliz que soy contigo... cada foto muestra tu hermosura.</p>
+      <div class="extras-bottom">
+        <div class="extra-card extra-card--map extra-card--map-full">
+          <h3>Mapa de nuestros recuerdos</h3>
+          <p><strong>Los lugares donde se hacen estas hermosas fotos y recuerdos</strong></p>
+          <p class="extras-note">Por ahora puedes recorrer ciudades, zonas y caminos; luego iremos poniendo cada fotico en su lugar.</p>
 
-  
+          <div class="map-placeholder">
+            <div id="memory-map" class="memory-map" aria-label="Mapa de recuerdos"></div>
 
-		<div id="print-gallery" class="print-gallery" aria-hidden="false">
-          <div class="photo-frame" id="photo-frame" role="button" tabindex="0" title="Haz clic para ver la siguiente foto">
-            <!-- Botón para expandir la imagen -->
-            <button id="photo-expand" class="photo-expand-btn" aria-label="Expandir foto">⤢</button>
+            <div class="map-photo-pocket">
+              <div id="print-gallery" class="print-gallery print-gallery--embedded" aria-hidden="false">
+                <div class="photo-frame" id="photo-frame" role="button" tabindex="0" title="Haz clic para ver la siguiente foto">
+                  <button id="photo-expand" class="photo-expand-btn" aria-label="Expandir foto">⤢</button>
+                </div>
+                <p class="print-gallery-hint"></p>
+              </div>
+            </div>
+
+            <div class="map-placeholder-copy">Aquí irá apareciendo el recuerdo que está sonando en el mapa.</div>
           </div>
-          <p style="text-align: center; font-size: 0.85rem; color: #999; margin-top: 8px;">Haz clic en la foto para ver la siguiente</p>
         </div>
       </div>
     </section>
@@ -108,20 +116,21 @@
   <section class="super-gallery full-bleed">
     <div class="super-gallery-inner">
       <div class="super-gallery-head">
-        <h4>Nuestra galería 💞</h4>
+        <div class="super-gallery-title-row">
+          <h4>Nuestra galería 💞</h4>
+          <span id="super-gallery-count" class="super-gallery-count">0 recuerdos</span>
+        </div>
         <p class="muted">Sube fotos con lugar y fecha. Se guardan solitas y aparecen aquí.</p>
 
         <div class="super-gallery-actions">
           <button id="btn-clear-filter" class="btn small outline" style="display:none;">✖ Quitar filtro</button>
-
-          <button id="btn-open-login" class="btn small outline">🔐 Iniciar sesión</button>
           <button id="btn-open-upload" class="btn small">➕ Subir recuerdo</button>
 
           <select id="filter-place" class="select small">
             <option value="">📍 Todos los lugares</option>
           </select>
 
-          <input id="search-caption" class="input small" type="text" placeholder="Buscar (ej: playa, cine, noche...)">
+          <input id="search-caption" class="input small" type="search" placeholder="Buscar (ej: playa, cine, noche...)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="gallery-search-zamge">
         </div>
       </div>
 
@@ -131,35 +140,34 @@
 
   <!-- Modal subir -->
   <div id="upload-modal" class="modal hidden" aria-hidden="true">
-    <div class="modal-card">
-      <h3>Subir recuerdo 💖</h3>
-      <p class="muted">Selecciona fotos y escribe dónde fue y qué recuerdas.</p>
+    <div class="modal-card upload-card">
+      <button id="btn-close-upload-x" class="upload-x" aria-label="Cerrar">✕</button>
 
-      <!-- Login box (solo aparece si no hay sesión) -->
+      <div class="upload-eyebrow">Subir recuerdo</div>
+      <h3 class="upload-title">Subir recuerdo 💖</h3>
+      <p class="upload-subtitle">Selecciona fotos y escribe dónde fue y qué recuerdas.</p>
+
       <div id="auth-box" class="auth-box">
-        <div class="auth-row">
-          <input id="auth-email" class="input" type="email" placeholder="Tu correo" autocomplete="email">
-          <input id="auth-pass" class="input" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+        <div class="upload-auth-summary">
+          <span id="auth-state" class="muted">No has iniciado sesión.</span>
         </div>
-        <div class="auth-actions">
-          <button id="btn-login" class="btn small">Iniciar sesión</button>
-          <button id="btn-logout" class="btn small outline" style="display:none;">Cerrar sesión</button>
-          <span id="auth-state" class="muted"></span>
-        </div>
-        <hr style="border:none;border-top:1px solid rgba(124,73,255,0.12); margin:12px 0;">
       </div>
 
-      <label class="field">
+      <div class="field">
         <span>Fotos</span>
-        <input id="upload-files" type="file" accept="image/*" multiple>
-      
-      <div id="upload-preview" class="upload-preview"></div>
-      </label>
+        <input id="upload-files" class="upload-input-native" type="file" accept="image/*" multiple>
+        <label for="upload-files" id="upload-dropzone" class="upload-dropzone">
+          <div class="upload-dropzone-icon">📸</div>
+          <div class="upload-dropzone-title">Arrastra tus fotos</div>
+          <div class="upload-dropzone-copy">o toca para seleccionarlas</div>
+        </label>
+        <div id="upload-preview" class="upload-preview"></div>
+      </div>
 
       <div class="row">
         <label class="field">
           <span>📍 Lugar</span>
-          <input id="upload-place" class="input" type="text" placeholder="Ej: Medellín, Cartagena, Parque..." />
+          <input id="upload-place" class="input" type="text" placeholder="Ej: Parque, Cafecito, Casa, Cita..." />
         </label>
 
         <label class="field">
@@ -167,6 +175,16 @@
           <input id="upload-date" class="input" type="date" />
         </label>
       </div>
+
+      <label class="field">
+        <span>🗺️ Ubicación en el mapa</span>
+        <input id="upload-map-location" type="hidden" />
+        <div class="map-location-tools">
+          <button id="btn-upload-map-picker" class="btn small outline" type="button">🗺️ Poner ubicación</button>
+          <span class="muted">Toca el mapa y deja el marcador justo donde fue.</span>
+        </div>
+        <div id="upload-map-location-display" class="map-location-display empty">Aún no has elegido un punto en el mapa.</div>
+      </label>
 
       <label id="album-field" class="field">
         <span id="album-label">🖼️ Nombre de la foto</span>
@@ -184,6 +202,79 @@
       </div>
 
       <div id="upload-status" class="muted" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <div id="upload-auth-modal" class="upload-auth-modal hidden" aria-hidden="true">
+    <div class="upload-auth-card">
+      <button id="btn-close-upload-auth" class="upload-auth-x" aria-label="Cerrar">✕</button>
+      <div class="upload-auth-eyebrow">Iniciar sesión</div>
+      <div class="upload-auth-title">Entra para guardar recuerdos</div>
+      <div class="upload-auth-copy">Pon tu correo y contraseña para poder subir nuevas foticos a la galería.</div>
+
+      <div id="upload-auth-form-view" class="upload-auth-view">
+        <div class="upload-auth-fields">
+          <input id="auth-email" class="input" type="email" placeholder="Tu correo" autocomplete="email">
+          <input id="auth-pass" class="input" type="password" placeholder="Tu contraseña" autocomplete="current-password">
+        </div>
+        <div class="upload-auth-actions">
+          <button id="btn-login" class="btn small">Iniciar sesión</button>
+        </div>
+      </div>
+
+      <div id="upload-auth-active-view" class="upload-auth-view hidden">
+        <div class="upload-auth-active-pill">Sesión activa</div>
+        <div id="auth-modal-active-email" class="upload-auth-active-email"></div>
+        <div id="auth-display-name-wrap" class="upload-auth-display-name hidden">
+          <input id="auth-display-name-input" class="input" type="text" placeholder="¿Cómo quieres aparecer?" maxlength="40">
+          <button id="btn-save-display-name" class="btn small">Guardar nombre</button>
+        </div>
+        <div class="upload-auth-actions">
+          <button id="btn-edit-display-name" class="btn small outline">Cambiar nombre</button>
+          <button id="btn-logout" class="btn small outline">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <div id="auth-modal-state" class="muted"></div>
+    </div>
+  </div>
+
+  <div id="map-picker-modal" class="map-picker-modal hidden" aria-hidden="true">
+    <div class="map-picker-card">
+      <button id="btn-close-map-picker-x" class="map-picker-x" aria-label="Cerrar">✕</button>
+      <div class="map-picker-eyebrow">Elegir en el mapa</div>
+      <div class="map-picker-title">Pon el marcador donde fue 💗</div>
+      <p class="map-picker-copy">Mueve el mapa hasta dejar el punto justo en el centro. También puedes buscar ciudad, barrio o zona para guiarte mejor.</p>
+
+      <div class="map-picker-search">
+        <input id="map-picker-search-input" class="input" type="text" placeholder="Buscar ciudad, barrio o zona..." autocomplete="off" />
+        <div id="map-picker-search-results" class="map-picker-search-results hidden"></div>
+      </div>
+
+      <div class="map-picker-quick">
+        <button class="map-picker-quick-chip" type="button" data-place="Mosquera Centro">Mosquera</button>
+        <button class="map-picker-quick-chip" type="button" data-place="Funza Centro">Funza</button>
+        <button class="map-picker-quick-chip" type="button" data-place="Bogotá">Bogotá</button>
+        <button class="map-picker-quick-chip" type="button" data-place="Madrid Centro">Madrid</button>
+        <button class="map-picker-quick-chip" type="button" data-place="Parque Principal de Mosquera">Parque Mosquera</button>
+      </div>
+
+        <div class="map-picker-stage">
+          <div id="map-picker-canvas" class="map-picker-canvas" aria-label="Selector de ubicación en el mapa"></div>
+          <div class="map-picker-center-pin" aria-hidden="true">
+          <span class="map-picker-center-pin-dot memory-marker"><span class="memory-marker-heart">💗</span></span>
+          </div>
+        </div>
+
+      <div class="map-picker-selected">
+        <div class="map-picker-selected-label">Ubicación elegida</div>
+        <div id="map-picker-selected-text" class="map-picker-selected-text">Aún no has marcado un punto.</div>
+      </div>
+
+      <div class="map-picker-actions">
+        <button id="btn-cancel-map-picker" class="btn small outline" type="button">Cancelar</button>
+        <button id="btn-confirm-map-picker" class="btn small" type="button">Usar esta ubicación</button>
+      </div>
     </div>
   </div>
 
@@ -217,17 +308,18 @@
   <div id="notes-modal" class="notes-modal hidden" role="dialog" aria-modal="true">
     <div class="notes-card">
       <div class="notes-head">
-        <div>
+        <div class="notes-headcopy">
+          <div class="notes-eyebrow">Nuestras notas</div>
           <h3>Nuestras notas 💗</h3>
-          <p class="muted" style="margin:0;">3 cuadernos: General, Geral y Zamir.</p>
+          <p class="muted notes-subcopy">Tres cuadernos compartidos para dejar pedacitos de nosotros.</p>
         </div>
         <button id="notes-close" class="notes-x" aria-label="Cerrar">✕</button>
       </div>
 
       <div class="notes-tabs">
-        <button class="notes-tab active" data-cat="general">🌸 General</button>
-        <button class="notes-tab" data-cat="geral">💗 Para Geral</button>
-        <button class="notes-tab" data-cat="zamir">🖤 Para Zamir</button>
+        <button class="notes-tab active" data-cat="general"><span class="notes-tab-label">🌸 General</span><span class="notes-tab-count">0</span></button>
+        <button class="notes-tab" data-cat="geral"><span class="notes-tab-label">💗 Geral</span><span class="notes-tab-count">0</span></button>
+        <button class="notes-tab" data-cat="zamir"><span class="notes-tab-label">🖤 Zamir</span><span class="notes-tab-count">0</span></button>
       </div>
 
       <div class="notes-compose">
@@ -239,17 +331,56 @@
         </div>
       </div>
 
+      <div class="notes-divider">
+        <span>Notas guardadas</span>
+      </div>
+
       <div class="notes-list" id="notes-list"></div>
     </div>
   </div>
+
+  <datalist id="colombia-cities-list">
+    <option value="Bogotá"></option>
+    <option value="Medellín"></option>
+    <option value="Cartagena"></option>
+    <option value="Cali"></option>
+    <option value="Barranquilla"></option>
+    <option value="Bucaramanga"></option>
+    <option value="Santa Marta"></option>
+    <option value="Pereira"></option>
+    <option value="Manizales"></option>
+    <option value="Armenia"></option>
+    <option value="Tunja"></option>
+    <option value="Ibagué"></option>
+    <option value="Villavicencio"></option>
+    <option value="Cúcuta"></option>
+    <option value="Montería"></option>
+    <option value="Sincelejo"></option>
+    <option value="Popayán"></option>
+    <option value="Pasto"></option>
+    <option value="Neiva"></option>
+    <option value="Riohacha"></option>
+    <option value="Valledupar"></option>
+    <option value="San Andrés"></option>
+    <option value="Leticia"></option>
+    <option value="Soacha"></option>
+    <option value="Chía"></option>
+    <option value="Sabaneta"></option>
+    <option value="Envigado"></option>
+    <option value="Rionegro"></option>
+    <option value="Guatapé"></option>
+    <option value="Villa de Leyva"></option>
+  </datalist>
 </footer>
   <!-- SDK de Supabase (debe cargarse SIN defer) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <!-- Módulos de la aplicación -->
   <script src="js/messages.js" defer></script>
   <script src="js/calendar.js" defer></script>
   <script src="js/printGallery.js" defer></script>
+  <script src="js/map.js" defer></script>
   <script src="js/gallery.js" defer></script>
   <!-- Script principal de inicialización -->
   <script src="app.js" defer></script>

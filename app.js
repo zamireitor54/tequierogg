@@ -1,92 +1,8 @@
 /**
- * app.js (REFACTORIZADO CON MÓDULOS)
- * Archivo principal: importa e inicializa todos los módulos
- * 
- * Módulos utilizados:
- * - messages.js       → Arrays de mensajes y renderizado de tarjetas
- * - gallery.js        → Super galería (upload, filtros, lightbox, álbumes)
- * - calendar.js       → Sistema de 365 días
- * - printGallery.js   → Galería de fotos de impresión
+ * app.js
+ * Inicialización general de la página y helpers visuales.
  */
-
-document.addEventListener('DOMContentLoaded', () => {
-  // ==============================================
-  // INICIALIZAR MÓDULOS
-  // ==============================================
-
-  // 1. Renderizar tarjetas de mensajes
-  try {
-    window.messagesModule?.renderMessageLists?.();
-  } catch(e) {
-    console.error("Error en messages module:", e);
-  }
-
-  // 2. Inicializar galería de super fotos
-  try {
-    window.galleryModule?.initGallery?.();
-  } catch(e) {
-    console.error("Error en gallery module:", e);
-  }
-
-  // 3. Inicializar calendario de 365 días
-  try {
-    window.calendarModule?.initCalendar?.();
-  } catch(e) {
-    console.error("Error en calendar module:", e);
-  }
-
-  // 4. Inicializar galería de impresión
-  try {
-    window.printGalleryModule?.initPrintGallery?.();
-  } catch(e) {
-    console.error("Error en printGallery module:", e);
-  }
-
-  // Mostrar mensaje especial durante 3 días en un banner independiente
-  const MESSAGE_STORAGE_KEY = 'specialMessageExpireAt';
-  const specialMessageBanner = document.getElementById('special-message-banner');
-  const now = Date.now();
-  const durationMs = 3 * 24 * 60 * 60 * 1000;
-  const savedUntil = Number(localStorage.getItem(MESSAGE_STORAGE_KEY) || '0');
-  let expireAt = savedUntil > now ? savedUntil : now + durationMs;
-
-  if (savedUntil <= now) {
-    localStorage.setItem(MESSAGE_STORAGE_KEY, String(expireAt));
-  }
-
-  if (specialMessageBanner) {
-    if (now <= expireAt) {
-      specialMessageBanner.innerHTML = `
-        <div>
-          <p style="margin:0 0 8px; font-weight:600;">Si estás aquí es porque algo en ti todavía me da una oportunidad, y eso me importa más de lo que imaginas.</p>
-          <p style="margin:0 0 8px;">Este espacio lo hice para nosotros, para guardar todo lo bonito que hemos vivido. Y hoy más que nunca quiero que sepas que lo siento. De verdad. Me duele haberte fallado, me duele que hayas sufrido por algo relacionado conmigo, y ojalá pudiera quitarte ese dolor.</p>
-          <p style="margin:0 0 8px;">No te pido que todo vuelva a ser igual de un momento a otro. Solo quiero que sepas que te amo, que eres mi niña, mi amor, mi estrella, y que eso no cambia sin importar lo que pase.</p>
-          <p style="margin:0 0 8px;">Aquí estarán siempre nuestros momentos, porque para mí cada uno vale oro. Y aquí voy a estar yo también, esperándote con el corazón abierto.</p>
-          <div style="text-align:right;"><button id="close-special-message" class="btn small outline">Cerrar mensaje</button></div>
-        </div>
-      `;
-
-      document.getElementById('close-special-message')?.addEventListener('click', () => {
-        specialMessageBanner.innerHTML = '';
-      });
-    } else {
-      specialMessageBanner.innerHTML = '';
-    }
-  }
-
-  // ==============================================
-  // FUNCIONALIDAD AUXILIAR
-  // ==============================================
-
-  // Modal "100 Razones"
-  const btn100Reasons = document.getElementById('btn-random-bday');
-  if (btn100Reasons) {
-    btn100Reasons.addEventListener('click', show100ReasonsModal);
-  }
-
-  /**
-   * Muestra modal de "100 Razones" con todas las razones del array
-   */
+(function(){
   function show100ReasonsModal() {
     if (!window.messagesModule?.hundredReasons) {
       console.error('hundredReasons no está disponible');
@@ -112,21 +28,13 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
 
     document.body.appendChild(modal);
-
-    // Cerrar modal
-    const closeBtn = modal.querySelector('.close-popup');
-    closeBtn.addEventListener('click', () => modal.remove());
+    modal.querySelector('.close-popup')?.addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
     });
-
-    // Animación de entrada
     setTimeout(() => modal.classList.add('show'), 10);
   }
 
-  /**
-   * Confeti pequeño para celebraciones
-   */
   window.runTinyConfetti = function() {
     const canvas = document.createElement('canvas');
     canvas.width = window.innerWidth;
@@ -160,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (p.y < canvas.height) {
           p.x += p.vx;
           p.y += p.vy;
-          p.vy += 0.1; // gravedad
+          p.vy += 0.1;
 
           ctx.fillStyle = p.color;
           ctx.fillRect(p.x, p.y, p.size, p.size);
@@ -168,19 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      if (activeCount > 0) {
-        requestAnimationFrame(animate);
-      } else {
-        canvas.remove();
-      }
+      if (activeCount > 0) requestAnimationFrame(animate);
+      else canvas.remove();
     };
 
     animate();
   };
 
-  /**
-   * Modal genérico para mostrar mensajes
-   */
   window.showPopup = function(text) {
     const modal = document.createElement('div');
     modal.className = 'popup-modal';
@@ -191,13 +93,26 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
     document.body.appendChild(modal);
-
-    const closeBtn = modal.querySelector('.close-popup');
-    closeBtn.addEventListener('click', () => modal.remove());
+    modal.querySelector('.close-popup')?.addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.remove();
     });
-
     setTimeout(() => modal.classList.add('show'), 10);
   };
-});
+
+  document.addEventListener('DOMContentLoaded', () => {
+    try { window.messagesModule?.renderMessageLists?.(); } catch(e) { console.error('Error en messages module:', e); }
+    try { window.galleryModule?.initGallery?.(); } catch(e) { console.error('Error en gallery module:', e); }
+    try { window.calendarModule?.initCalendar?.(); } catch(e) { console.error('Error en calendar module:', e); }
+    try { window.printGalleryModule?.initPrintGallery?.(); } catch(e) { console.error('Error en printGallery module:', e); }
+    try { window.memoryMapModule?.init?.(); } catch(e) { console.error('Error inicializando mapa:', e); }
+
+    const specialMessageBanner = document.getElementById('special-message-banner');
+    if (specialMessageBanner) {
+      specialMessageBanner.innerHTML = '';
+      specialMessageBanner.style.display = 'none';
+    }
+
+    document.getElementById('btn-random-bday')?.addEventListener('click', show100ReasonsModal);
+  });
+})();
