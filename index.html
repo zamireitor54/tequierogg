@@ -25,7 +25,7 @@
 
       <figure class="hero-photo">
         <!-- Reemplaza 'tu-foto.jpg' por el nombre de tu archivo -->
-  <img src="img/miniña.jpg" alt="Foto de mi niña" id="main-photo">
+  <img src="img/mini_nina.jpg" alt="Foto de mi niña" id="main-photo">
         <figcaption class="photo-caption">Para la persona que hace mis días mejores</figcaption>
       </figure>
     </header>
@@ -123,12 +123,15 @@
         <p class="muted">Sube fotos con lugar y fecha. Se guardan solitas y aparecen aquí.</p>
       </div>
 
-      <div class="super-gallery-sticky-controls">
+      <div class="super-gallery-actions">
+        <button id="btn-clear-filter" class="btn small outline" style="display:none;">✖ Quitar filtro</button>
         <button id="btn-open-upload" class="btn small">➕ Subir recuerdo</button>
+
         <select id="filter-place" class="select small">
           <option value="">📍 Todos los lugares</option>
         </select>
-        <input id="search-caption" class="input small" type="search" placeholder="Buscar lugar o momento" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="gallery-search-zamge">
+
+        <input id="search-caption" class="input small" type="search" placeholder="Buscar (ej: playa, cine, noche...)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="gallery-search-zamge">
       </div>
 
       <div id="super-gallery-grid" class="super-gallery-grid"></div>
@@ -288,7 +291,7 @@
   </div>
 
   <div class="certificate-full" aria-hidden="false">
-    <img id="certificate-img" src="img/Certificado de Adopción Perro Ilustrado Verde.png" alt="Certificado" />
+    <img id="certificate-img" src="img/certificado_adopcion_perro_ilustrado_verde.png" alt="Certificado" />
   </div>
 <footer class="footer">
       <p>Hecho con cariño. Para la niña mas HERMOSOSOSOSOSOSISIMA</p>

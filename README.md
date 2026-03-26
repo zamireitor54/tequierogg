@@ -14,7 +14,7 @@ Archivos importantes:
 - `index.html` — la página principal.
 - `styles.css` — estilos.
 - `app.js` — lógica de la app (mensajes, calendario, galería).
-- `img/` — carpeta donde colocar tus imágenes (ej. `miniña.jpg`, `img 2.jpg`, `certificate.jpg`).
+- `img/` — carpeta donde colocar tus imágenes (ej. `mini_nina.jpg`, `img 2.jpg`, `certificate.jpg`).
 
 Cómo usar
 

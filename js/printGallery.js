@@ -23,6 +23,20 @@ function initPrintGallery() {
   let shuffled = [];
   let autoAdvanceTimer = null;
 
+  function hasRealCoords(item) {
+    const lat = Number(item?.map_lat);
+    const lng = Number(item?.map_lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+    if (Math.abs(lat) < 0.000001 && Math.abs(lng) < 0.000001) return false;
+    return true;
+  }
+
+  function hasMapData(item) {
+    if (!item) return false;
+    const mapLocation = String(item?.map_location || '').trim();
+    return !!mapLocation || hasRealCoords(item);
+  }
+
   function restartAutoAdvance() {
     if (autoAdvanceTimer) {
       clearInterval(autoAdvanceTimer);
@@ -88,7 +102,7 @@ function initPrintGallery() {
   }
 
   function emitSpotlight(item) {
-    if (!item?.map_location) return;
+    if (!hasMapData(item)) return;
     window.dispatchEvent(new CustomEvent('memory-map:spotlight-photo', {
       detail: { item }
     }));
@@ -97,7 +111,7 @@ function initPrintGallery() {
   function buildImages(list) {
     sourceList = (list || [])
       .filter(Boolean)
-      .filter(item => String(item?.map_location || '').trim());
+      .filter(item => hasMapData(item));
     idx = 0;
     shuffled = shuffleArray(sourceList);
     if (autoAdvanceTimer) {

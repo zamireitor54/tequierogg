@@ -68,6 +68,25 @@ let uploadObjectUrls = [];
 let selectedUploadFiles = [];
 let isGalleryLoading = false;
 let galleryLoadingStartedAt = 0;
+let superGalleryHead = null;
+let superGalleryActions = null;
+let superGallerySection = null;
+let superGalleryActionsSpacer = null;
+
+function setGalleryActionsFloating(isFloating) {
+  if (!superGalleryActions) return;
+  superGalleryActions.classList.toggle('is-floating', !!isFloating);
+}
+
+function syncGalleryActionsScrollOffset() {
+  if (!superGalleryActions || !superGalleryActionsSpacer) return;
+  superGalleryActions.classList.remove('is-fixed');
+  setGalleryActionsFloating(false);
+  superGalleryActionsSpacer.style.height = '0px';
+  superGalleryActions.style.removeProperty('top');
+  superGalleryActions.style.removeProperty('left');
+  superGalleryActions.style.removeProperty('width');
+}
 
 function updateUploadMapLocationDisplay(label = '') {
   const display = document.getElementById('upload-map-location-display');
@@ -83,6 +102,14 @@ function updateEditMapLocationDisplay(label = '') {
   const clean = String(label || '').trim();
   display.textContent = clean || 'Aún no has elegido un punto en el mapa.';
   display.classList.toggle('empty', !clean);
+}
+
+function parseCoordinateValue(rawValue) {
+  if (rawValue === undefined || rawValue === null) return null;
+  const clean = String(rawValue).trim();
+  if (!clean) return null;
+  const value = Number(clean);
+  return Number.isFinite(value) ? value : null;
 }
 
 async function fetchProfileById(userId) {
@@ -402,7 +429,11 @@ function renderSuperGallery() {
 
   // Mostrar/ocultar botón "Quitar filtro"
   if (btnClearFilter) {
-    btnClearFilter.style.display = activeAlbum ? '' : 'none';
+    btnClearFilter.hidden = !hasActiveFilters;
+    btnClearFilter.disabled = !hasActiveFilters;
+    btnClearFilter.classList.toggle('is-visible', hasActiveFilters);
+    btnClearFilter.style.display = hasActiveFilters ? 'inline-flex' : 'none';
+    btnClearFilter.setAttribute('aria-hidden', hasActiveFilters ? 'false' : 'true');
   }
 
   superGrid.innerHTML = '';
@@ -1050,8 +1081,8 @@ function paintLightbox() {
     const place = document.getElementById('edit-place')?.value?.trim() || null;
     const mapInput = document.getElementById('edit-map-location');
     const map_location = mapInput?.value?.trim() || null;
-    let map_lat = Number(mapInput?.dataset?.mapLat);
-    let map_lng = Number(mapInput?.dataset?.mapLng);
+    let map_lat = parseCoordinateValue(mapInput?.dataset?.mapLat);
+    let map_lng = parseCoordinateValue(mapInput?.dataset?.mapLng);
     const date  = document.getElementById('edit-date')?.value?.trim() || null;
     const album = document.getElementById('edit-album')?.value?.trim() || null;
     const caption = document.getElementById('edit-cap')?.value?.trim() || null;
@@ -1260,8 +1291,16 @@ function refreshUploadPreview() {
  */
 function initGallery() {
   // Referencias del DOM
+  superGallerySection = document.querySelector('.super-gallery');
   superGrid = document.getElementById('super-gallery-grid');
   superGalleryCount = document.getElementById('super-gallery-count');
+  superGalleryHead = document.querySelector('.super-gallery-head');
+  superGalleryActions = document.querySelector('.super-gallery-actions');
+  if (superGalleryActions && !superGalleryActionsSpacer) {
+    superGalleryActionsSpacer = document.createElement('div');
+    superGalleryActionsSpacer.className = 'super-gallery-actions-spacer';
+    superGalleryActions.insertAdjacentElement('afterend', superGalleryActionsSpacer);
+  }
   filterPlace = document.getElementById('filter-place');
   searchCaption = document.getElementById('search-caption');
   const btnOpenLogin = document.getElementById('btn-open-login');
@@ -1283,6 +1322,14 @@ function initGallery() {
   if (btnClearFilter && btnClearFilter.parentElement !== document.body) {
     document.body.appendChild(btnClearFilter);
   }
+  if (btnClearFilter) {
+    btnClearFilter.hidden = true;
+    btnClearFilter.disabled = true;
+    btnClearFilter.classList.remove('is-visible');
+    btnClearFilter.style.display = 'none';
+    btnClearFilter.setAttribute('aria-hidden', 'true');
+  }
+  syncGalleryActionsScrollOffset();
   lightbox = document.getElementById('lightbox');
   lightboxImg = document.getElementById('lightbox-img');
   lightboxCap = document.getElementById('lightbox-cap');
@@ -1313,6 +1360,7 @@ function initGallery() {
   lightboxPrev?.addEventListener('click', () => navLightbox(-1));
   lightboxNext?.addEventListener('click', () => navLightbox(1));
   window.addEventListener('resize', () => {
+    syncGalleryActionsScrollOffset();
     if (!lightbox || lightbox.classList.contains('hidden')) return;
     const frameTop = lightbox.querySelector('.lb-frame-top');
     if (!frameTop || !lightboxImg) return;
@@ -1555,9 +1603,12 @@ function initGallery() {
   sanitizeSearchCaptionInput();
   btnClearFilter?.addEventListener('click', () => {
     activeAlbum = "";
+    if (filterPlace) filterPlace.value = "";
+    if (searchCaption) searchCaption.value = "";
     shuffledOrder = null;
     renderSuperGallery();
   });
+  window.addEventListener('scroll', syncGalleryActionsScrollOffset, { passive: true });
 
   // Event listeners: login + modal upload
   btnOpenLogin?.addEventListener('click', openUploadAuthModal);
@@ -1616,8 +1667,8 @@ function initGallery() {
 
     const place = (uploadPlace?.value || '').trim();
     const map_location = (uploadMapLocation?.value || '').trim();
-    let map_lat = Number(uploadMapLocation?.dataset?.mapLat);
-    let map_lng = Number(uploadMapLocation?.dataset?.mapLng);
+    let map_lat = parseCoordinateValue(uploadMapLocation?.dataset?.mapLat);
+    let map_lng = parseCoordinateValue(uploadMapLocation?.dataset?.mapLng);
     const date = (uploadDate?.value || '').trim();
     const caption = (uploadCaption?.value || '').trim();
     const album = (uploadAlbum?.value || '').trim() || null;

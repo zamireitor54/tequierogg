@@ -248,6 +248,19 @@
     localStorage.setItem('zamge-map-geocode-cache-v1', JSON.stringify(cache));
   }
 
+  function hasSpecificMapLabel(value) {
+    const clean = String(value || '').trim();
+    return !!clean && !isGenericManualPlace(clean);
+  }
+
+  function hasRealCoords(item) {
+    const lat = Number(item?.map_lat);
+    const lng = Number(item?.map_lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
+    if (Math.abs(lat) < 0.000001 && Math.abs(lng) < 0.000001) return false;
+    return true;
+  }
+
   function createPurpleMarkerIcon(count = 1) {
     const countBadge = count > 1 ? `<span class="memory-marker-count">${count}</span>` : '';
     return L.divIcon({
@@ -443,10 +456,9 @@
     if (!canvas) return null;
 
     if (!mapPicker) {
-      mapPicker = L.map(canvas, { zoomControl: true, attributionControl: true }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+      mapPicker = L.map(canvas, { zoomControl: true, attributionControl: false }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
+        maxZoom: 19
       }).addTo(mapPicker);
 
       if (!mapPickerMoveEndBound) {
@@ -480,7 +492,11 @@
     if (resolver) resolver(result);
   }
 
-  function finalizeMapPickerSelection() {
+  async function finalizeMapPickerSelection() {
+    const liveSelection = await syncMapPickerToCenter();
+    if (liveSelection?.label) {
+      updateMapPickerSelection(liveSelection);
+    }
     if (!mapPickerSelected) {
       closeMapPicker(null);
       return;
@@ -561,29 +577,35 @@
     const grouped = new Map();
     currentGalleryItems.forEach((item) => {
       const mapPlace = String(item.map_location || '').trim();
-      if (!mapPlace || isGenericManualPlace(mapPlace)) return;
-      const key = normalizePlaceKey(mapPlace);
+      const hasCoords = hasRealCoords(item);
+      if ((!mapPlace || isGenericManualPlace(mapPlace)) && !hasCoords) return;
+      const key = hasCoords
+        ? `${Number(item.map_lat).toFixed(6)},${Number(item.map_lng).toFixed(6)}`
+        : normalizePlaceKey(mapPlace);
       if (!grouped.has(key)) grouped.set(key, []);
       grouped.get(key).push(item);
     });
 
     for (const [key, photos] of grouped.entries()) {
       const firstPhoto = photos[0] || {};
-      const resolved = (Number.isFinite(Number(firstPhoto.map_lat)) && Number.isFinite(Number(firstPhoto.map_lng)))
+      const resolved = hasRealCoords(firstPhoto)
         ? {
             lat: Number(firstPhoto.map_lat),
             lng: Number(firstPhoto.map_lng),
-            label: firstPhoto.map_location || '',
+            label: hasSpecificMapLabel(firstPhoto.map_location) ? firstPhoto.map_location : '',
             subtitle: ''
           }
         : await resolvePlaceToCoords(firstPhoto.map_location || key);
       if (!resolved) continue;
+      if (!resolved.label && hasRealCoords(firstPhoto)) {
+        resolved.label = await reverseLookupLabel(Number(firstPhoto.map_lat), Number(firstPhoto.map_lng));
+      }
       const marker = L.marker([resolved.lat, resolved.lng], {
         icon: createPurpleMarkerIcon(photos.length)
       });
       const popupHtml = `
         <div class="memory-map-popup">
-          <strong>${photos[0]?.map_location || resolved.label}</strong>
+          <strong>${hasSpecificMapLabel(photos[0]?.map_location) ? photos[0].map_location : resolved.label}</strong>
           <div>${photos.length} recuerdo${photos.length > 1 ? 's' : ''}</div>
         </div>
       `;
@@ -601,19 +623,21 @@
   async function spotlightPhoto(item) {
     if (!memoryMap || !item) return;
     const place = String(item.map_location || '').trim();
-    if (!place) return;
 
     let resolved = null;
     const lat = Number(item.map_lat);
     const lng = Number(item.map_lng);
 
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    if (hasRealCoords(item)) {
       resolved = {
         lat,
         lng,
-        label: place,
+        label: hasSpecificMapLabel(place) ? place : '',
         subtitle: ''
       };
+      if (!resolved.label) {
+        resolved.label = await reverseLookupLabel(lat, lng);
+      }
     } else {
       resolved = await resolvePlaceToCoords(place);
     }
@@ -628,7 +652,7 @@
     });
     marker.bindPopup(`
       <div class="memory-map-popup">
-        <strong>${place}</strong>
+        <strong>${hasSpecificMapLabel(place) ? place : resolved.label}</strong>
         <div>${item.place || item.album || 'Nuestro recuerdo'}</div>
       </div>
     `);
@@ -642,10 +666,9 @@
     const mapEl = document.getElementById('memory-map');
     if (!mapEl) return;
 
-    memoryMap = L.map(mapEl, { zoomControl: true, attributionControl: true }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
+    memoryMap = L.map(mapEl, { zoomControl: true, attributionControl: false }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
+      maxZoom: 19
     }).addTo(memoryMap);
 
     memoryMarkersLayer = L.layerGroup().addTo(memoryMap);
@@ -671,7 +694,9 @@
 
     closeX?.addEventListener('click', () => closeMapPicker(null));
     cancelBtn?.addEventListener('click', () => closeMapPicker(null));
-    confirmBtn?.addEventListener('click', finalizeMapPickerSelection);
+    confirmBtn?.addEventListener('click', () => {
+      finalizeMapPickerSelection();
+    });
 
     document.querySelectorAll('.map-picker-quick-chip').forEach((chip) => {
       chip.addEventListener('click', async () => {
