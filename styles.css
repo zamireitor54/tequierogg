@@ -1141,7 +1141,7 @@ body {
   margin-left: calc(50% - 50vw);
   padding: 34px 18px 36px;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 
   background:
     radial-gradient(900px 420px at 10% 15%, rgba(255,111,191,0.20), transparent 60%),
@@ -1209,8 +1209,8 @@ body {
   align-items: center;
   margin-top: 6px;
 
-  position: sticky;
-  top: 10px;
+  position: static;
+  top: auto;
   z-index: 100;
 
   padding: 12px 14px;
