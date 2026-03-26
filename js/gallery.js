@@ -54,6 +54,31 @@ let viewItems = [];
 let shuffledOrder = null;
 let lightboxIndex = 0;
 let isAuthed = false;
+let lastFocusedElementBeforeModal = null;
+
+function setModalFocus(modal, focusSelector) {
+  if (!modal) return;
+  lastFocusedElementBeforeModal = document.activeElement;
+  modal.inert = false;
+  const toFocus = modal.querySelector(focusSelector);
+  if (toFocus && toFocus.focus) {
+    toFocus.focus();
+  } else {
+    modal.focus();
+  }
+}
+
+function clearModalFocus(modal) {
+  if (!modal) return;
+  if (document.activeElement && modal.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+  modal.inert = true;
+  if (lastFocusedElementBeforeModal && lastFocusedElementBeforeModal.focus) {
+    lastFocusedElementBeforeModal.focus();
+  }
+  lastFocusedElementBeforeModal = null;
+}
 
 // Referencias del DOM
 let superGrid, filterPlace, searchCaption, btnOpenUpload, uploadModal, btnCancelUpload;
@@ -500,11 +525,13 @@ function renderSuperGallery() {
 function openLightbox(items, idx) {
   if (!lightbox) return;
   sanitizeSearchCaptionInput();
+  lastFocusedElementBeforeModal = document.activeElement;
   // evitar que la página de fondo haga scroll mientras el overlay está abierto
   document.body.style.overflow = 'hidden';
   document.body.classList.add('lightbox-open');
   lightbox.classList.remove('hidden');
   lightbox.setAttribute('aria-hidden', 'false');
+  setModalFocus(lightbox, '#btn-lightbox-close-inner');
   lightbox._items = items;
   lightboxIndex = idx;
   paintLightbox();
@@ -1156,6 +1183,8 @@ function paintLightbox() {
  * Cerrar lightbox
  */
 function closeLightbox() {
+  if (!lightbox) return;
+  clearModalFocus(lightbox);
   lightbox.classList.add('hidden');
   lightbox.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('lightbox-open');
@@ -1191,6 +1220,8 @@ function navLightbox(step) {
  * Abrir modal de upload
  */
 function openUpload() {
+  if (!uploadModal) return;
+  setModalFocus(uploadModal, '#upload-files');
   uploadModal.classList.remove('hidden');
   uploadModal.setAttribute('aria-hidden', 'false');
   uploadStatus.textContent = '';
@@ -1202,12 +1233,21 @@ function openUpload() {
  * Cerrar modal de upload
  */
 function closeUpload() {
+  if (!uploadModal) return;
+  clearModalFocus(uploadModal);
   uploadModal.classList.add('hidden');
   uploadModal.setAttribute('aria-hidden', 'true');
   closeUploadAuthModal();
 }
 
 function openUploadAuthModal() {
+  const authModal = document.getElementById('upload-auth-modal');
+  if (!authModal) return;
+  setModalFocus(authModal, '#btn-close-upload-auth');
+  try { window.refreshAuthUI?.(); } catch(e){}
+  authModal.classList.remove('hidden');
+  authModal.setAttribute('aria-hidden', 'false');
+}
   const authModal = document.getElementById('upload-auth-modal');
   if (!authModal) return;
   try { window.refreshAuthUI?.(); } catch(e){}
@@ -1218,6 +1258,7 @@ function openUploadAuthModal() {
 function closeUploadAuthModal() {
   const authModal = document.getElementById('upload-auth-modal');
   if (!authModal) return;
+  clearModalFocus(authModal);
   authModal.classList.add('hidden');
   authModal.setAttribute('aria-hidden', 'true');
 }
