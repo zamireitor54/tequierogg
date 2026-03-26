@@ -1181,20 +1181,24 @@ body {
   box-shadow: none;
 }
 
-.super-gallery-sticky-controls {
+..super-gallery-sticky-controls {
   position: sticky;
-  top: 0;
+  top: 10px;
   z-index: 100;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 12px 20px;
-  border-bottom: 1px solid rgba(139,92,246,0.12);
+  padding: 10px 16px;
+  border: 1px solid rgba(139,92,246,0.16);
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba(36,19,50,0.10);
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  width: min(1120px, calc(100% - 36px));
+  margin: 0 auto 10px;
 }
 
 .super-gallery-sticky-controls .btn,
