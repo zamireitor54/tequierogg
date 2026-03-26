@@ -457,7 +457,7 @@ function renderSuperGallery() {
     const canGroup = relatedCount > 1;
 
     card.innerHTML = `
-    <img src="${it.url}" alt="recuerdo">
+    <img src="${it.url || 'data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27560%27%20height=%27340%27%3E%3Crect%20width=%27560%27%20height=%27340%27%20fill=%27%23f8f0ff%27%20/%3E%3Ctext%20x=%27280%27%20y=%27170%27%20fill=%27%238a4dff%27%20font-family=%27Arial%27%20font-size=%2724%27%20text-anchor=%27middle%27%3ESin%20imagen%3C/text%3E%3C/svg%3E'}" alt="${(it.caption||'recuerdo').replaceAll('"','&quot;')}">
     ${canGroup ? `
       <button class="sg-group-btn" type="button" data-album="${albumName.replaceAll('"', '&quot;')}" title="Ver ${relatedCount} de &quot;${albumName}&quot;" aria-label="Ver ${relatedCount} recuerdos de ${albumName}">
         <span class="sg-group-icon">🗂️</span>
@@ -467,7 +467,7 @@ function renderSuperGallery() {
     <div class="sg-meta">
       <div class="top">
       <span class="sg-pill">🗂️ ${it.album || 'Sin bloque'}</span>
-            <span class="sg-pill">📍 ${it.place || '—'}</span>
+            <span class="sg-pill">📍 ${it.place || it.map_location || 'Aún sin ubicación'}</span>
       </div>
       <div class="cap">📅 ${formatNiceDate(it.date) || ''} — ${it.caption || ''}</div>
     </div>`;

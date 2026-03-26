@@ -443,9 +443,17 @@ body {
 
 /* MESSAGES/CARDS */
 .cards-section {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
   gap: 18px;
+}
+
+@media (max-width: 1000px) {
+  .cards-section { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 700px) {
+  .cards-section { grid-template-columns: 1fr !important; }
 }
 
 /* (old) auth-box styles removed: login moved to global auth modal */
@@ -7267,6 +7275,8 @@ body{
 }
 
 .cards-section{
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
   gap: 22px !important;
 }
 
