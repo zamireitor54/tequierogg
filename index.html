@@ -121,17 +121,14 @@
           <span id="super-gallery-count" class="super-gallery-count">0 recuerdos</span>
         </div>
         <p class="muted">Sube fotos con lugar y fecha. Se guardan solitas y aparecen aquí.</p>
+      </div>
 
-        <div class="super-gallery-actions">
-          <button id="btn-clear-filter" class="btn small outline" style="display:none;">✖ Quitar filtro</button>
-          <button id="btn-open-upload" class="btn small">➕ Subir recuerdo</button>
-
-          <select id="filter-place" class="select small">
-            <option value="">📍 Todos los lugares</option>
-          </select>
-
-          <input id="search-caption" class="input small" type="search" placeholder="Buscar (ej: playa, cine, noche...)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="gallery-search-zamge">
-        </div>
+      <div class="super-gallery-sticky-controls">
+        <button id="btn-open-upload" class="btn small">➕ Subir recuerdo</button>
+        <select id="filter-place" class="select small">
+          <option value="">📍 Todos los lugares</option>
+        </select>
+        <input id="search-caption" class="input small" type="search" placeholder="Buscar lugar o momento" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="gallery-search-zamge">
       </div>
 
       <div id="super-gallery-grid" class="super-gallery-grid"></div>
