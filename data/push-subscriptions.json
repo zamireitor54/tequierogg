@@ -1,0 +1,22 @@
+[
+  {
+    "endpoint": "https://fcm.googleapis.com/fcm/send/fqOZemIe2E0:APA91bFaePUN5ZWiG_wuamKbZpJ9FXF_mbw23kQtrihxS_Wz8Rb6o8YljTZPrlYC6wuM_8Mf1uDApEZGtinC6D_94SuJnQVpkdM0rxOgBeZKFc4f-aGo-uJPVAzApZbmJIX3d5HR2KdJ",
+    "subscription": {
+      "endpoint": "https://fcm.googleapis.com/fcm/send/fqOZemIe2E0:APA91bFaePUN5ZWiG_wuamKbZpJ9FXF_mbw23kQtrihxS_Wz8Rb6o8YljTZPrlYC6wuM_8Mf1uDApEZGtinC6D_94SuJnQVpkdM0rxOgBeZKFc4f-aGo-uJPVAzApZbmJIX3d5HR2KdJ",
+      "expirationTime": null,
+      "keys": {
+        "p256dh": "BOpC9K611xd3ZwiTg8wO3_vyDlLldXJ1j9000shAxfHLbucOYJIlJ7XL2jAkE8-LKjeORH1OLa3SYljKJ8AZYts",
+        "auth": "qtyM0XDA0IQBG5l_FPCHXw"
+      }
+    },
+    "keys": {
+      "p256dh": "BOpC9K611xd3ZwiTg8wO3_vyDlLldXJ1j9000shAxfHLbucOYJIlJ7XL2jAkE8-LKjeORH1OLa3SYljKJ8AZYts",
+      "auth": "qtyM0XDA0IQBG5l_FPCHXw"
+    },
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+    "is_active": true,
+    "preferred_hour": 6,
+    "preferred_minute": 0,
+    "updated_at": "2026-03-27T00:02:54.828Z"
+  }
+]

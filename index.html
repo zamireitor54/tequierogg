@@ -8,6 +8,9 @@
   <!-- Fuente: Poppins para cuerpo y Sacramento para títulos -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Playfair+Display:wght@600;700;800&family=Sacramento&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#8d56ff">
+  <meta name="push-api-base" content="http://localhost:3010">
 
   <!-- CSS Principal -->
   <link rel="stylesheet" href="styles.css">
@@ -58,7 +61,7 @@
         <p>Selecciona un día para leer tu mensaje especial. Los días futuros se irán desbloqueando mientras pasa el tiempo. </p>
         
         <div class="calendar-toggle-row">
-          <button id="toggle-calendar" class="btn small">Abrir calendario 📖</button>
+          <button id="toggle-calendar" class="btn small">Abrir calendario <span class="calendar-btn-emoji" aria-hidden="true">📖</span></button>
           <span id="selected-date" class="selected-date">17/11/2025</span>
           <button id="unlock-all" class="btn small outline">Desbloquear todos</button>
         </div>
@@ -278,6 +281,69 @@
     </div>
   </div>
 
+  <div id="calendar-unlock-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card calendar-unlock-card">
+      <button id="btn-close-calendar-unlock-x" class="upload-x calendar-unlock-x" aria-label="Cerrar">✕</button>
+      <div class="upload-eyebrow">Desbloqueo especial</div>
+      <h3 class="upload-title">Desbloquear todos 🔓</h3>
+      <p class="upload-subtitle">Escribe la clave de 4 dígitos para abrir todos los días del calendario.</p>
+
+      <div class="field calendar-unlock-field">
+        <input id="calendar-unlock-code" class="input" type="password" inputmode="numeric" maxlength="4" placeholder="Clave de 4 dígitos" autocomplete="off">
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-cancel-calendar-unlock" class="btn small outline" type="button">Cancelar</button>
+        <button id="btn-confirm-calendar-unlock" class="btn small" type="button">Confirmar</button>
+      </div>
+
+      <div id="calendar-unlock-status" class="muted"></div>
+    </div>
+  </div>
+
+  <div id="push-settings-modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card push-settings-card">
+      <button id="btn-close-push-settings-x" class="upload-x push-settings-x" aria-label="Cerrar">✕</button>
+      <div class="upload-eyebrow">Mensajitos diarios</div>
+      <h3 class="upload-title">Configura tus notificaciones 🔔</h3>
+      <p class="upload-subtitle">Elige la hora a la que quieres recibir el mensaje del día y decide si quieres mantenerlos activos.</p>
+
+      <div class="push-settings-switch">
+        <label class="push-settings-toggle">
+          <input id="push-enabled" type="checkbox" checked>
+          <span class="push-settings-toggle-ui" aria-hidden="true"></span>
+          <span class="push-settings-toggle-copy">
+            <strong>Mensajitos diarios</strong>
+            <small>Activa o pausa los avisos del calendario</small>
+          </span>
+        </label>
+        <div id="push-live-state" class="push-live-state">✅ Mensajes activos — recibirás tu mensaje cada día a las 6:00 a. m.</div>
+      </div>
+
+      <div class="field push-settings-field">
+        <span>Hora de llegada</span>
+        <div class="push-time-wrap">
+          <span class="push-time-icon" aria-hidden="true">⏰</span>
+          <div class="push-time-selects">
+            <select id="push-hour" class="input push-time-select" aria-label="Hora"></select>
+            <select id="push-minute" class="input push-time-select" aria-label="Minutos"></select>
+            <select id="push-meridiem" class="input push-time-select" aria-label="AM o PM">
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-cancel-push-settings" class="btn small outline" type="button">Cancelar</button>
+        <button id="btn-save-push-settings" class="btn small" type="button">Guardar</button>
+      </div>
+
+      <div id="push-settings-status" class="muted"></div>
+    </div>
+  </div>
+
   <!-- Lightbox -->
   <div id="lightbox" class="lightbox hidden" aria-hidden="true">
     <button id="lightbox-close" class="lightbox-close">✕</button>
@@ -300,8 +366,9 @@
 
   <!-- FAB Notas + Iniciar sesión -->
   <div class="notes-login-row">
-    <button id="btn-open-login-footer" class="btn small outline">🔐 Iniciar sesión</button>
-    <button id="notes-fab" class="notes-fab" aria-label="Abrir notas">📝</button>
+    <button id="btn-push-settings" class="btn small outline" type="button" aria-label="Mensajitos diarios" onclick="window.pushNotificationsModule?.openPushSettingsModal?.(); return false;">🔔</button>
+    <button id="btn-open-login-footer" class="btn small outline" type="button" aria-label="Iniciar sesión">🔐</button>
+    <button id="notes-fab" class="notes-fab" type="button" aria-label="Abrir notas">📝</button>
   </div>
 
   <!-- Modal Notas -->
@@ -382,6 +449,7 @@
   <script src="js/printGallery.js" defer></script>
   <script src="js/map.js" defer></script>
   <script src="js/gallery.js" defer></script>
+  <script src="js/notifications.js" defer></script>
   <!-- Script principal de inicialización -->
   <script src="app.js" defer></script>
   <!-- Script de notas -->

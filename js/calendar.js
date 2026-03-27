@@ -11,10 +11,13 @@ const endDate = new Date(2026, 10, 17, 0, 0, 0, 0);   // Nov 17, 2026 medianoche
 // Nota: se inicializa correctamente en initCalendar() según la fecha actual
 let currentDisplayMonth = new Date(2025, 10, 17);
 let unlockedAll = false;
+let selectedDayNum = null;
 
 // Referencias del DOM
 let calendarDiv, messageDisplayDiv, currentMonthDiv, prevMonthBtn, nextMonthBtn;
 let toggleCalendarBtn, calendarContainer, selectedDateSpan, unlockAllBtn;
+let calendarUnlockModal, calendarUnlockInput, calendarUnlockStatus;
+let calendarUnlockConfirmBtn, calendarUnlockCancelBtn, calendarUnlockCloseBtn;
 
 /**
  * Calcular el día número (0-364) desde la fecha actual
@@ -150,7 +153,7 @@ function showLockedDayMessage(dayOfMonth) {
 /**
  * Mostrar mensaje en el div de display
  */
-function displayMessage(dayNum, closeCalendar = false) {
+function displayMessage(dayNum, closeCalendar = false, persistSelection = true) {
   if (!messageDisplayDiv) return;
 
   if (dayNum < 0) {
@@ -163,6 +166,10 @@ function displayMessage(dayNum, closeCalendar = false) {
   messageDisplayDiv.textContent = msg;
   messageDisplayDiv.classList.remove('empty');
   messageDisplayDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  if (persistSelection) {
+    selectedDayNum = dayNum;
+  }
 
   if (selectedDateSpan) {
     const d = getDateFromDayNumber(dayNum);
@@ -222,11 +229,58 @@ function showPopup(text) {
   document.body.appendChild(overlay);
 }
 
+function closeCalendarUnlockModal() {
+  if (!calendarUnlockModal) return;
+  calendarUnlockModal.classList.add('hidden');
+  calendarUnlockModal.setAttribute('aria-hidden', 'true');
+  if (calendarUnlockInput) {
+    calendarUnlockInput.value = '';
+  }
+  if (calendarUnlockStatus) {
+    calendarUnlockStatus.textContent = '';
+  }
+}
+
+function confirmCalendarUnlock() {
+  const code = String(calendarUnlockInput?.value || '').trim();
+  if (code === '9118') {
+    unlockedAll = true;
+    unlockAllBtn?.classList.add('active');
+    if (unlockAllBtn) unlockAllBtn.textContent = 'Bloquear por fecha';
+    renderCalendar();
+    closeCalendarUnlockModal();
+    showPopup('¡Listo! Todos los días quedan desbloqueados.');
+    return;
+  }
+
+  if (calendarUnlockStatus) {
+    calendarUnlockStatus.textContent = 'Clave incorrecta. Intenta de nuevo.';
+  }
+  calendarUnlockInput?.focus();
+  calendarUnlockInput?.select();
+}
+
+function openCalendarUnlockModal() {
+  if (!calendarUnlockModal) return;
+  calendarUnlockModal.classList.remove('hidden');
+  calendarUnlockModal.setAttribute('aria-hidden', 'false');
+  if (calendarUnlockInput) {
+    calendarUnlockInput.value = '';
+  }
+  if (calendarUnlockStatus) {
+    calendarUnlockStatus.textContent = '';
+  }
+  requestAnimationFrame(() => {
+    calendarUnlockInput?.focus();
+  });
+}
+
 /**
  * Renderizar calendario del mes actual
  */
 function renderCalendar() {
   if (!calendarDiv) return;
+  calendarDiv.classList.remove('calendar-grid-animate');
   calendarDiv.innerHTML = '';
 
   const today = getDayNumber();
@@ -289,20 +343,25 @@ function renderCalendar() {
       if (cellDate.getTime() === todayDate.getTime()) {
         dayBtn.classList.add('today');
       }
+      if (selectedDayNum === dayNum) {
+        dayBtn.classList.add('selected');
+      }
 
       dayBtn.addEventListener('click', () => {
-        displayMessage(dayNum, true);
+        selectedDayNum = dayNum;
+        renderCalendar();
+        displayMessage(dayNum, true, false);
       });
     } else if (dayNum < 0 || dayNum > 364) {
       dayBtn.classList.add('locked');
-      dayBtn.textContent = '✕';
+      dayBtn.textContent = dayOfMonth;
       dayBtn.title = 'Este día no está en el rango';
       dayBtn.addEventListener('click', () => {
         showLockedDayMessage(dayOfMonth);
       });
     } else {
       dayBtn.classList.add('locked');
-      dayBtn.textContent = '✕';
+      dayBtn.textContent = dayOfMonth;
       dayBtn.title = 'Este día aún no está disponible';
       dayBtn.addEventListener('click', () => {
         showLockedDayMessage(dayOfMonth);
@@ -312,8 +371,18 @@ function renderCalendar() {
     calendarDiv.appendChild(dayBtn);
   }
 
+  requestAnimationFrame(() => {
+    calendarDiv.classList.add('calendar-grid-animate');
+  });
+
   const currentDayNum = getDayNumber();
-  displayMessage(currentDayNum >= 0 ? currentDayNum : 0);
+  if (selectedDayNum !== null) {
+    displayMessage(selectedDayNum, false, false);
+  } else if (currentDayNum >= 0) {
+    displayMessage(currentDayNum, false, false);
+  } else {
+    displayMessage(0, false, false);
+  }
 }
 
 /**
@@ -335,6 +404,20 @@ function toggleCalendar() {
   }
 }
 
+function openDay(dayNum, { openCalendar = true } = {}) {
+  const safeDayNum = Number(dayNum);
+  if (!Number.isFinite(safeDayNum) || safeDayNum < 0 || safeDayNum > 364) return;
+
+  selectedDayNum = safeDayNum;
+  currentDisplayMonth = getDateFromDayNumber(safeDayNum);
+  renderCalendar();
+  displayMessage(safeDayNum, false, false);
+
+  if (openCalendar && calendarContainer?.classList.contains('calendar-hidden')) {
+    toggleCalendar();
+  }
+}
+
 /**
  * Inicializar el calendario
  */
@@ -349,6 +432,12 @@ function initCalendar() {
   calendarContainer = document.getElementById('calendar-container');
   selectedDateSpan = document.getElementById('selected-date');
   unlockAllBtn = document.getElementById('unlock-all');
+  calendarUnlockModal = document.getElementById('calendar-unlock-modal');
+  calendarUnlockInput = document.getElementById('calendar-unlock-code');
+  calendarUnlockStatus = document.getElementById('calendar-unlock-status');
+  calendarUnlockConfirmBtn = document.getElementById('btn-confirm-calendar-unlock');
+  calendarUnlockCancelBtn = document.getElementById('btn-cancel-calendar-unlock');
+  calendarUnlockCloseBtn = document.getElementById('btn-close-calendar-unlock-x');
 
   // ✅ Al iniciar, mostrar el mes del día actual (si está dentro del rango).
   // Si la fecha actual está fuera del rango, caer al inicio/fin.
@@ -388,6 +477,25 @@ function initCalendar() {
     toggleCalendarBtn.addEventListener('click', toggleCalendar);
   }
 
+  calendarUnlockConfirmBtn?.addEventListener('click', confirmCalendarUnlock);
+  calendarUnlockCancelBtn?.addEventListener('click', closeCalendarUnlockModal);
+  calendarUnlockCloseBtn?.addEventListener('click', closeCalendarUnlockModal);
+  calendarUnlockModal?.addEventListener('click', (event) => {
+    if (event.target === calendarUnlockModal) {
+      closeCalendarUnlockModal();
+    }
+  });
+  calendarUnlockInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      confirmCalendarUnlock();
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeCalendarUnlockModal();
+    }
+  });
+
   // Desbloquear todo (con clave)
   if (unlockAllBtn) {
     unlockAllBtn.addEventListener('click', () => {
@@ -400,18 +508,7 @@ function initCalendar() {
         return;
       }
 
-      const code = window.prompt('Introduce la clave para desbloquear todos los días (4 dígitos):');
-      if (code === null) return;
-
-      if (String(code).trim() === '9118') {
-        unlockedAll = true;
-        unlockAllBtn.classList.add('active');
-        unlockAllBtn.textContent = 'Bloquear por fecha';
-        renderCalendar();
-        showPopup('¡Listo! Todos los días quedan desbloqueados.');
-      } else {
-        showPopup('Clave incorrecta. Intenta de nuevo.');
-      }
+      openCalendarUnlockModal();
     });
   }
 
@@ -421,5 +518,6 @@ function initCalendar() {
 
 // Exportar para app.js
 window.calendarModule = {
-  initCalendar
+  initCalendar,
+  openDay
 };

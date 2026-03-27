@@ -106,6 +106,7 @@
     try { window.calendarModule?.initCalendar?.(); } catch(e) { console.error('Error en calendar module:', e); }
     try { window.printGalleryModule?.initPrintGallery?.(); } catch(e) { console.error('Error en printGallery module:', e); }
     try { window.memoryMapModule?.init?.(); } catch(e) { console.error('Error inicializando mapa:', e); }
+    try { window.pushNotificationsModule?.initNotifications?.(); } catch(e) { console.error('Error inicializando notificaciones push:', e); }
 
     const specialMessageBanner = document.getElementById('special-message-banner');
     if (specialMessageBanner) {
@@ -113,6 +114,28 @@
       specialMessageBanner.style.display = 'none';
     }
 
+    const params = new URLSearchParams(window.location.search);
+    const calendarDay = params.get('calendarDay');
+    const openCalendar = params.get('openCalendar') === '1';
+    if (calendarDay !== null) {
+      const parsedDay = Number(calendarDay);
+      if (Number.isFinite(parsedDay)) {
+        try { window.calendarModule?.openDay?.(parsedDay, { openCalendar }); } catch (e) { console.error('Error abriendo día desde notificación:', e); }
+        params.delete('calendarDay');
+        params.delete('openCalendar');
+        const nextQuery = params.toString();
+        const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash || ''}`;
+        window.history.replaceState({}, '', nextUrl);
+      }
+    }
+
     document.getElementById('btn-random-bday')?.addEventListener('click', show100ReasonsModal);
+    document.getElementById('btn-push-settings')?.addEventListener('click', () => {
+      try {
+        window.pushNotificationsModule?.openPushSettingsModal?.();
+      } catch (e) {
+        console.error('Error abriendo modal de mensajitos diarios:', e);
+      }
+    });
   });
 })();

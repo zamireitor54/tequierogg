@@ -22,6 +22,48 @@ function initPrintGallery() {
   let imgs = [];
   let shuffled = [];
   let autoAdvanceTimer = null;
+  let captionResizeObserver = null;
+
+  function syncMobileMemoryPocketPosition() {
+    const pocket = document.querySelector('.map-photo-pocket');
+    const mapCopy = document.querySelector('.map-placeholder-copy');
+    if (!pocket || !mapCopy) return;
+
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      const copyHeight = Math.ceil(mapCopy.getBoundingClientRect().height) || 0;
+      const copyStyle = window.getComputedStyle(mapCopy);
+      const lineHeight = parseFloat(copyStyle.lineHeight) || 22;
+      const isMultiline = copyHeight > lineHeight * 1.6;
+      const baseCaptionHeight = 72;
+      const extraCaptionHeight = Math.max(0, copyHeight - baseCaptionHeight);
+      const extraGap = 22 + extraCaptionHeight;
+      pocket.style.top = 'auto';
+      pocket.style.bottom = `${copyHeight + extraGap}px`;
+      pocket.classList.toggle('is-caption-tall', isMultiline);
+    } else {
+      pocket.style.top = '';
+      pocket.style.bottom = '';
+      pocket.classList.remove('is-caption-tall');
+    }
+  }
+
+  function scheduleMobileMemoryPocketPositionSync() {
+    requestAnimationFrame(() => {
+      syncMobileMemoryPocketPosition();
+    });
+  }
+
+  function bindMobileMemoryPocketObserver() {
+    const mapCopy = document.querySelector('.map-placeholder-copy');
+    if (!mapCopy || captionResizeObserver) return;
+
+    if (typeof ResizeObserver === 'function') {
+      captionResizeObserver = new ResizeObserver(() => {
+        scheduleMobileMemoryPocketPositionSync();
+      });
+      captionResizeObserver.observe(mapCopy);
+    }
+  }
 
   function hasRealCoords(item) {
     const lat = Number(item?.map_lat);
@@ -61,6 +103,7 @@ function initPrintGallery() {
       <div style="font-size: 13px; margin-top: 6px; color:#5d4a7f;">Pulsa "Subir recuerdo" para guardar un momento.</div>
     `;
     frame.appendChild(placeholder);
+    scheduleMobileMemoryPocketPositionSync();
   }
 
   function shuffleArray(arr) {
@@ -99,6 +142,8 @@ function initPrintGallery() {
       hint.textContent = '';
       hint.hidden = true;
     }
+
+    scheduleMobileMemoryPocketPositionSync();
   }
 
   function emitSpotlight(item) {
@@ -289,6 +334,13 @@ function initPrintGallery() {
   window.addEventListener('superGallery:items', (ev) => {
     buildImages(toItemsFromGallery(ev?.detail?.items));
   });
+
+  window.addEventListener('resize', () => {
+    syncMobileMemoryPocketPosition();
+  });
+
+  bindMobileMemoryPocketObserver();
+  scheduleMobileMemoryPocketPositionSync();
 }
 
 // Exportar para app.js

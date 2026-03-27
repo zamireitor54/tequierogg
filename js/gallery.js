@@ -1248,12 +1248,6 @@ function openUploadAuthModal() {
   authModal.classList.remove('hidden');
   authModal.setAttribute('aria-hidden', 'false');
 }
-  const authModal = document.getElementById('upload-auth-modal');
-  if (!authModal) return;
-  try { window.refreshAuthUI?.(); } catch(e){}
-  authModal.classList.remove('hidden');
-  authModal.setAttribute('aria-hidden', 'false');
-}
 
 function closeUploadAuthModal() {
   const authModal = document.getElementById('upload-auth-modal');

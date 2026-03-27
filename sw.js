@@ -1,0 +1,42 @@
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  let payload = {};
+  try {
+    payload = event.data.json();
+  } catch (_error) {
+    payload = { title: 'Tienes un mensaje nuevo 💌', body: event.data.text() };
+  }
+
+  const title = payload.title || 'Tienes un mensaje nuevo 💌';
+  const options = {
+    body: payload.body || 'Abre la página para verlo.',
+    icon: payload.icon || '/img/mini_nina.jpg',
+    badge: payload.badge || '/img/mini_nina.jpg',
+    image: payload.image || undefined,
+    tag: payload.tag || 'zamge-daily-message',
+    renotify: true,
+    data: payload.data || {}
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || '/';
+
+  event.waitUntil((async () => {
+    const windowClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of windowClients) {
+      if ('focus' in client) {
+        client.navigate(targetUrl);
+        return client.focus();
+      }
+    }
+    if (clients.openWindow) {
+      return clients.openWindow(targetUrl);
+    }
+    return null;
+  })());
+});

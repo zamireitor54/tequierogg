@@ -272,6 +272,29 @@
     });
   }
 
+  function getMemoryPopupSide(latlng) {
+    return null;
+  }
+
+  function syncMemoryPopupLayout(popup) {
+    if (!memoryMap || !popup) return;
+
+    const side = getMemoryPopupSide(popup.getLatLng?.());
+    popup.options.offset = side === 'left'
+      ? L.point(-92, -8)
+      : L.point(0, -12);
+
+    popup.update();
+
+    const popupEl = popup.getElement?.();
+    if (!popupEl) return;
+
+    popupEl.classList.remove('memory-popup-mobile', 'memory-popup-side-left');
+    if (side === 'left') {
+      popupEl.classList.add('memory-popup-mobile', 'memory-popup-side-left');
+    }
+  }
+
   async function queryNominatim(q) {
     if (!q) return [];
     if (mapPickerSearchController) {
@@ -679,8 +702,13 @@
       window.addEventListener('resize', () => {
         memoryMap?.invalidateSize();
         mapPicker?.invalidateSize();
+        if (memoryMap?._popup) syncMemoryPopupLayout(memoryMap._popup);
       });
     }
+
+    memoryMap.on('popupopen', (event) => {
+      syncMemoryPopupLayout(event.popup);
+    });
 
     setTimeout(() => memoryMap.invalidateSize(), 120);
   }
