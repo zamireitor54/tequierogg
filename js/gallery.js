@@ -283,6 +283,13 @@ function setStoredPhotoMapPoint(photoId, point) {
   window.memoryMapModule?.setStoredPhotoMapPoint?.(photoId, point);
 }
 
+function getTrustedStoredMapData(photoId) {
+  const point = getStoredPhotoMapPoint(photoId);
+  if (!point) return { location: null, point: null };
+  const location = getStoredPhotoMapLocation(photoId) || null;
+  return { location, point };
+}
+
 function wirePlaceSuggestions(inputEl, suggestionsEl) {
   if (!inputEl || !suggestionsEl) return;
 
@@ -544,6 +551,7 @@ function paintLightbox() {
   const items = lightbox._items || [];
   const it = items[lightboxIndex];
   if (!it) return;
+  const trustedStoredMap = getTrustedStoredMapData(it.id);
   lightboxImg.src = it.url;
 
   let photoBg = lightbox.querySelector('.lightbox-photo-bg');
@@ -717,12 +725,12 @@ function paintLightbox() {
 
               <label class="lb-field lb-span-2">
                 <span>🗺️ Ubicación en el mapa</span>
-                <input id="edit-map-location" type="hidden" value="${((it.map_location || getStoredPhotoMapLocation(it.id)) || '').replaceAll('"','&quot;')}" />
+                <input id="edit-map-location" type="hidden" value="${((it.map_location || trustedStoredMap.location) || '').replaceAll('"','&quot;')}" />
                 <div class="map-location-tools">
                   <button id="btn-edit-map-picker" class="btn small outline" type="button">🗺️ Poner ubicación</button>
                   <span class="muted">Toca el punto exacto y se guardará con esta foto.</span>
                 </div>
-                <div id="edit-map-location-display" class="map-location-display ${(it.map_location || getStoredPhotoMapLocation(it.id)) ? '' : 'empty'}">${(it.map_location || getStoredPhotoMapLocation(it.id) || 'Aún no has elegido un punto en el mapa.').replaceAll('<','&lt;')}</div>
+                <div id="edit-map-location-display" class="map-location-display ${(it.map_location || trustedStoredMap.location) ? '' : 'empty'}">${(it.map_location || trustedStoredMap.location || 'Aún no has elegido un punto en el mapa.').replaceAll('<','&lt;')}</div>
               </label>
 
               <label class="lb-field lb-span-2">
@@ -793,15 +801,14 @@ function paintLightbox() {
   }
   document.getElementById('edit-place')?.setAttribute('value', it.place || '');
   if (document.getElementById('edit-place')) document.getElementById('edit-place').value = it.place || '';
-  document.getElementById('edit-map-location')?.setAttribute('value', it.map_location || getStoredPhotoMapLocation(it.id) || '');
+  document.getElementById('edit-map-location')?.setAttribute('value', it.map_location || trustedStoredMap.location || '');
   if (document.getElementById('edit-map-location')) {
     const editMapLocation = document.getElementById('edit-map-location');
-    const storedPoint = getStoredPhotoMapPoint(it.id);
-    editMapLocation.value = it.map_location || getStoredPhotoMapLocation(it.id) || '';
-    editMapLocation.dataset.mapLat = String(it.map_lat ?? storedPoint?.lat ?? '');
-    editMapLocation.dataset.mapLng = String(it.map_lng ?? storedPoint?.lng ?? '');
+    editMapLocation.value = it.map_location || trustedStoredMap.location || '';
+    editMapLocation.dataset.mapLat = String(it.map_lat ?? trustedStoredMap.point?.lat ?? '');
+    editMapLocation.dataset.mapLng = String(it.map_lng ?? trustedStoredMap.point?.lng ?? '');
   }
-  updateEditMapLocationDisplay(it.map_location || getStoredPhotoMapLocation(it.id) || '');
+  updateEditMapLocationDisplay(it.map_location || trustedStoredMap.location || '');
   if (document.getElementById('edit-date')) document.getElementById('edit-date').value = it.date || '';
   if (document.getElementById('edit-album')) document.getElementById('edit-album').value = it.album || '';
   if (document.getElementById('edit-cap')) document.getElementById('edit-cap').value = it.caption || '';
@@ -1892,6 +1899,7 @@ async function loadFromDB() {
     const profileById = new Map((profileRows || []).map(profile => [String(profile.id || '').trim(), profile]));
 
     allItems = (data || []).map(item => {
+      const storedMap = getTrustedStoredMapData(item.id);
       const profile = profileById.get(String(item.created_by || item.author_id || item.user_id || '').trim());
       const resolvedAuthorName = profile?.display_name || item.author_name || item.uploaded_by_name || null;
       const resolvedAuthorEmail = profile?.email || item.author_email || item.uploaded_by_email || null;
@@ -1899,9 +1907,9 @@ async function loadFromDB() {
       ...item,
       author_name: resolvedAuthorName,
       author_email: resolvedAuthorEmail,
-      map_location: item.map_location || getStoredPhotoMapLocation(item.id) || null,
-      map_lat: item.map_lat ?? getStoredPhotoMapPoint(item.id)?.lat ?? null,
-      map_lng: item.map_lng ?? getStoredPhotoMapPoint(item.id)?.lng ?? null
+      map_location: item.map_location || storedMap.location || null,
+      map_lat: item.map_lat ?? storedMap.point?.lat ?? null,
+      map_lng: item.map_lng ?? storedMap.point?.lng ?? null
       });
     });
     shuffledOrder = null; // mezclar una sola vez por carga

@@ -1,15 +1,41 @@
 (function () {
   const STORAGE_KEY = 'zamge_push_prompt_dismissed';
+  const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
+
+  function isLocalUrl(value) {
+    try {
+      const url = new URL(value, window.location.origin);
+      return LOCAL_HOSTNAMES.has(url.hostname);
+    } catch {
+      return false;
+    }
+  }
+
+  function isCurrentHostLocal() {
+    return LOCAL_HOSTNAMES.has(window.location.hostname);
+  }
+
+  function pickApiBase(...values) {
+    for (const rawValue of values) {
+      const value = String(rawValue || '').trim();
+      if (!value) continue;
+      if (isLocalUrl(value) && !isCurrentHostLocal()) continue;
+      return value.replace(/\/+$/, '');
+    }
+    return window.location.origin;
+  }
+
   const API_BASE = (() => {
     const metaValue = document.querySelector('meta[name="push-api-base"]')?.getAttribute('content')?.trim();
     const globalValue = String(window.ZAMGE_PUSH_API_BASE || '').trim();
     const storedValue = String(localStorage.getItem('zamge_push_api_base') || '').trim();
-    return metaValue || globalValue || storedValue || window.location.origin;
+    return pickApiBase(metaValue, globalValue, storedValue);
   })();
 
   let serviceWorkerRegistration = null;
   let currentSubscription = null;
   let settingsUiBound = false;
+  let backendStatus = { checked: false, available: false, message: '' };
 
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -22,9 +48,11 @@
     return {
       modal: document.getElementById('push-settings-modal'),
       enabled: document.getElementById('push-enabled'),
+      timeField: document.getElementById('push-settings-time-field'),
       hour: document.getElementById('push-hour'),
       minute: document.getElementById('push-minute'),
       meridiem: document.getElementById('push-meridiem'),
+      meridiemButtons: Array.from(document.querySelectorAll('.push-meridiem-btn')),
       status: document.getElementById('push-settings-status'),
       liveState: document.getElementById('push-live-state'),
       openBtn: document.getElementById('btn-push-settings'),
@@ -35,13 +63,41 @@
   }
 
   async function getPublicKey() {
-    const res = await fetch(`${API_BASE}/api/push/public-key`);
-    if (res.status === 404) {
-      throw new Error('El backend push no está disponible en esta URL. Si subes el frontend a GitHub, configura un backend aparte y pon su URL en push-api-base.');
+    let res;
+    try {
+      res = await fetch(`${API_BASE}/api/push/public-key`);
+    } catch (_error) {
+      throw new Error('Los mensajitos diarios necesitan un backend de notificaciones. En GitHub Pages el diseño funciona, pero las notificaciones no se pueden guardar hasta conectar ese backend.');
     }
-    if (!res.ok) throw new Error('No se pudo obtener la clave pública push.');
+    if (res.status === 404) {
+      throw new Error('Los mensajitos diarios necesitan un backend de notificaciones. En esta URL no está configurado todavía.');
+    }
+    if (!res.ok) throw new Error('No se pudo preparar la activación de los mensajitos diarios.');
     const data = await res.json();
     return data.publicKey;
+  }
+
+  async function checkBackendAvailability() {
+    if (backendStatus.checked) return backendStatus;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/push/public-key`, { method: 'GET' });
+      if (res.ok) {
+        backendStatus = { checked: true, available: true, message: '' };
+        return backendStatus;
+      }
+    } catch (_error) {
+      // handled below with friendly fallback
+    }
+
+    backendStatus = {
+      checked: true,
+      available: false,
+      message: isCurrentHostLocal()
+        ? 'Los mensajitos diarios no funcionarán desde Live Server. Para probarlos en tu PC abre esta página con `npm start` para levantar el backend.'
+        : 'Los mensajitos diarios necesitan un backend de notificaciones aparte. En GitHub Pages el diseño sí sirve, pero para activar avisos hay que conectar ese backend.'
+    };
+    return backendStatus;
   }
 
   async function registerServiceWorker() {
@@ -82,18 +138,107 @@
 
   function populateTimeSelects() {
     const els = getSettingsElements();
-    if (!els.hour || !els.minute) return;
-    if (!els.hour.options.length) {
-      els.hour.innerHTML = Array.from({ length: 12 }, (_, index) => {
-        const value = String(index + 1).padStart(2, '0');
-        return `<option value="${value}">${value}</option>`;
-      }).join('');
+    if (!els.hour) return;
+    if (!els.hour.value) {
+      els.hour.value = '06';
     }
-    if (!els.minute.options.length) {
-      els.minute.innerHTML = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55']
-        .map((value) => `<option value="${value}">${value}</option>`)
-        .join('');
+    if (els.minute && !els.minute.value) {
+      els.minute.value = '00';
     }
+  }
+
+  function normalizeHourInput(rawValue) {
+    const digitsOnly = String(rawValue || '').replace(/\D+/g, '').slice(0, 2);
+    if (!digitsOnly) return '06';
+    const hour = Math.min(12, Math.max(1, Number(digitsOnly) || 6));
+    return String(hour).padStart(2, '0');
+  }
+
+  function normalizeMinuteInput(rawValue) {
+    const digitsOnly = String(rawValue || '').replace(/\D+/g, '').slice(0, 2);
+    if (!digitsOnly) return '00';
+    const minute = Math.min(59, Math.max(0, Number(digitsOnly) || 0));
+    return String(minute).padStart(2, '0');
+  }
+
+  function overwriteTimeInputDigit(input, digit, normalize) {
+    if (!input) return;
+    const cleanDigit = String(digit || '').replace(/\D+/g, '').slice(0, 1);
+    if (!cleanDigit) return;
+
+    const current = normalize(input.value || input.placeholder || '');
+    const start = Math.max(0, Math.min(1, input.selectionStart ?? 0));
+    const end = Math.max(start, Math.min(2, input.selectionEnd ?? start));
+    const chars = current.padEnd(2, '0').slice(0, 2).split('');
+
+    if (end > start) {
+      chars[start] = cleanDigit;
+      if (start + 1 < end) {
+        for (let index = start + 1; index < end; index += 1) {
+          chars[index] = '0';
+        }
+      }
+    } else {
+      chars[start] = cleanDigit;
+    }
+
+    input.value = normalize(chars.join(''));
+    const nextPos = Math.min(2, start + 1);
+    requestAnimationFrame(() => input.setSelectionRange(nextPos, nextPos));
+  }
+
+  function bindOverwriteNumericInput(input, normalize, onChange, onEnter) {
+    if (!input) return;
+
+    input.addEventListener('focus', () => {
+      const normalized = normalize(input.value || input.placeholder || '');
+      input.value = normalized;
+      requestAnimationFrame(() => input.setSelectionRange(0, 0));
+    });
+
+    input.addEventListener('click', () => {
+      const caret = Math.max(0, Math.min(2, input.selectionStart ?? 0));
+      requestAnimationFrame(() => input.setSelectionRange(caret, caret));
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (/^\d$/.test(event.key)) {
+        event.preventDefault();
+        overwriteTimeInputDigit(input, event.key, normalize);
+        onChange?.();
+        return;
+      }
+
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        onEnter?.();
+        return;
+      }
+
+      if (event.key === 'Backspace' || event.key === 'Delete') {
+        event.preventDefault();
+        const current = normalize(input.value || input.placeholder || '');
+        const chars = current.padEnd(2, '0').slice(0, 2).split('');
+        const start = Math.max(0, Math.min(1, input.selectionStart ?? 0));
+        const end = Math.max(start, Math.min(2, input.selectionEnd ?? start));
+        const index = end > start ? start : (event.key === 'Backspace' ? Math.max(0, start - 1) : start);
+        chars[index] = '0';
+        input.value = normalize(chars.join(''));
+        const nextPos = event.key === 'Backspace' ? index : Math.min(2, index);
+        requestAnimationFrame(() => input.setSelectionRange(nextPos, nextPos));
+        onChange?.();
+      }
+    });
+
+    input.addEventListener('input', () => {
+      input.value = normalize(input.value);
+      onChange?.();
+    });
+
+    input.addEventListener('blur', () => {
+      input.value = normalize(input.value);
+      onChange?.();
+    });
   }
 
   function readSelectedTime() {
@@ -104,9 +249,12 @@
   function writeSelectedTime(value) {
     const els = getSettingsElements();
     const parts = to12HourParts(value);
-    if (els.hour) els.hour.value = parts.hour;
-    if (els.minute) els.minute.value = parts.minute;
+    if (els.hour) els.hour.value = normalizeHourInput(parts.hour);
+    if (els.minute) els.minute.value = normalizeMinuteInput(parts.minute);
     if (els.meridiem) els.meridiem.value = parts.meridiem;
+    els.meridiemButtons?.forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.value === parts.meridiem);
+    });
   }
 
   function formatFriendlyTime(value) {
@@ -114,29 +262,65 @@
     return `${Number(parts.hour)}:${parts.minute} ${parts.meridiem === 'AM' ? 'a. m.' : 'p. m.'}`;
   }
 
+  function syncTimeFieldVisibility() {
+    const els = getSettingsElements();
+    if (!els.timeField) return;
+    const enabled = !!els.enabled?.checked;
+    els.timeField.classList.toggle('is-hidden', !enabled);
+  }
+
+  function syncBackendDependentUi() {
+    const els = getSettingsElements();
+    const available = !!backendStatus.available;
+    if (els.enabled) {
+      els.enabled.disabled = !available;
+    }
+    if (els.saveBtn) {
+      els.saveBtn.disabled = !available;
+      els.saveBtn.title = available ? '' : 'Necesitas un backend de notificaciones para guardar esto.';
+    }
+    if (!available && els.enabled) {
+      els.enabled.checked = false;
+    }
+    syncTimeFieldVisibility();
+  }
+
   function renderLiveState() {
     const els = getSettingsElements();
     if (!els.liveState) return;
+    if (!backendStatus.available) {
+      els.liveState.textContent = 'Avisos no disponibles en esta versión de la página.';
+      els.liveState.classList.add('is-paused');
+      els.liveState.classList.remove('is-active');
+      syncBackendDependentUi();
+      return;
+    }
     const time = readSelectedTime();
+    syncTimeFieldVisibility();
     if (els.enabled?.checked) {
       els.liveState.textContent = `✅ Mensajes activos — recibirás tu mensaje cada día a las ${formatFriendlyTime(time)}.`;
       els.liveState.classList.add('is-active');
       els.liveState.classList.remove('is-paused');
     } else {
-      els.liveState.textContent = '💤 Notificaciones pausadas.';
+      els.liveState.textContent = '💤 Mensajitos pausados por ahora.';
       els.liveState.classList.add('is-paused');
       els.liveState.classList.remove('is-active');
     }
   }
 
   async function postJson(url, body) {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+    let res;
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    } catch (_error) {
+      throw new Error('No pude guardar esto porque el backend de notificaciones no está conectado en esta versión publicada.');
+    }
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'No se pudo completar la acción.');
+    if (!res.ok) throw new Error(data.error || 'No se pudo completar la configuración de los mensajitos.');
     return data;
   }
 
@@ -290,13 +474,24 @@
 
     els.status.textContent = '';
     populateTimeSelects();
+    await checkBackendAvailability();
+    syncBackendDependentUi();
+
+    if (!backendStatus.available) {
+      renderLiveState();
+      els.status.textContent = backendStatus.message;
+      els.modal.classList.remove('hidden');
+      els.modal.setAttribute('aria-hidden', 'false');
+      return;
+    }
+
     try {
       const settings = await readCurrentSettings();
       els.enabled.checked = settings.enabled;
       writeSelectedTime(settings.time);
       renderLiveState();
       if (!settings.hasSubscription && Notification.permission !== 'granted') {
-        els.status.textContent = 'Primero acepta el permiso del navegador para poder activarlos.';
+        els.status.textContent = 'Actívalos cuando quieras. Al guardar, el navegador te pedirá permiso para enviarte el mensajito diario.';
       }
     } catch (error) {
       els.status.textContent = error.message || 'No se pudieron cargar los ajustes.';
@@ -309,6 +504,9 @@
   function closePushSettingsModal() {
     const els = getSettingsElements();
     if (!els.modal) return;
+    if (document.activeElement && els.modal.contains(document.activeElement) && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
     els.modal.classList.add('hidden');
     els.modal.setAttribute('aria-hidden', 'true');
     els.status.textContent = '';
@@ -317,6 +515,16 @@
   async function savePushSettings() {
     const els = getSettingsElements();
     els.status.textContent = '';
+    if (!backendStatus.available) {
+      els.status.textContent = backendStatus.message;
+      return;
+    }
+    if (els.minute) {
+      els.minute.value = normalizeMinuteInput(els.minute.value);
+    }
+    if (els.hour) {
+      els.hour.value = normalizeHourInput(els.hour.value);
+    }
     const selectedTime = readSelectedTime();
 
     try {
@@ -355,9 +563,28 @@
     els.closeBtn?.addEventListener('click', closePushSettingsModal);
     els.saveBtn?.addEventListener('click', savePushSettings);
     els.enabled?.addEventListener('change', renderLiveState);
-    els.hour?.addEventListener('change', renderLiveState);
-    els.minute?.addEventListener('change', renderLiveState);
-    els.meridiem?.addEventListener('change', renderLiveState);
+    bindOverwriteNumericInput(els.hour, normalizeHourInput, renderLiveState, () => {
+      els.minute?.focus();
+      els.minute?.setSelectionRange?.(0, 0);
+    });
+    bindOverwriteNumericInput(els.minute, normalizeMinuteInput, renderLiveState, () => {
+      const activeMeridiemButton = els.meridiemButtons?.find((button) => button.dataset.value === els.meridiem?.value);
+      activeMeridiemButton?.focus();
+    });
+    els.meridiemButtons?.forEach((button) => {
+      button.addEventListener('click', () => {
+        if (!els.meridiem) return;
+        els.meridiem.value = button.dataset.value || 'AM';
+        writeSelectedTime(from12HourParts(els.hour?.value, els.minute?.value, els.meridiem.value));
+        renderLiveState();
+      });
+      button.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          els.saveBtn?.focus();
+        }
+      });
+    });
     els.modal?.addEventListener('click', (event) => {
       if (event.target === els.modal) closePushSettingsModal();
     });
@@ -365,6 +592,8 @@
 
   async function initNotifications() {
     bindSettingsUi();
+    await checkBackendAvailability();
+    syncBackendDependentUi();
     renderLiveState();
 
     if (!window.isSecureContext) return;

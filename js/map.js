@@ -140,6 +140,7 @@
   let mapPickerSearchDebounce = null;
   let mapPickerMoveEndBound = false;
   let mapPickerReverseTimer = null;
+  let mapPickerInitialSyncTimer = null;
   let currentGalleryItems = [];
   let moduleInitialized = false;
   let geocodeCache = null;
@@ -376,6 +377,8 @@
   }
 
   function updateMapPickerSelection(selection) {
+    clearTimeout(mapPickerInitialSyncTimer);
+    mapPickerInitialSyncTimer = null;
     mapPickerSelected = selection ? {
       lat: Number(selection.lat),
       lng: Number(selection.lng),
@@ -502,11 +505,18 @@
   function closeMapPicker(result = null) {
     const modal = document.getElementById('map-picker-modal');
     const resultsEl = document.getElementById('map-picker-search-results');
+    clearTimeout(mapPickerInitialSyncTimer);
+    mapPickerInitialSyncTimer = null;
+    clearTimeout(mapPickerReverseTimer);
+    mapPickerReverseTimer = null;
     if (resultsEl) {
       resultsEl.innerHTML = '';
       resultsEl.classList.add('hidden');
     }
     if (modal) {
+      if (document.activeElement && modal.contains(document.activeElement) && document.activeElement.blur) {
+        document.activeElement.blur();
+      }
       modal.classList.add('hidden');
       modal.setAttribute('aria-hidden', 'true');
     }
@@ -516,19 +526,22 @@
   }
 
   async function finalizeMapPickerSelection() {
-    const liveSelection = await syncMapPickerToCenter();
-    if (liveSelection?.label) {
-      updateMapPickerSelection(liveSelection);
+    let finalSelection = mapPickerSelected;
+    if (!finalSelection || !Number.isFinite(Number(finalSelection.lat)) || !Number.isFinite(Number(finalSelection.lng))) {
+      finalSelection = await syncMapPickerToCenter();
+      if (finalSelection?.label) {
+        updateMapPickerSelection(finalSelection);
+      }
     }
-    if (!mapPickerSelected) {
+    if (!finalSelection) {
       closeMapPicker(null);
       return;
     }
     closeMapPicker({
-      label: mapPickerSelected.label,
-      lat: mapPickerSelected.lat,
-      lng: mapPickerSelected.lng,
-      subtitle: mapPickerSelected.subtitle || ''
+      label: finalSelection.label,
+      lat: finalSelection.lat,
+      lng: finalSelection.lng,
+      subtitle: finalSelection.subtitle || ''
     });
   }
 
@@ -542,15 +555,20 @@
     modal.setAttribute('aria-hidden', 'false');
     setTimeout(() => mapPicker?.invalidateSize(), 60);
 
+    clearTimeout(mapPickerInitialSyncTimer);
+    mapPickerInitialSyncTimer = null;
     mapPickerSelected = null;
     updateMapPickerSelection(null);
     searchInput.value = initialPlace || '';
+
+    await new Promise((resolve) => setTimeout(resolve, 80));
+    mapPicker?.invalidateSize();
 
     if (initialPlace) {
       await goToMapPickerSearch(initialPlace);
     } else if (mapPicker) {
       mapPicker.flyTo(DEFAULT_CENTER, DEFAULT_ZOOM, { duration: 1.1 });
-      setTimeout(() => syncMapPickerToCenter(), 350);
+      mapPickerInitialSyncTimer = setTimeout(() => syncMapPickerToCenter(), 350);
     }
 
     return new Promise((resolve) => {

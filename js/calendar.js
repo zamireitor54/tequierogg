@@ -231,6 +231,9 @@ function showPopup(text) {
 
 function closeCalendarUnlockModal() {
   if (!calendarUnlockModal) return;
+  if (document.activeElement && calendarUnlockModal.contains(document.activeElement) && document.activeElement.blur) {
+    document.activeElement.blur();
+  }
   calendarUnlockModal.classList.add('hidden');
   calendarUnlockModal.setAttribute('aria-hidden', 'true');
   if (calendarUnlockInput) {

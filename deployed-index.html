@@ -4,16 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Feliz cumpleaños PRECIOSA </title>
-  <link rel="icon" type="image/svg+xml" href="img/tab-love.svg">
-  <link rel="alternate icon" type="image/jpeg" href="img/mini_nina.jpg">
-  <link rel="apple-touch-icon" href="img/mini_nina.jpg">
 
   <!-- Fuente: Poppins para cuerpo y Sacramento para títulos -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Playfair+Display:wght@600;700;800&family=Sacramento&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#8d56ff">
-  <meta name="push-api-base" content="">
+  <meta name="push-api-base" content="http://localhost:3010">
 
   <!-- CSS Principal -->
   <link rel="stylesheet" href="styles.css">
@@ -323,20 +320,17 @@
         <div id="push-live-state" class="push-live-state">✅ Mensajes activos — recibirás tu mensaje cada día a las 6:00 a. m.</div>
       </div>
 
-      <div id="push-settings-time-field" class="field push-settings-field">
-        <div class="push-time-head">
-          <span class="push-time-head-icon" aria-hidden="true">⏰</span>
-          <span>Hora de llegada</span>
-        </div>
+      <div class="field push-settings-field">
+        <span>Hora de llegada</span>
         <div class="push-time-wrap">
+          <span class="push-time-icon" aria-hidden="true">⏰</span>
           <div class="push-time-selects">
-            <input id="push-hour" class="input push-time-select push-time-input" aria-label="Hora" type="text" inputmode="numeric" maxlength="2" placeholder="06">
-            <input id="push-minute" class="input push-time-select push-time-input" aria-label="Minutos" type="text" inputmode="numeric" maxlength="2" placeholder="00">
-            <div class="push-meridiem-toggle" role="group" aria-label="AM o PM">
-              <button type="button" class="push-meridiem-btn is-active" data-value="AM">AM</button>
-              <button type="button" class="push-meridiem-btn" data-value="PM">PM</button>
-              <input id="push-meridiem" type="hidden" value="AM">
-            </div>
+            <select id="push-hour" class="input push-time-select" aria-label="Hora"></select>
+            <select id="push-minute" class="input push-time-select" aria-label="Minutos"></select>
+            <select id="push-meridiem" class="input push-time-select" aria-label="AM o PM">
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
           </div>
         </div>
       </div>
@@ -462,3 +456,4 @@
   <script src="notes.js" defer></script>
 </body>
 </html>
+
