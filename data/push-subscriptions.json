@@ -17,7 +17,8 @@
     "is_active": true,
     "preferred_hour": 6,
     "preferred_minute": 0,
-    "updated_at": "2026-03-27T00:02:54.828Z"
+    "updated_at": "2026-03-31T22:21:12.556Z",
+    "last_sent_at": "2026-03-31T22:21:12.556Z"
   },
   {
     "endpoint": "https://fcm.googleapis.com/fcm/send/dfhQutNv1cA:APA91bExYmTi_ijVhEevlgUTd3uP0CCo_77l9oJYKSg6pFThGZNpMvI9gYQ6bPElb3Cpo4chMUOqF7Osh92f54mPpILDfzFjs-_NjG5dkFc7a9ndTmdFGtbD4fm8x7cN5ZiTsV8ASvA4",
@@ -37,7 +38,7 @@
     "is_active": true,
     "preferred_hour": 12,
     "preferred_minute": 20,
-    "updated_at": "2026-03-27T05:19:06.388Z",
-    "last_sent_at": "2026-03-27T04:52:00.588Z"
+    "updated_at": "2026-03-31T22:21:12.733Z",
+    "last_sent_at": "2026-03-31T22:21:12.733Z"
   }
 ]
