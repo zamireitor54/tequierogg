@@ -10,11 +10,30 @@ const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
-const APP_URL = process.env.PUBLIC_APP_URL || `http://localhost:${PORT}`;
+
+function normalizeBaseUrl(value, fallback) {
+  const rawValue = String(value || fallback || '').trim();
+  if (!rawValue) return '';
+  return rawValue.replace(/\/+$/, '');
+}
+
+function normalizeOrigin(value) {
+  const rawValue = String(value || '').trim();
+  if (!rawValue) return '';
+  try {
+    return new URL(rawValue).origin;
+  } catch {
+    return rawValue.replace(/\/+$/, '');
+  }
+}
+
+const APP_URL = normalizeBaseUrl(process.env.PUBLIC_APP_URL, `http://localhost:${PORT}`);
+const SITE_URL = normalizeBaseUrl(process.env.PUBLIC_SITE_URL, APP_URL);
+const ASSET_URL = normalizeBaseUrl(process.env.PUBLIC_ASSET_URL, SITE_URL);
 const TIMEZONE = 'America/Bogota';
-const allowedOrigins = String(process.env.PUSH_ALLOWED_ORIGINS || APP_URL)
+const allowedOrigins = String(process.env.PUSH_ALLOWED_ORIGINS || `${APP_URL},${SITE_URL}`)
   .split(',')
-  .map((origin) => origin.trim())
+  .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
 const vapidPublicKey = process.env.VAPID_PUBLIC_KEY || '';
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY || '';
@@ -314,11 +333,11 @@ function buildNotificationPayload(dayNum, { isTest = false } = {}) {
     title,
     body: body || 'Ya está listo tu mensaje de hoy.',
     tag: `zamge-day-${safeDayNum}`,
-    icon: '/img/mini_nina.jpg',
-    badge: '/img/mini_nina.jpg',
-    image: '/img/mini_nina.jpg',
+    icon: `${ASSET_URL}/img/mini_nina.jpg`,
+    badge: `${ASSET_URL}/img/mini_nina.jpg`,
+    image: `${ASSET_URL}/img/mini_nina.jpg`,
     data: {
-      url: `${APP_URL}/?calendarDay=${safeDayNum}&openCalendar=1`,
+      url: `${SITE_URL}/?calendarDay=${safeDayNum}&openCalendar=1`,
       dayNum: safeDayNum
     }
   };
@@ -417,5 +436,6 @@ cron.schedule('* * * * *', async () => {
 }, { timezone: TIMEZONE });
 
 app.listen(PORT, () => {
-  console.log(`Zamge corriendo en ${APP_URL}`);
+  console.log(`Zamge backend corriendo en ${APP_URL}`);
+  console.log(`Sitio configurado para notificaciones en ${SITE_URL}`);
 });

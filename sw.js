@@ -1,3 +1,15 @@
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
+function resolveScopedUrl(path = '') {
+  return new URL(path, self.registration.scope).href;
+}
+
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 
@@ -11,8 +23,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title || 'Tienes un mensaje nuevo 💌';
   const options = {
     body: payload.body || 'Abre la página para verlo.',
-    icon: payload.icon || '/img/mini_nina.jpg',
-    badge: payload.badge || '/img/mini_nina.jpg',
+    icon: payload.icon || resolveScopedUrl('img/mini_nina.jpg'),
+    badge: payload.badge || resolveScopedUrl('img/mini_nina.jpg'),
     image: payload.image || undefined,
     tag: payload.tag || 'zamge-daily-message',
     renotify: true,
@@ -24,7 +36,9 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = event.notification.data?.url || '/';
+  const targetUrl = event.notification.data?.url
+    ? resolveScopedUrl(event.notification.data.url)
+    : self.registration.scope;
 
   event.waitUntil((async () => {
     const windowClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });

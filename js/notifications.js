@@ -55,8 +55,10 @@
       meridiemButtons: Array.from(document.querySelectorAll('.push-meridiem-btn')),
       status: document.getElementById('push-settings-status'),
       liveState: document.getElementById('push-live-state'),
+      backendState: document.getElementById('push-backend-state'),
       openBtn: document.getElementById('btn-push-settings'),
       saveBtn: document.getElementById('btn-save-push-settings'),
+      testBtn: document.getElementById('btn-test-push-settings'),
       cancelBtn: document.getElementById('btn-cancel-push-settings'),
       closeBtn: document.getElementById('btn-close-push-settings-x')
     };
@@ -103,7 +105,7 @@
   async function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return null;
     if (serviceWorkerRegistration) return serviceWorkerRegistration;
-    serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js');
+    serviceWorkerRegistration = await navigator.serviceWorker.register('sw.js', { scope: './' });
     return serviceWorkerRegistration;
   }
 
@@ -279,10 +281,32 @@
       els.saveBtn.disabled = !available;
       els.saveBtn.title = available ? '' : 'Necesitas un backend de notificaciones para guardar esto.';
     }
+    if (els.testBtn) {
+      els.testBtn.disabled = !available;
+      els.testBtn.title = available ? '' : 'Primero necesitas conectar el backend de notificaciones.';
+    }
     if (!available && els.enabled) {
       els.enabled.checked = false;
     }
     syncTimeFieldVisibility();
+  }
+
+  function renderBackendState() {
+    const els = getSettingsElements();
+    if (!els.backendState) return;
+
+    if (backendStatus.available) {
+      els.backendState.textContent = 'Backend listo para enviar notificaciones reales ✅';
+      els.backendState.classList.add('is-ready');
+      els.backendState.classList.remove('is-unavailable');
+      return;
+    }
+
+    els.backendState.textContent = isCurrentHostLocal()
+      ? 'Estás viendo la versión local. Para probar el envío real usa `npm start` y abre la página desde ese backend.'
+      : 'En GitHub Pages el diseño sí se ve, pero el envío real solo funciona si conectas un backend push aparte.';
+    els.backendState.classList.add('is-unavailable');
+    els.backendState.classList.remove('is-ready');
   }
 
   function renderLiveState() {
@@ -475,6 +499,7 @@
     els.status.textContent = '';
     populateTimeSelects();
     await checkBackendAvailability();
+    renderBackendState();
     syncBackendDependentUi();
 
     if (!backendStatus.available) {
@@ -553,6 +578,51 @@
     }
   }
 
+  async function sendTestNotificationNow() {
+    const els = getSettingsElements();
+    els.status.textContent = '';
+    await checkBackendAvailability();
+    renderBackendState();
+    syncBackendDependentUi();
+
+    if (!backendStatus.available) {
+      els.status.textContent = backendStatus.message;
+      return;
+    }
+
+    if (els.minute) {
+      els.minute.value = normalizeMinuteInput(els.minute.value);
+    }
+    if (els.hour) {
+      els.hour.value = normalizeHourInput(els.hour.value);
+    }
+
+    const selectedTime = readSelectedTime();
+    if (!els.enabled?.checked) {
+      els.status.textContent = 'Activa los mensajitos diarios y guárdalos para poder mandarte una prueba en este dispositivo.';
+      return;
+    }
+
+    try {
+      const ok = await subscribeToDailyNotifications({ showSuccess: false, time: selectedTime });
+      if (!ok) return;
+
+      await saveSubscriptionSettings({ enabled: true, time: selectedTime });
+      const data = await postJson(`${API_BASE}/api/push/send-test`, {});
+      const results = Array.isArray(data.result?.sent) ? data.result.sent : [];
+      const sentCount = results.filter((item) => item.status === 'sent').length;
+
+      if (sentCount > 0) {
+        window.showPopup?.(`Prueba enviada 💌 Revisa tus notificaciones. El backend reportó ${sentCount} envío${sentCount === 1 ? '' : 's'} correcto${sentCount === 1 ? '' : 's'}.`);
+        return;
+      }
+
+      els.status.textContent = 'No encontré suscripciones activas para mandar la prueba.';
+    } catch (error) {
+      els.status.textContent = error.message || 'No se pudo enviar la notificación de prueba.';
+    }
+  }
+
   function bindSettingsUi() {
     if (settingsUiBound) return;
     settingsUiBound = true;
@@ -562,6 +632,7 @@
     els.cancelBtn?.addEventListener('click', closePushSettingsModal);
     els.closeBtn?.addEventListener('click', closePushSettingsModal);
     els.saveBtn?.addEventListener('click', savePushSettings);
+    els.testBtn?.addEventListener('click', sendTestNotificationNow);
     els.enabled?.addEventListener('change', renderLiveState);
     bindOverwriteNumericInput(els.hour, normalizeHourInput, renderLiveState, () => {
       els.minute?.focus();
@@ -593,6 +664,7 @@
   async function initNotifications() {
     bindSettingsUi();
     await checkBackendAvailability();
+    renderBackendState();
     syncBackendDependentUi();
     renderLiveState();
 
