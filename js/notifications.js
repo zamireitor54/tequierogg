@@ -22,7 +22,7 @@
       if (isLocalUrl(value) && !isCurrentHostLocal()) continue;
       return value.replace(/\/+$/, '');
     }
-    return window.location.origin;
+    return isCurrentHostLocal() ? window.location.origin.replace(/\/+$/, '') : '';
   }
 
   const API_BASE = (() => {
@@ -36,6 +36,12 @@
   let currentSubscription = null;
   let settingsUiBound = false;
   let backendStatus = { checked: false, available: false, message: '' };
+
+  function getUnavailableBackendMessage() {
+    return isCurrentHostLocal()
+      ? 'Los mensajitos diarios no funcionarán desde Live Server. Para probarlos en tu PC abre esta página con `npm start` para levantar el backend.'
+      : 'Los mensajitos diarios necesitan un backend de notificaciones aparte. En GitHub Pages el diseño sí sirve, pero para activar avisos hay que conectar ese backend.';
+  }
 
   function urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -65,6 +71,9 @@
   }
 
   async function getPublicKey() {
+    if (!API_BASE) {
+      throw new Error(getUnavailableBackendMessage());
+    }
     let res;
     try {
       res = await fetch(`${API_BASE}/api/push/public-key`);
@@ -82,6 +91,15 @@
   async function checkBackendAvailability() {
     if (backendStatus.checked) return backendStatus;
 
+    if (!API_BASE) {
+      backendStatus = {
+        checked: true,
+        available: false,
+        message: getUnavailableBackendMessage()
+      };
+      return backendStatus;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/api/push/public-key`, { method: 'GET' });
       if (res.ok) {
@@ -95,9 +113,7 @@
     backendStatus = {
       checked: true,
       available: false,
-      message: isCurrentHostLocal()
-        ? 'Los mensajitos diarios no funcionarán desde Live Server. Para probarlos en tu PC abre esta página con `npm start` para levantar el backend.'
-        : 'Los mensajitos diarios necesitan un backend de notificaciones aparte. En GitHub Pages el diseño sí sirve, pero para activar avisos hay que conectar ese backend.'
+      message: getUnavailableBackendMessage()
     };
     return backendStatus;
   }
@@ -333,6 +349,9 @@
   }
 
   async function postJson(url, body) {
+    if (!API_BASE) {
+      throw new Error(getUnavailableBackendMessage());
+    }
     let res;
     try {
       res = await fetch(url, {
