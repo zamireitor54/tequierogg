@@ -20,14 +20,18 @@ self.addEventListener('push', (event) => {
     payload = { title: 'Tienes un mensaje nuevo 💌', body: event.data.text() };
   }
 
-  const title = payload.title || 'Tienes un mensaje nuevo 💌';
+  const title = payload.title || 'Mensajito diario';
+  const preferTextOnly = Boolean(payload.data?.preferTextOnly);
   const options = {
     body: payload.body || 'Abre la página para verlo.',
-    icon: payload.icon || resolveScopedUrl('img/mini_nina.jpg'),
-    badge: payload.badge || resolveScopedUrl('img/mini_nina.jpg'),
-    image: payload.image || undefined,
+    icon: payload.icon || resolveScopedUrl('img/tab-love.svg'),
+    badge: payload.badge || resolveScopedUrl('img/tab-love.svg'),
+    image: preferTextOnly ? undefined : (payload.image || undefined),
     tag: payload.tag || 'zamge-daily-message',
     renotify: true,
+    lang: 'es-CO',
+    dir: 'auto',
+    timestamp: Date.now(),
     data: payload.data || {}
   };
 

@@ -380,27 +380,43 @@ async function getNotificationGalleryImageUrl() {
   }
 }
 
-async function buildNotificationPayload(dayNum, { isTest = false } = {}) {
+function isMobileUserAgent(userAgent = '') {
+  return /(android|iphone|ipad|ipod|mobile)/i.test(String(userAgent || '').toLowerCase());
+}
+
+function shouldAttachNotificationImage(userAgent = '') {
+  return !isMobileUserAgent(userAgent);
+}
+
+async function buildNotificationPayload(dayNum, { isTest = false, userAgent = '' } = {}) {
   const dailyMessages = loadDailyMessages();
   const rawMessage = String(dailyMessages[dayNum] || '').trim();
-  const body = rawMessage.replace(/^Día\s+\d+:\s*/i, '').trim();
+  const body = rawMessage
+    .replace(/^Día\s+\d+:\s*/i, '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
   const safeDayNum = Number.isFinite(dayNum) ? dayNum : 0;
+  const isMobile = isMobileUserAgent(userAgent);
   const title = isTest
-    ? 'Prueba de notificación 💌'
-    : `Tu mensajito del día ${safeDayNum + 1} 💌`;
-  const galleryImageUrl = await getNotificationGalleryImageUrl();
-  const fallbackBadge = `${ASSET_URL}/img/mini_nina.jpg`;
+    ? 'Mensajito de prueba'
+    : (isMobile ? 'Mensajito de hoy' : `Mensajito del dia ${safeDayNum + 1}`);
+  const appIconUrl = `${ASSET_URL}/img/mini_nina.jpg`;
+  const cleanIconUrl = `${ASSET_URL}/img/tab-love.svg`;
+  const includeImage = shouldAttachNotificationImage(userAgent);
+  const galleryImageUrl = includeImage ? await getNotificationGalleryImageUrl() : '';
 
   return {
     title,
     body: body || 'Ya está listo tu mensaje de hoy.',
     tag: `zamge-day-${safeDayNum}`,
-    icon: galleryImageUrl,
-    badge: fallbackBadge,
-    image: galleryImageUrl,
+    icon: isMobile ? cleanIconUrl : appIconUrl,
+    badge: cleanIconUrl,
+    image: galleryImageUrl || undefined,
     data: {
       url: `${SITE_URL}/?calendarDay=${safeDayNum}&openCalendar=1`,
-      dayNum: safeDayNum
+      dayNum: safeDayNum,
+      preferTextOnly: isMobile
     }
   };
 }
@@ -409,7 +425,7 @@ async function getActiveSubscriptions() {
   if (supabaseAdmin) {
     const { data, error } = await supabaseAdmin
       .from('push_subscriptions')
-      .select('endpoint, subscription, is_active, preferred_hour, preferred_minute, last_sent_at')
+      .select('endpoint, subscription, user_agent, is_active, preferred_hour, preferred_minute, last_sent_at')
       .eq('is_active', true);
 
     if (error) throw error;
@@ -457,7 +473,6 @@ async function sendDailyCalendarNotification({ force = false, isTest = false, ig
     return { skipped: true, reason: 'Fuera del rango del calendario.' };
   }
 
-  const payload = await buildNotificationPayload(dayNum, { isTest });
   const subscriptions = await getActiveSubscriptions();
   if (!subscriptions.length) {
     return { skipped: true, reason: 'No hay suscripciones activas.' };
@@ -499,6 +514,10 @@ async function sendDailyCalendarNotification({ force = false, isTest = false, ig
       }
     }
 
+    const payload = await buildNotificationPayload(dayNum, {
+      isTest,
+      userAgent: record.user_agent || ''
+    });
     results.push(await sendNotificationToSubscription(record, payload));
   }
   return { dayNum, sent: results };
