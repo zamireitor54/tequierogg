@@ -6144,28 +6144,34 @@ body{
 }
 
 .calendar-toggle-row{
+  display: flex !important;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
-  margin-bottom: 0 !important;
+  justify-content: center;
+  margin: 0 0 12px !important;
 }
 
 #toggle-calendar,
 #selected-date,
 #unlock-all{
-  min-height: 44px !important;
-  padding: 10px 20px !important;
-  border-radius: 20px !important;
-  font-weight: 500 !important;
+  min-height: 46px !important;
+  padding: 11px 20px !important;
+  border-radius: 18px !important;
+  font-weight: 600 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
+  line-height: 1.2 !important;
+  border: 1.5px solid rgba(139,92,246,0.18) !important;
+  box-shadow: 0 10px 24px rgba(124,73,255,0.08) !important;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease !important;
 }
 
 #toggle-calendar{
   gap: 8px !important;
-  box-shadow: 0 10px 24px rgba(124,73,255,0.12) !important;
+  box-shadow: 0 12px 24px rgba(124,73,255,0.12) !important;
 }
 
 #toggle-calendar .calendar-btn-emoji{
@@ -6177,27 +6183,121 @@ body{
 
 #unlock-all{
   background: rgba(255,255,255,0.92) !important;
-  border: 1.5px solid rgba(139,92,246,0.30) !important;
   color: #6d28d9 !important;
-  box-shadow: 0 10px 24px rgba(124,73,255,0.08) !important;
 }
 
 #unlock-all:hover{
   background: rgba(124,73,255,0.08) !important;
+  border-color: rgba(139,92,246,0.26) !important;
   transform: translateY(-1px);
 }
 
 .selected-date{
   background: rgba(255,255,255,0.92) !important;
-  border: 1.5px solid rgba(139,92,246,0.30) !important;
   color: #6d28d9 !important;
-  box-shadow: 0 10px 24px rgba(124,73,255,0.08) !important;
+  min-width: 168px;
+  letter-spacing: -0.01em;
+}
+
+.month-nav{
+  display: grid !important;
+  grid-template-columns: minmax(120px, 1fr) auto minmax(120px, 1fr);
+  align-items: center !important;
+  gap: 14px !important;
+  width: 100% !important;
+  margin: 0 0 18px !important;
+  padding: 10px 14px !important;
+  border-radius: 22px !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(251,244,255,0.7)) !important;
+  border: 1px solid rgba(139,92,246,0.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.86) !important;
+}
+
+.month-nav .current-month{
+  min-width: 0 !important;
+  margin: 0 !important;
+  font-size: clamp(1.32rem, 3vw, 1.72rem) !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.03em !important;
+  color: #34174a !important;
+  text-align: center !important;
+  font-weight: 800 !important;
+  text-wrap: balance;
+}
+
+.month-nav .month-btn{
+  min-width: 0 !important;
+  min-height: 46px !important;
+  width: 100% !important;
+  padding: 11px 16px !important;
+  border-radius: 18px !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  white-space: normal !important;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease !important;
+}
+
+.month-nav #prev-month{
+  justify-self: start !important;
+  background: rgba(255,255,255,0.92) !important;
+  color: #5c3a79 !important;
+  border: 1.5px solid rgba(139,92,246,0.18) !important;
+  box-shadow: 0 10px 22px rgba(124,73,255,0.07) !important;
+}
+
+.month-nav #next-month{
+  justify-self: end !important;
+  background: linear-gradient(135deg, #ff6fbf, #8d56ff) !important;
+  color: #fff !important;
+  border: 1.5px solid transparent !important;
+  box-shadow: 0 14px 26px rgba(141,86,255,0.2) !important;
+}
+
+.month-nav #prev-month:hover,
+.month-nav #next-month:hover,
+#toggle-calendar:hover,
+#unlock-all:hover{
+  transform: translateY(-1px);
+}
+
+.month-nav #prev-month:hover{
+  border-color: rgba(139,92,246,0.28) !important;
+  background: rgba(248,243,255,0.98) !important;
+}
+
+.month-nav #next-month:hover{
+  box-shadow: 0 16px 28px rgba(141,86,255,0.26) !important;
+  filter: saturate(1.04);
+}
+
+.month-nav #prev-month:active,
+.month-nav #next-month:active,
+#toggle-calendar:active,
+#unlock-all:active{
+  transform: translateY(0);
+}
+
+.month-nav #prev-month[disabled],
+.month-nav #next-month[disabled],
+#toggle-calendar[disabled],
+#unlock-all[disabled]{
+  opacity: 0.56;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .message-display{
   position: relative;
   min-height: 164px;
-  margin-top: 20px !important;
+  margin-top: 22px !important;
   padding: 24px;
   background:
     radial-gradient(circle at top left, rgba(255,111,191,0.18), transparent 34%),
@@ -6910,7 +7010,6 @@ body{
 }
 
 .extra-card--daily .month-nav{
-  justify-content: center !important;
   width: 100% !important;
   margin-bottom: 14px !important;
 }
@@ -6924,35 +7023,8 @@ body{
   margin-right: auto !important;
 }
 
-.extra-card--daily .calendar-header{
-  gap: 8px !important;
-  padding: 0 0 10px !important;
-  margin-bottom: 8px !important;
-}
-
-.extra-card--daily .calendar-header-day{
-  padding: 10px 0 !important;
-  color: #8b5cf6 !important;
-  font-weight: 600 !important;
-  font-size: 0.92rem !important;
-}
-
-.extra-card--daily .calendar-grid{
-  gap: 8px !important;
-  padding: 12px !important;
-  border-radius: 18px !important;
-  background: linear-gradient(135deg, rgba(124,73,255,0.08), rgba(255,111,191,0.08)) !important;
-  overflow: hidden !important;
-}
-
 .extra-card--daily .calendar-grid-animate{
   animation: calendarFadeIn 180ms ease !important;
-}
-
-.extra-card--daily .calendar-day{
-  min-height: 24px !important;
-  border-radius: 12px !important;
-  font-size: 0.72rem !important;
 }
 
 .extra-card--daily .calendar-day.available{
@@ -7024,12 +7096,62 @@ body{
     padding: 0 16px !important;
     box-sizing: border-box !important;
     margin-bottom: 16px !important;
+    gap: 10px !important;
+    justify-content: center !important;
+  }
+
+  .extra-card--daily .calendar-toggle-row #toggle-calendar{
+    width: 100% !important;
+  }
+
+  .extra-card--daily .calendar-toggle-row #selected-date,
+  .extra-card--daily .calendar-toggle-row #unlock-all{
+    width: calc(50% - 5px);
+    min-width: 0;
   }
 
   .extra-card--daily .month-nav{
     width: 100% !important;
     padding: 0 16px !important;
     box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-areas:
+      "title title"
+      "prev next" !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+    background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(251,244,255,0.78)) !important;
+  }
+
+  .extra-card--daily .month-nav .current-month{
+    grid-area: title !important;
+    min-width: 0 !important;
+    font-size: 1.04rem !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    margin-bottom: 2px !important;
+  }
+
+  .extra-card--daily .month-nav .month-btn{
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 10px 8px !important;
+    font-size: 0.84rem !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+    min-height: 44px !important;
+  }
+
+  .extra-card--daily .month-nav #prev-month{
+    grid-area: prev !important;
+    justify-self: start !important;
+  }
+
+  .extra-card--daily .month-nav #next-month{
+    grid-area: next !important;
+    justify-self: end !important;
   }
 
   .extra-card--daily .calendar-wrapper{
@@ -7051,6 +7173,9 @@ body{
   .extra-card--daily .calendar-grid{
     gap: 8px !important;
     padding: 12px !important;
+    border-radius: 18px !important;
+    background: linear-gradient(135deg, rgba(124,73,255,0.08), rgba(255,111,191,0.08)) !important;
+    overflow: hidden !important;
   }
 
   .extra-card--daily .calendar-day{
@@ -7058,6 +7183,35 @@ body{
     aspect-ratio: 1 / 1 !important;
     font-size: 0.82rem !important;
     border-radius: 12px !important;
+  }
+}
+
+@media (max-width: 420px){
+  .calendar-toggle-row{
+    gap: 10px !important;
+  }
+
+  .extra-card--daily .calendar-toggle-row #selected-date,
+  .extra-card--daily .calendar-toggle-row #unlock-all{
+    width: 100%;
+    min-width: 0;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .extra-card--daily .month-nav{
+    padding: 0 8px !important;
+    gap: 8px !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .extra-card--daily .month-nav .month-btn{
+    padding: 9px 6px !important;
+    font-size: 0.76rem !important;
+  }
+
+  .extra-card--daily .month-nav .current-month{
+    font-size: 0.94rem !important;
   }
 }
 
