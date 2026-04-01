@@ -6544,6 +6544,10 @@ body{
   color: rgba(76,51,88,0.88);
 }
 
+.push-backend-state.is-hidden{
+  display: none;
+}
+
 .push-settings-x{
   position: absolute !important;
   top: 10px !important;

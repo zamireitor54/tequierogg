@@ -308,6 +308,7 @@
 
     if (backendStatus.available) {
       els.backendState.innerHTML = `<span class="push-status-icon" aria-hidden="true">✓</span><span class="push-status-copy">Backend listo para enviar notificaciones reales cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.</span>`;
+      els.backendState.classList.add('is-hidden');
       els.backendState.classList.add('is-ready');
       els.backendState.classList.remove('is-unavailable');
       return;
@@ -318,6 +319,7 @@
         ? 'Estás viendo la versión local. Para probar el envío real usa `npm start` y abre la página desde ese backend.'
         : 'En GitHub Pages el diseño sí se ve, pero el envío real solo funciona si conectas un backend push aparte.'
     }</span>`;
+    els.backendState.classList.remove('is-hidden');
     els.backendState.classList.add('is-unavailable');
     els.backendState.classList.remove('is-ready');
   }
