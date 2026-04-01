@@ -259,9 +259,10 @@ app.post('/api/push/unsubscribe', async (req, res) => {
   }
 });
 
-app.post('/api/push/send-test', async (_req, res) => {
+app.post('/api/push/send-test', async (req, res) => {
   try {
-    const result = await sendDailyCalendarNotification({ force: true, isTest: true });
+    const endpoint = String(req.body?.endpoint || '').trim();
+    const result = await sendDailyCalendarNotification({ force: true, isTest: true, targetEndpoint: endpoint || null });
     res.json({ ok: true, result });
   } catch (error) {
     console.error('Error enviando push de prueba:', error);
@@ -445,7 +446,7 @@ async function sendNotificationToSubscription(record, payload) {
   }
 }
 
-async function sendDailyCalendarNotification({ force = false, isTest = false, ignorePreferredTime = false } = {}) {
+async function sendDailyCalendarNotification({ force = false, isTest = false, ignorePreferredTime = false, targetEndpoint = null } = {}) {
   if (!vapidPublicKey || !vapidPrivateKey) {
     throw new Error('Faltan variables de entorno VAPID para notificaciones push.');
   }
@@ -462,9 +463,23 @@ async function sendDailyCalendarNotification({ force = false, isTest = false, ig
     return { skipped: true, reason: 'No hay suscripciones activas.' };
   }
 
+  const normalizedTargetEndpoint = String(targetEndpoint || '').trim();
+  const scopedSubscriptions = normalizedTargetEndpoint
+    ? subscriptions.filter((record) => String(record.endpoint || '').trim() === normalizedTargetEndpoint)
+    : subscriptions;
+
+  if (!scopedSubscriptions.length) {
+    return {
+      skipped: true,
+      reason: normalizedTargetEndpoint
+        ? 'No existe una suscripción activa para este dispositivo.'
+        : 'No hay suscripciones activas.'
+    };
+  }
+
   const nowParts = getTimePartsInTimezone(now);
   const results = [];
-  for (const record of subscriptions) {
+  for (const record of scopedSubscriptions) {
     if (!force) {
       if (!ignorePreferredTime) {
         const preferredHour = clampHour(record.preferred_hour);

@@ -612,7 +612,15 @@
       if (!ok) return;
 
       await saveSubscriptionSettings({ enabled: true, time: selectedTime });
-      const data = await postJson(`${API_BASE}/api/push/send-test`, {});
+      const registration = await registerServiceWorker();
+      const subscription = await getExistingSubscription(registration);
+      if (!subscription?.endpoint) {
+        throw new Error('No encontré la suscripción activa de este dispositivo.');
+      }
+
+      const data = await postJson(`${API_BASE}/api/push/send-test`, {
+        endpoint: subscription.endpoint
+      });
       const results = Array.isArray(data.result?.sent) ? data.result.sent : [];
       const sentCount = results.filter((item) => item.status === 'sent').length;
 
