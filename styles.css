@@ -6312,35 +6312,128 @@ body{
 
 .push-settings-card{
   position: relative !important;
-  width: min(520px, 92vw) !important;
-  padding: 26px 24px 24px !important;
-  border-radius: 20px !important;
+  isolation: isolate;
+  overflow: hidden;
+  width: min(560px, 92vw) !important;
+  padding: 28px 26px 24px !important;
+  border-radius: 28px !important;
+  border: 1px solid rgba(255,255,255,0.72);
   background:
-    radial-gradient(900px 320px at 20% 0%, rgba(255,111,191,0.16), transparent 60%),
-    radial-gradient(900px 320px at 80% 0%, rgba(124,73,255,0.16), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,241,255,0.94)) !important;
+    radial-gradient(1200px 460px at 0% 0%, rgba(255,111,191,0.24), transparent 56%),
+    radial-gradient(920px 420px at 100% 0%, rgba(124,73,255,0.22), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,0.99), rgba(251,244,255,0.96)) !important;
+  box-shadow:
+    0 30px 80px rgba(47, 22, 72, 0.24),
+    0 14px 34px rgba(141,86,255,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.88) !important;
+}
+
+.push-settings-glow{
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(10px);
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.push-settings-glow-a{
+  width: 220px;
+  height: 220px;
+  top: -120px;
+  left: -58px;
+  background: radial-gradient(circle, rgba(255,138,196,0.28), rgba(255,138,196,0));
+}
+
+.push-settings-glow-b{
+  width: 240px;
+  height: 240px;
+  top: -130px;
+  right: -80px;
+  background: radial-gradient(circle, rgba(124,73,255,0.22), rgba(124,73,255,0));
+}
+
+.push-settings-card > *{
+  position: relative;
+  z-index: 1;
+}
+
+.push-settings-hero{
+  margin-bottom: 16px;
+}
+
+.push-settings-card .upload-eyebrow{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(247,239,255,0.9));
+  border: 1px solid rgba(124,73,255,0.12);
+  box-shadow: 0 10px 22px rgba(124,73,255,0.08);
+}
+
+.push-settings-card .upload-title{
+  margin-top: 14px !important;
+  margin-bottom: 10px !important;
+  font-size: clamp(1.8rem, 3vw, 2.3rem) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.03em;
+  color: #2d173a !important;
 }
 
 .push-settings-card .upload-subtitle{
-  opacity: 0.65 !important;
-  font-size: 0.85rem !important;
+  max-width: 440px;
+  opacity: 0.78 !important;
+  font-size: 0.98rem !important;
+  line-height: 1.6 !important;
+  color: rgba(76,51,88,0.82) !important;
+}
+
+.push-schedule-pill{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.96), rgba(246,237,255,0.92));
+  border: 1px solid rgba(124,73,255,0.14);
+  box-shadow: 0 14px 28px rgba(124,73,255,0.10);
+  color: #5d22b5;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.push-schedule-pill-icon{
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,120,190,0.18), rgba(141,86,255,0.18));
 }
 
 .push-backend-state{
-  margin: 10px 0 14px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(124,73,255,0.14);
-  background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(246,239,255,0.92));
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(124,73,255,0.12);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(246,239,255,0.92)),
+    linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0));
   color: #5a3a72;
-  font-size: 0.8rem;
-  line-height: 1.45;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.85);
 }
 
 .push-backend-state.is-ready{
-  border-color: rgba(124,73,255,0.2);
+  border-color: rgba(124,73,255,0.16);
   color: #5d22b5;
-  box-shadow: 0 10px 24px rgba(124,73,255,0.08);
+  box-shadow:
+    0 14px 28px rgba(124,73,255,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
 .push-backend-state.is-unavailable{
@@ -6349,37 +6442,48 @@ body{
 
 .push-settings-x{
   position: absolute !important;
-  top: 16px !important;
-  right: 16px !important;
-  width: 42px !important;
-  height: 42px !important;
+  top: 18px !important;
+  right: 18px !important;
+  width: 48px !important;
+  height: 48px !important;
   border-radius: 999px !important;
-  border: 1px solid rgba(124,73,255,0.14) !important;
-  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245,236,255,0.92)) !important;
+  border: 1px solid rgba(124,73,255,0.12) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245,236,255,0.94)) !important;
   color: #6d28d9 !important;
-  font-size: 1.1rem !important;
+  font-size: 1.2rem !important;
   display: grid !important;
   place-items: center !important;
-  box-shadow: 0 12px 28px rgba(36,19,50,0.12) !important;
+  box-shadow:
+    0 16px 36px rgba(36,19,50,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.85) !important;
 }
 
 .push-settings-x:hover{
-  transform: translateY(-1px) scale(1.03) !important;
+  transform: translateY(-2px) scale(1.04) !important;
   background: linear-gradient(180deg, rgba(250,246,255,1), rgba(240,231,255,0.98)) !important;
 }
 
 .push-settings-switch{
   margin: 6px 0 16px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(246,238,255,0.88));
-  border: 1px solid rgba(124,73,255,0.14);
+  padding: 18px 18px;
+  border-radius: 22px;
+  background:
+    radial-gradient(260px 120px at 0% 0%, rgba(255,120,190,0.10), transparent 65%),
+    linear-gradient(180deg, rgba(255,255,255,0.92), rgba(246,238,255,0.9));
+  border: 1px solid rgba(124,73,255,0.12);
+  box-shadow:
+    0 18px 36px rgba(124,73,255,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.88);
+}
+
+.push-settings-main-card{
+  position: relative;
 }
 
 .push-settings-toggle{
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   color: #4b2b62;
   font-weight: 600;
   cursor: pointer;
@@ -6393,8 +6497,8 @@ body{
 
 .push-settings-toggle-ui{
   position: relative;
-  width: 58px;
-  height: 32px;
+  width: 62px;
+  height: 34px;
   border-radius: 999px;
   background: linear-gradient(180deg, rgba(227,214,246,0.9), rgba(210,198,229,0.9));
   box-shadow: inset 0 1px 2px rgba(255,255,255,0.6);
@@ -6407,8 +6511,8 @@ body{
   position: absolute;
   top: 4px;
   left: 4px;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   background: linear-gradient(180deg, rgba(255,255,255,1), rgba(247,241,255,0.96));
   box-shadow: 0 6px 16px rgba(36,19,50,0.16);
@@ -6421,7 +6525,7 @@ body{
 }
 
 .push-settings-toggle input:checked + .push-settings-toggle-ui::after{
-  transform: translateX(26px);
+  transform: translateX(28px);
 }
 
 .push-settings-toggle-copy{
@@ -6432,13 +6536,14 @@ body{
 
 .push-settings-toggle-copy strong{
   color: #432456;
-  font-size: 0.98rem;
+  font-size: 1.04rem;
 }
 
 .push-settings-toggle-copy small{
   color: rgba(76,51,88,0.66);
-  font-size: 0.8rem;
+  font-size: 0.86rem;
   font-weight: 500;
+  line-height: 1.5;
 }
 
 .push-settings-field{
@@ -6556,35 +6661,70 @@ body{
 
 .push-test-btn{
   color: #6d28d9 !important;
-  border-color: rgba(124,73,255,0.18) !important;
-  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(246,239,255,0.9)) !important;
+  border-color: rgba(124,73,255,0.16) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,239,255,0.92)) !important;
+  box-shadow: 0 12px 22px rgba(124,73,255,0.08) !important;
 }
 
 .push-test-btn:hover{
   background: linear-gradient(180deg, rgba(249,244,255,1), rgba(238,227,255,0.94)) !important;
+  transform: translateY(-1px) !important;
 }
 
 .push-live-state{
-  margin-top: 12px;
-  font-size: 0.84rem;
-  line-height: 1.45;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  line-height: 1.55;
   text-align: left;
+  background: linear-gradient(180deg, rgba(255,255,255,0.76), rgba(246,239,255,0.78));
+  border: 1px solid rgba(124,73,255,0.10);
 }
 
 .push-live-state.is-active{
   color: rgba(109,40,217,0.78);
+  box-shadow: 0 12px 24px rgba(124,73,255,0.06);
 }
 
 .push-live-state.is-paused{
   color: rgba(76,51,88,0.6);
 }
 
+.push-settings-actions{
+  margin-top: 18px !important;
+  gap: 10px !important;
+}
+
+.push-settings-actions .btn{
+  min-width: 118px;
+  border-radius: 16px !important;
+  min-height: 48px;
+  font-weight: 700 !important;
+  box-shadow: 0 14px 28px rgba(124,73,255,0.10);
+}
+
+.push-settings-actions .btn.outline{
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(246,239,255,0.9)) !important;
+}
+
 @media (max-width: 640px){
   .push-settings-card{
     width: min(430px, 94vw) !important;
-    padding: 24px 18px 22px !important;
+    padding: 22px 18px 22px !important;
     box-sizing: border-box;
     overflow-x: hidden;
+  }
+
+  .push-settings-card .upload-title{
+    max-width: 280px;
+    font-size: 1.85rem !important;
+  }
+
+  .push-schedule-pill{
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 20px;
   }
 
   .push-time-selects{
@@ -6603,6 +6743,7 @@ body{
 
   .push-settings-card .modal-actions .btn{
     min-width: 0;
+    width: 100%;
   }
 }
 

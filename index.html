@@ -306,13 +306,22 @@
 
   <div id="push-settings-modal" class="modal hidden" aria-hidden="true">
     <div class="modal-card push-settings-card">
+      <div class="push-settings-glow push-settings-glow-a" aria-hidden="true"></div>
+      <div class="push-settings-glow push-settings-glow-b" aria-hidden="true"></div>
       <button id="btn-close-push-settings-x" class="upload-x push-settings-x" aria-label="Cerrar">✕</button>
-      <div class="upload-eyebrow">Mensajitos diarios</div>
-      <h3 class="upload-title">Configura tus notificaciones 🔔</h3>
-      <p class="upload-subtitle">Actívalos y te llegará un mensajito cada mañana alrededor de las 6:00 a. m.</p>
+      <div class="push-settings-hero">
+        <div class="upload-eyebrow">Mensajitos diarios</div>
+        <h3 class="upload-title">Configura tus notificaciones 🔔</h3>
+        <p class="upload-subtitle">Actívalos y te llegará un mensajito cada mañana alrededor de las 6:00 a. m.</p>
+        <div class="push-schedule-pill">
+          <span class="push-schedule-pill-icon" aria-hidden="true">⏰</span>
+          <span>Envío diario fijo alrededor de las 6:00 a. m.</span>
+        </div>
+      </div>
+
       <div id="push-backend-state" class="push-backend-state">Comprobando conexión del backend...</div>
 
-      <div class="push-settings-switch">
+      <div class="push-settings-switch push-settings-main-card">
         <label class="push-settings-toggle">
           <input id="push-enabled" type="checkbox" checked>
           <span class="push-settings-toggle-ui" aria-hidden="true"></span>
@@ -342,7 +351,7 @@
         </div>
       </div>
 
-      <div class="modal-actions">
+      <div class="modal-actions push-settings-actions">
         <button id="btn-cancel-push-settings" class="btn small outline" type="button">Cancelar</button>
         <button id="btn-test-push-settings" class="btn small outline push-test-btn" type="button">Enviar prueba</button>
         <button id="btn-save-push-settings" class="btn small" type="button">Guardar</button>
