@@ -307,15 +307,17 @@
     if (!els.backendState) return;
 
     if (backendStatus.available) {
-      els.backendState.textContent = `Backend listo para enviar notificaciones reales cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL} ✅`;
+      els.backendState.innerHTML = `<span class="push-status-icon" aria-hidden="true">✓</span><span class="push-status-copy">Backend listo para enviar notificaciones reales cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.</span>`;
       els.backendState.classList.add('is-ready');
       els.backendState.classList.remove('is-unavailable');
       return;
     }
 
-    els.backendState.textContent = isCurrentHostLocal()
-      ? 'Estás viendo la versión local. Para probar el envío real usa `npm start` y abre la página desde ese backend.'
-      : 'En GitHub Pages el diseño sí se ve, pero el envío real solo funciona si conectas un backend push aparte.';
+    els.backendState.innerHTML = `<span class="push-status-icon" aria-hidden="true">i</span><span class="push-status-copy">${
+      isCurrentHostLocal()
+        ? 'Estás viendo la versión local. Para probar el envío real usa `npm start` y abre la página desde ese backend.'
+        : 'En GitHub Pages el diseño sí se ve, pero el envío real solo funciona si conectas un backend push aparte.'
+    }</span>`;
     els.backendState.classList.add('is-unavailable');
     els.backendState.classList.remove('is-ready');
   }
@@ -324,7 +326,7 @@
     const els = getSettingsElements();
     if (!els.liveState) return;
     if (!backendStatus.available) {
-      els.liveState.textContent = 'Avisos no disponibles en esta versión de la página.';
+      els.liveState.innerHTML = '<span class="push-status-icon" aria-hidden="true">i</span><span class="push-status-copy">Avisos no disponibles en esta versión de la página.</span>';
       els.liveState.classList.add('is-paused');
       els.liveState.classList.remove('is-active');
       syncBackendDependentUi();
@@ -332,11 +334,11 @@
     }
     syncTimeFieldVisibility();
     if (els.enabled?.checked) {
-      els.liveState.textContent = `✅ Mensajes activos — recibirás tu mensaje cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.`;
+      els.liveState.innerHTML = `<span class="push-status-icon" aria-hidden="true">✓</span><span class="push-status-copy">Mensajes activos. Recibirás tu mensaje cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.</span>`;
       els.liveState.classList.add('is-active');
       els.liveState.classList.remove('is-paused');
     } else {
-      els.liveState.textContent = '💤 Mensajitos pausados por ahora.';
+      els.liveState.innerHTML = '<span class="push-status-icon" aria-hidden="true">•</span><span class="push-status-copy">Mensajitos pausados por ahora.</span>';
       els.liveState.classList.add('is-paused');
       els.liveState.classList.remove('is-active');
     }

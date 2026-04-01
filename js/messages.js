@@ -380,7 +380,19 @@ const dailyMessages = [
   "Día 132: Hoy soñé contigo, y al despertar estabas ahí.",
   "Día 133: Te quiero como el río quiere al mar.",
   "Día 134: Eres mi razón de despertar cada mañana.",
-  "Día 135: Ciento treinta y cinco días de que nada sea lo mismo.",
+  `A veces dejar ir duele…
+pero no porque se acabe el cariño,
+sino porque hay cosas que se quedan.
+
+Como una mascota…
+ya no está, pero sigue contigo
+en la forma en la que recuerdas,
+en lo que te hizo sentir,
+en ese pedacito que nunca se va.
+
+Supongo que hay personas así también…
+no se pierden,
+solo aprenden a quedarse distinto.`,
   "Día 136: Mi niña, jamás seré perfecto. Voy a tener días torpes, silencios que no sabré llenar y errores que quizá me pesen más de la cuenta, pero hay algo que no va a cambiar: voy a seguir eligiéndote. Porque cuando el amor es de verdad, uno no sale corriendo al primer tropiezo; uno se queda, aprende, mejora y abraza más fuerte.",
   "Día 137: A veces pienso que la vida fue buena conmigo el día que te puso en mi camino. Desde entonces, hasta lo simple tiene más color, más sentido, más alma. Tú no solo adornas mis días, mi niña, los vuelves hogar.",
   "Día 138: Me gustaría ser una lágrima tuya, para nacer en tus ojos, recorrer tus mejillas y morir en tus labios. Pero más que eso, quisiera ser la sonrisa que evita que tengas que llorar. Quisiera ser calma, refugio y ternura para tu corazón.",
