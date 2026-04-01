@@ -312,10 +312,11 @@ function clampMinute(value) {
   return Math.min(59, Math.max(0, Math.floor(minute)));
 }
 
-function getCalendarDayNumber(date = new Date()) {
-  const startDate = new Date(2025, 10, 17, 0, 0, 0, 0);
-  const target = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
-  const diffMs = target - startDate;
+function getCalendarDayNumber(date = new Date(), timeZone = TIMEZONE) {
+  const targetParts = getTimePartsInTimezone(date, timeZone);
+  const startUtc = Date.UTC(2025, 10, 17);
+  const targetUtc = Date.UTC(targetParts.year, targetParts.month - 1, targetParts.day);
+  const diffMs = targetUtc - startUtc;
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   return diffDays >= 0 ? Math.min(diffDays, 364) : -1;
 }
