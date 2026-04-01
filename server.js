@@ -343,7 +343,42 @@ function getTimePartsInTimezone(date = new Date(), timeZone = TIMEZONE) {
   };
 }
 
-function buildNotificationPayload(dayNum, { isTest = false } = {}) {
+function normalizePhotoUrl(value) {
+  const rawValue = String(value || '').trim();
+  if (!rawValue) return '';
+  try {
+    return new URL(rawValue, SITE_URL).href;
+  } catch {
+    return rawValue;
+  }
+}
+
+async function getNotificationGalleryImageUrl() {
+  const fallbackImage = `${ASSET_URL}/img/mini_nina.jpg`;
+  if (!supabaseAdmin) return fallbackImage;
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('photos')
+      .select('url')
+      .not('url', 'is', null)
+      .limit(200);
+
+    if (error) throw error;
+
+    const candidates = (Array.isArray(data) ? data : [])
+      .map((item) => normalizePhotoUrl(item?.url))
+      .filter(Boolean);
+
+    if (!candidates.length) return fallbackImage;
+    return candidates[Math.floor(Math.random() * candidates.length)] || fallbackImage;
+  } catch (error) {
+    console.warn('No pude sacar una foto de la galeria para la notificacion:', error?.message || error);
+    return fallbackImage;
+  }
+}
+
+async function buildNotificationPayload(dayNum, { isTest = false } = {}) {
   const dailyMessages = loadDailyMessages();
   const rawMessage = String(dailyMessages[dayNum] || '').trim();
   const body = rawMessage.replace(/^Día\s+\d+:\s*/i, '').trim();
@@ -351,14 +386,16 @@ function buildNotificationPayload(dayNum, { isTest = false } = {}) {
   const title = isTest
     ? 'Prueba de notificación 💌'
     : `Tu mensajito del día ${safeDayNum + 1} 💌`;
+  const galleryImageUrl = await getNotificationGalleryImageUrl();
+  const fallbackBadge = `${ASSET_URL}/img/mini_nina.jpg`;
 
   return {
     title,
     body: body || 'Ya está listo tu mensaje de hoy.',
     tag: `zamge-day-${safeDayNum}`,
-    icon: `${ASSET_URL}/img/mini_nina.jpg`,
-    badge: `${ASSET_URL}/img/mini_nina.jpg`,
-    image: `${ASSET_URL}/img/mini_nina.jpg`,
+    icon: galleryImageUrl,
+    badge: fallbackBadge,
+    image: galleryImageUrl,
     data: {
       url: `${SITE_URL}/?calendarDay=${safeDayNum}&openCalendar=1`,
       dayNum: safeDayNum
@@ -418,7 +455,7 @@ async function sendDailyCalendarNotification({ force = false, isTest = false, ig
     return { skipped: true, reason: 'Fuera del rango del calendario.' };
   }
 
-  const payload = buildNotificationPayload(dayNum, { isTest });
+  const payload = await buildNotificationPayload(dayNum, { isTest });
   const subscriptions = await getActiveSubscriptions();
   if (!subscriptions.length) {
     return { skipped: true, reason: 'No hay suscripciones activas.' };
