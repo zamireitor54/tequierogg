@@ -1,6 +1,8 @@
 (function () {
   const STORAGE_KEY = 'zamge_push_prompt_dismissed';
   const LOCAL_HOSTNAMES = new Set(['localhost', '127.0.0.1']);
+  const FIXED_DAILY_TIME = '06:00';
+  const FIXED_DAILY_TIME_LABEL = '6:00 a. m.';
 
   function isLocalUrl(value) {
     try {
@@ -126,7 +128,7 @@
   }
 
   function getTimeParts(value) {
-    const [hourText = '06', minuteText = '00'] = String(value || '06:00').split(':');
+    const [hourText = '06', minuteText = '00'] = String(value || FIXED_DAILY_TIME).split(':');
     return {
       hour: Math.min(23, Math.max(0, Number(hourText) || 6)),
       minute: Math.min(59, Math.max(0, Number(minuteText) || 0))
@@ -157,12 +159,7 @@
   function populateTimeSelects() {
     const els = getSettingsElements();
     if (!els.hour) return;
-    if (!els.hour.value) {
-      els.hour.value = '06';
-    }
-    if (els.minute && !els.minute.value) {
-      els.minute.value = '00';
-    }
+    writeSelectedTime(FIXED_DAILY_TIME);
   }
 
   function normalizeHourInput(rawValue) {
@@ -260,8 +257,7 @@
   }
 
   function readSelectedTime() {
-    const els = getSettingsElements();
-    return from12HourParts(els.hour?.value, els.minute?.value, els.meridiem?.value);
+    return FIXED_DAILY_TIME;
   }
 
   function writeSelectedTime(value) {
@@ -283,8 +279,7 @@
   function syncTimeFieldVisibility() {
     const els = getSettingsElements();
     if (!els.timeField) return;
-    const enabled = !!els.enabled?.checked;
-    els.timeField.classList.toggle('is-hidden', !enabled);
+    els.timeField.classList.add('is-hidden');
   }
 
   function syncBackendDependentUi() {
@@ -312,7 +307,7 @@
     if (!els.backendState) return;
 
     if (backendStatus.available) {
-      els.backendState.textContent = 'Backend listo para enviar notificaciones reales ✅';
+      els.backendState.textContent = `Backend listo para enviar notificaciones reales cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL} ✅`;
       els.backendState.classList.add('is-ready');
       els.backendState.classList.remove('is-unavailable');
       return;
@@ -335,10 +330,9 @@
       syncBackendDependentUi();
       return;
     }
-    const time = readSelectedTime();
     syncTimeFieldVisibility();
     if (els.enabled?.checked) {
-      els.liveState.textContent = `✅ Mensajes activos — recibirás tu mensaje cada día a las ${formatFriendlyTime(time)}.`;
+      els.liveState.textContent = `✅ Mensajes activos — recibirás tu mensaje cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.`;
       els.liveState.classList.add('is-active');
       els.liveState.classList.remove('is-paused');
     } else {
@@ -436,7 +430,7 @@
     const registration = await registerServiceWorker();
     const subscription = await getExistingSubscription(registration);
     if (!subscription) {
-      return { enabled: false, time: '06:00', hasSubscription: false };
+      return { enabled: false, time: FIXED_DAILY_TIME, hasSubscription: false };
     }
 
     const data = await postJson(`${API_BASE}/api/push/settings/read`, {
@@ -465,7 +459,7 @@
       <div class="popup-content" style="max-width: 520px;">
         <button class="close-popup" aria-label="Cerrar">×</button>
         <h2 style="margin-bottom:8px;">Activa los mensajitos diarios 🔔</h2>
-        <p style="margin:0 0 18px;">Si aceptas, te llegará cada día a la hora que elijas el mensaje del calendario, incluso cuando no tengas la página abierta.</p>
+        <p style="margin:0 0 18px;">Si aceptas, te llegará cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL} el mensaje del calendario, incluso cuando no tengas la página abierta.</p>
         <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
           <button type="button" class="btn small outline" id="btn-push-later">Más tarde</button>
           <button type="button" class="btn small" id="btn-push-allow">Activar notificaciones</button>
@@ -498,10 +492,10 @@
 
   async function subscribeToDailyNotifications({ showSuccess = true, time = '06:00' } = {}) {
     try {
-      await ensureSubscription({ enabled: true, time });
+      await ensureSubscription({ enabled: true, time: FIXED_DAILY_TIME });
       localStorage.setItem(STORAGE_KEY, '1');
       if (showSuccess) {
-        window.showPopup?.(`Listo 💌 Quedaste suscrita para recibir tu mensajito diario a las ${time}.`);
+        window.showPopup?.(`Listo 💌 Quedaste suscrita para recibir tu mensajito diario cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.`);
       }
       return true;
     } catch (error) {
@@ -532,7 +526,7 @@
     try {
       const settings = await readCurrentSettings();
       els.enabled.checked = settings.enabled;
-      writeSelectedTime(settings.time);
+      writeSelectedTime(FIXED_DAILY_TIME);
       renderLiveState();
       if (!settings.hasSubscription && Notification.permission !== 'granted') {
         els.status.textContent = 'Actívalos cuando quieras. Al guardar, el navegador te pedirá permiso para enviarte el mensajito diario.';
@@ -563,13 +557,7 @@
       els.status.textContent = backendStatus.message;
       return;
     }
-    if (els.minute) {
-      els.minute.value = normalizeMinuteInput(els.minute.value);
-    }
-    if (els.hour) {
-      els.hour.value = normalizeHourInput(els.hour.value);
-    }
-    const selectedTime = readSelectedTime();
+    const selectedTime = FIXED_DAILY_TIME;
 
     try {
       if (els.enabled.checked) {
@@ -585,7 +573,7 @@
 
       if (els.enabled.checked) {
         await saveSubscriptionSettings({ enabled: true, time: selectedTime });
-        window.showPopup?.(`Mensajitos diarios activados 💌 Llegarán a las ${formatFriendlyTime(selectedTime)}.`);
+        window.showPopup?.(`Mensajitos diarios activados 💌 Llegarán cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.`);
       } else {
         await saveSubscriptionSettings({ enabled: false, time: selectedTime });
         window.showPopup?.('Mensajitos diarios desactivados por ahora.');
@@ -609,14 +597,7 @@
       return;
     }
 
-    if (els.minute) {
-      els.minute.value = normalizeMinuteInput(els.minute.value);
-    }
-    if (els.hour) {
-      els.hour.value = normalizeHourInput(els.hour.value);
-    }
-
-    const selectedTime = readSelectedTime();
+    const selectedTime = FIXED_DAILY_TIME;
     if (!els.enabled?.checked) {
       els.status.textContent = 'Activa los mensajitos diarios y guárdalos para poder mandarte una prueba en este dispositivo.';
       return;

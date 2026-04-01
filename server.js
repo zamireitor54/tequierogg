@@ -10,6 +10,8 @@ const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+const FIXED_PUSH_HOUR = 6;
+const FIXED_PUSH_MINUTE = 0;
 
 function normalizeBaseUrl(value, fallback) {
   const rawValue = String(value || fallback || '').trim();
@@ -28,9 +30,10 @@ function normalizeOrigin(value) {
 }
 
 const APP_URL = normalizeBaseUrl(process.env.PUBLIC_APP_URL, `http://localhost:${PORT}`);
-const SITE_URL = normalizeBaseUrl(process.env.PUBLIC_SITE_URL, APP_URL);
+const SITE_URL = normalizeBaseUrl(process.env.PUSH_SITE_URL || process.env.PUBLIC_SITE_URL, APP_URL);
 const ASSET_URL = normalizeBaseUrl(process.env.PUBLIC_ASSET_URL, SITE_URL);
 const TIMEZONE = 'America/Bogota';
+const cronSecret = String(process.env.CRON_SECRET || '').trim();
 const allowedOrigins = String(process.env.PUSH_ALLOWED_ORIGINS || `${APP_URL},${SITE_URL}`)
   .split(',')
   .map((origin) => normalizeOrigin(origin))
@@ -164,8 +167,6 @@ app.post('/api/push/subscribe', async (req, res) => {
     }
 
     const userAgent = String(req.headers['user-agent'] || '').slice(0, 500);
-    const preferredHour = clampHour(req.body?.preferredHour);
-    const preferredMinute = clampMinute(req.body?.preferredMinute);
     const enabled = req.body?.enabled !== false;
     await upsertSubscriptionRecord({
       endpoint: subscription.endpoint,
@@ -173,8 +174,8 @@ app.post('/api/push/subscribe', async (req, res) => {
       keys: subscription.keys,
       user_agent: userAgent || null,
       is_active: enabled,
-      preferred_hour: preferredHour,
-      preferred_minute: preferredMinute,
+      preferred_hour: FIXED_PUSH_HOUR,
+      preferred_minute: FIXED_PUSH_MINUTE,
       updated_at: new Date().toISOString()
     });
 
@@ -199,8 +200,8 @@ app.post('/api/push/settings/read', async (req, res) => {
       settings: data || {
         endpoint,
         is_active: true,
-        preferred_hour: 6,
-        preferred_minute: 0
+        preferred_hour: FIXED_PUSH_HOUR,
+        preferred_minute: FIXED_PUSH_MINUTE
       }
     });
   } catch (error) {
@@ -216,14 +217,12 @@ app.post('/api/push/settings', async (req, res) => {
       return res.status(400).json({ error: 'Endpoint inválido.' });
     }
 
-    const preferredHour = clampHour(req.body?.preferredHour);
-    const preferredMinute = clampMinute(req.body?.preferredMinute);
     const enabled = req.body?.enabled !== false;
 
     await updateSubscriptionRecord(endpoint, {
       is_active: enabled,
-      preferred_hour: preferredHour,
-      preferred_minute: preferredMinute,
+      preferred_hour: FIXED_PUSH_HOUR,
+      preferred_minute: FIXED_PUSH_MINUTE,
       updated_at: new Date().toISOString()
     });
 
@@ -260,6 +259,23 @@ app.post('/api/push/send-test', async (_req, res) => {
   } catch (error) {
     console.error('Error enviando push de prueba:', error);
     res.status(500).json({ error: 'No se pudo enviar el push de prueba.' });
+  }
+});
+
+app.get('/api/cron/send-daily', async (req, res) => {
+  try {
+    if (cronSecret) {
+      const authorization = String(req.headers.authorization || '').trim();
+      if (authorization !== `Bearer ${cronSecret}`) {
+        return res.status(401).json({ error: 'No autorizado.' });
+      }
+    }
+
+    const result = await sendDailyCalendarNotification({ ignorePreferredTime: true });
+    res.json({ ok: true, result });
+  } catch (error) {
+    console.error('Error en cron diario push:', error);
+    res.status(500).json({ error: 'No se pudo ejecutar el cron diario.' });
   }
 });
 
@@ -384,7 +400,7 @@ async function sendNotificationToSubscription(record, payload) {
   }
 }
 
-async function sendDailyCalendarNotification({ force = false, isTest = false } = {}) {
+async function sendDailyCalendarNotification({ force = false, isTest = false, ignorePreferredTime = false } = {}) {
   if (!vapidPublicKey || !vapidPrivateKey) {
     throw new Error('Faltan variables de entorno VAPID para notificaciones push.');
   }
@@ -405,11 +421,13 @@ async function sendDailyCalendarNotification({ force = false, isTest = false } =
   const results = [];
   for (const record of subscriptions) {
     if (!force) {
-      const preferredHour = clampHour(record.preferred_hour);
-      const preferredMinute = clampMinute(record.preferred_minute);
-      if (preferredHour !== nowParts.hour || preferredMinute !== nowParts.minute) {
-        results.push({ endpoint: record.endpoint, status: 'skipped-time' });
-        continue;
+      if (!ignorePreferredTime) {
+        const preferredHour = clampHour(record.preferred_hour);
+        const preferredMinute = clampMinute(record.preferred_minute);
+        if (preferredHour !== nowParts.hour || preferredMinute !== nowParts.minute) {
+          results.push({ endpoint: record.endpoint, status: 'skipped-time' });
+          continue;
+        }
       }
 
       const lastSentDateKey = record.last_sent_at
