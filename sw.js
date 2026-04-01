@@ -24,8 +24,8 @@ self.addEventListener('push', (event) => {
   const preferTextOnly = Boolean(payload.data?.preferTextOnly);
   const options = {
     body: payload.body || 'Abre la página para verlo.',
-    icon: payload.icon || resolveScopedUrl('img/tab-love.svg'),
-    badge: payload.badge || resolveScopedUrl('img/tab-love.svg'),
+    icon: payload.icon || resolveScopedUrl('img/zg-chrome-logo.png'),
+    badge: payload.badge || resolveScopedUrl('img/zg-chrome-logo.png'),
     image: preferTextOnly ? undefined : (payload.image || undefined),
     tag: payload.tag || 'zamge-daily-message',
     renotify: true,

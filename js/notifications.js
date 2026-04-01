@@ -66,7 +66,6 @@
       backendState: document.getElementById('push-backend-state'),
       openBtn: document.getElementById('btn-push-settings'),
       saveBtn: document.getElementById('btn-save-push-settings'),
-      testBtn: document.getElementById('btn-test-push-settings'),
       cancelBtn: document.getElementById('btn-cancel-push-settings'),
       closeBtn: document.getElementById('btn-close-push-settings-x')
     };
@@ -292,10 +291,6 @@
       els.saveBtn.disabled = !available;
       els.saveBtn.title = available ? '' : 'Necesitas un backend de notificaciones para guardar esto.';
     }
-    if (els.testBtn) {
-      els.testBtn.disabled = !available;
-      els.testBtn.title = available ? '' : 'Primero necesitas conectar el backend de notificaciones.';
-    }
     if (!available && els.enabled) {
       els.enabled.checked = false;
     }
@@ -383,6 +378,8 @@
       preferredHour: hour,
       preferredMinute: minute
     });
+
+    return subscription;
   }
 
   async function ensureSubscription({ enabled = true, time = '06:00' } = {}) {
@@ -564,9 +561,12 @@
     const selectedTime = FIXED_DAILY_TIME;
 
     try {
+      let activeSubscription = null;
       if (els.enabled.checked) {
         const ok = await subscribeToDailyNotifications({ showSuccess: false, time: selectedTime });
         if (!ok) return;
+        const registration = await registerServiceWorker();
+        activeSubscription = await getExistingSubscription(registration);
       } else {
         const registration = await registerServiceWorker();
         const subscription = await getExistingSubscription(registration);
@@ -576,8 +576,25 @@
       }
 
       if (els.enabled.checked) {
-        await saveSubscriptionSettings({ enabled: true, time: selectedTime });
-        window.showPopup?.(`Mensajitos diarios activados 💌 Llegarán cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.`);
+        activeSubscription = await saveSubscriptionSettings({ enabled: true, time: selectedTime });
+        let immediateSent = false;
+        if (activeSubscription?.endpoint) {
+          try {
+            const data = await postJson(`${API_BASE}/api/push/send-now`, {
+              endpoint: activeSubscription.endpoint
+            });
+            const results = Array.isArray(data.result?.sent) ? data.result.sent : [];
+            immediateSent = results.some((item) => item.status === 'sent');
+          } catch (_error) {
+            immediateSent = false;
+          }
+        }
+
+        window.showPopup?.(
+          immediateSent
+            ? `Mensajitos diarios activados 💌 Como ya pasó la hora de hoy, te mandé el mensajito de una vez. Desde mañana llegará alrededor de las ${FIXED_DAILY_TIME_LABEL}.`
+            : `Mensajitos diarios activados 💌 Llegarán cada mañana alrededor de las ${FIXED_DAILY_TIME_LABEL}.`
+        );
       } else {
         await saveSubscriptionSettings({ enabled: false, time: selectedTime });
         window.showPopup?.('Mensajitos diarios desactivados por ahora.');
@@ -586,52 +603,6 @@
       closePushSettingsModal();
     } catch (error) {
       els.status.textContent = error.message || 'No se pudieron guardar los ajustes.';
-    }
-  }
-
-  async function sendTestNotificationNow() {
-    const els = getSettingsElements();
-    els.status.textContent = '';
-    await checkBackendAvailability();
-    renderBackendState();
-    syncBackendDependentUi();
-
-    if (!backendStatus.available) {
-      els.status.textContent = backendStatus.message;
-      return;
-    }
-
-    const selectedTime = FIXED_DAILY_TIME;
-    if (!els.enabled?.checked) {
-      els.status.textContent = 'Activa los mensajitos diarios y guárdalos para poder mandarte una prueba en este dispositivo.';
-      return;
-    }
-
-    try {
-      const ok = await subscribeToDailyNotifications({ showSuccess: false, time: selectedTime });
-      if (!ok) return;
-
-      await saveSubscriptionSettings({ enabled: true, time: selectedTime });
-      const registration = await registerServiceWorker();
-      const subscription = await getExistingSubscription(registration);
-      if (!subscription?.endpoint) {
-        throw new Error('No encontré la suscripción activa de este dispositivo.');
-      }
-
-      const data = await postJson(`${API_BASE}/api/push/send-test`, {
-        endpoint: subscription.endpoint
-      });
-      const results = Array.isArray(data.result?.sent) ? data.result.sent : [];
-      const sentCount = results.filter((item) => item.status === 'sent').length;
-
-      if (sentCount > 0) {
-        window.showPopup?.(`Prueba enviada 💌 Revisa tus notificaciones. El backend reportó ${sentCount} envío${sentCount === 1 ? '' : 's'} correcto${sentCount === 1 ? '' : 's'}.`);
-        return;
-      }
-
-      els.status.textContent = 'No encontré suscripciones activas para mandar la prueba.';
-    } catch (error) {
-      els.status.textContent = error.message || 'No se pudo enviar la notificación de prueba.';
     }
   }
 
@@ -644,7 +615,6 @@
     els.cancelBtn?.addEventListener('click', closePushSettingsModal);
     els.closeBtn?.addEventListener('click', closePushSettingsModal);
     els.saveBtn?.addEventListener('click', savePushSettings);
-    els.testBtn?.addEventListener('click', sendTestNotificationNow);
     els.enabled?.addEventListener('change', renderLiveState);
     bindOverwriteNumericInput(els.hour, normalizeHourInput, renderLiveState, () => {
       els.minute?.focus();

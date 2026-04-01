@@ -270,6 +270,21 @@ app.post('/api/push/send-test', async (req, res) => {
   }
 });
 
+app.post('/api/push/send-now', async (req, res) => {
+  try {
+    const endpoint = String(req.body?.endpoint || '').trim();
+    if (!endpoint) {
+      return res.status(400).json({ error: 'Endpoint inválido.' });
+    }
+
+    const result = await sendImmediateDailyNotificationForEndpoint(endpoint);
+    res.json({ ok: true, result });
+  } catch (error) {
+    console.error('Error enviando push inmediato:', error);
+    res.status(500).json({ error: 'No se pudo enviar el mensajito inmediato.' });
+  }
+});
+
 app.get('/api/cron/send-daily', async (req, res) => {
   try {
     if (cronSecret) {
@@ -355,6 +370,26 @@ function normalizePhotoUrl(value) {
   }
 }
 
+function buildNotificationImageUrl(value) {
+  const normalized = normalizePhotoUrl(value);
+  if (!normalized) return '';
+
+  try {
+    const url = new URL(normalized);
+    const isSupabaseStorage = /supabase\.co$/i.test(url.hostname) && url.pathname.includes('/storage/v1/object/public/');
+    if (isSupabaseStorage) {
+      url.searchParams.set('width', '1200');
+      url.searchParams.set('height', '630');
+      url.searchParams.set('resize', 'cover');
+      url.searchParams.set('quality', '85');
+      return url.href;
+    }
+    return url.href;
+  } catch {
+    return normalized;
+  }
+}
+
 async function getNotificationGalleryImageUrl() {
   const fallbackImage = `${ASSET_URL}/img/mini_nina.jpg`;
   if (!supabaseAdmin) return fallbackImage;
@@ -369,7 +404,7 @@ async function getNotificationGalleryImageUrl() {
     if (error) throw error;
 
     const candidates = (Array.isArray(data) ? data : [])
-      .map((item) => normalizePhotoUrl(item?.url))
+      .map((item) => buildNotificationImageUrl(item?.url))
       .filter(Boolean);
 
     if (!candidates.length) return fallbackImage;
@@ -401,8 +436,8 @@ async function buildNotificationPayload(dayNum, { isTest = false, userAgent = ''
   const title = isTest
     ? 'Mensajito de prueba'
     : (isMobile ? 'Mensajito de hoy' : `Mensajito del dia ${safeDayNum + 1}`);
-  const appIconUrl = `${ASSET_URL}/img/mini_nina.jpg`;
-  const cleanIconUrl = `${ASSET_URL}/img/tab-love.svg`;
+  const appIconUrl = `${ASSET_URL}/img/zg-chrome-logo.png`;
+  const cleanIconUrl = `${ASSET_URL}/img/zg-chrome-logo.png`;
   const includeImage = shouldAttachNotificationImage(userAgent);
   const galleryImageUrl = includeImage ? await getNotificationGalleryImageUrl() : '';
 
@@ -460,6 +495,46 @@ async function sendNotificationToSubscription(record, payload) {
     console.error('Falló envío push:', record.endpoint, error);
     return { endpoint: record.endpoint, status: 'failed' };
   }
+}
+
+async function sendImmediateDailyNotificationForEndpoint(endpoint) {
+  const normalizedEndpoint = String(endpoint || '').trim();
+  if (!normalizedEndpoint) {
+    return { skipped: true, reason: 'Endpoint inválido.' };
+  }
+
+  const subscriptions = await getActiveSubscriptions();
+  const record = subscriptions.find((item) => String(item.endpoint || '').trim() === normalizedEndpoint);
+  if (!record) {
+    return { skipped: true, reason: 'No existe una suscripción activa para este dispositivo.' };
+  }
+
+  const now = new Date();
+  const nowParts = getTimePartsInTimezone(now);
+  const alreadySentToday = record.last_sent_at
+    ? getTimePartsInTimezone(new Date(record.last_sent_at)).dateKey === nowParts.dateKey
+    : false;
+
+  if (alreadySentToday) {
+    return { skipped: true, reason: 'El mensajito de hoy ya fue enviado a este dispositivo.' };
+  }
+
+  if (nowParts.hour < FIXED_PUSH_HOUR || (nowParts.hour === FIXED_PUSH_HOUR && nowParts.minute < FIXED_PUSH_MINUTE)) {
+    return { skipped: true, reason: 'Todavía no es la hora del envío diario.' };
+  }
+
+  const dayNum = getCalendarDayNumber(now);
+  if (dayNum < 0 || dayNum > 364) {
+    return { skipped: true, reason: 'Fuera del rango del calendario.' };
+  }
+
+  const payload = await buildNotificationPayload(dayNum, {
+    isTest: false,
+    userAgent: record.user_agent || ''
+  });
+
+  const result = await sendNotificationToSubscription(record, payload);
+  return { dayNum, sent: [result] };
 }
 
 async function sendDailyCalendarNotification({ force = false, isTest = false, ignorePreferredTime = false, targetEndpoint = null } = {}) {

@@ -8,14 +8,14 @@
   "theme_color": "#8d56ff",
   "icons": [
     {
-      "src": "img/mini_nina.jpg",
+      "src": "img/zg-chrome-logo.png",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/png"
     },
     {
-      "src": "img/mini_nina.jpg",
+      "src": "img/zg-chrome-logo.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png"
     }
   ]
 }
