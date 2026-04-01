@@ -34,7 +34,14 @@ const SITE_URL = normalizeBaseUrl(process.env.PUSH_SITE_URL || process.env.PUBLI
 const ASSET_URL = normalizeBaseUrl(process.env.PUBLIC_ASSET_URL, SITE_URL);
 const TIMEZONE = 'America/Bogota';
 const cronSecret = String(process.env.CRON_SECRET || '').trim();
-const allowedOrigins = String(process.env.PUSH_ALLOWED_ORIGINS || `${APP_URL},${SITE_URL}`)
+const defaultAllowedOrigins = [
+  APP_URL,
+  SITE_URL,
+  'http://localhost:3010',
+  'http://localhost:5503',
+  'http://127.0.0.1:5503'
+];
+const allowedOrigins = String(process.env.PUSH_ALLOWED_ORIGINS || defaultAllowedOrigins.join(','))
   .split(',')
   .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
