@@ -91,12 +91,15 @@ let syncLightboxChromeTimeout = null;
 let syncLightboxChromeTimeoutLate = null;
 let uploadObjectUrls = [];
 let selectedUploadFiles = [];
+let selectedUploadRejectedFiles = [];
 let isGalleryLoading = false;
 let galleryLoadingStartedAt = 0;
 let superGalleryHead = null;
 let superGalleryActions = null;
 let superGallerySection = null;
 let superGalleryActionsSpacer = null;
+const SUPPORTED_UPLOAD_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'avif']);
+const COMMON_UNSUPPORTED_MOBILE_EXTENSIONS = new Set(['heic', 'heif']);
 
 function setGalleryActionsFloating(isFloating) {
   if (!superGalleryActions) return;
@@ -119,6 +122,132 @@ function updateUploadMapLocationDisplay(label = '') {
   const clean = String(label || '').trim();
   display.textContent = clean || 'Aún no has elegido un punto en el mapa.';
   display.classList.toggle('empty', !clean);
+}
+
+function getUploadFileExtension(file) {
+  const rawName = String(file?.name || '').trim().toLowerCase();
+  if (!rawName.includes('.')) return '';
+  return rawName.split('.').pop() || '';
+}
+
+function setUploadInlineAlert(message = '', tone = 'info') {
+  const alertBox = document.getElementById('upload-file-alert');
+  if (!alertBox) return;
+  const clean = String(message || '').trim();
+  alertBox.textContent = clean;
+  alertBox.dataset.tone = tone;
+  alertBox.classList.toggle('hidden', !clean);
+}
+
+function buildUploadValidationMessage(rejected = [], acceptedCount = 0) {
+  if (!rejected.length) {
+    return acceptedCount
+      ? { tone: 'success', message: 'Tus fotos sí están listas para subirse.' }
+      : { tone: 'info', message: '' };
+  }
+
+  const hasHeic = rejected.some(item => COMMON_UNSUPPORTED_MOBILE_EXTENSIONS.has(item.extension));
+  if (!acceptedCount && hasHeic) {
+    return {
+      tone: 'warning',
+      message: 'Este navegador no pudo abrir tus fotos HEIC/HEIF. Pásalas a JPG, PNG o WebP y vuelve a intentarlo.'
+    };
+  }
+
+  const rejectedNames = rejected.slice(0, 2).map(item => item.file?.name || 'archivo').join(', ');
+  const suffix = rejected.length > 2 ? ` y ${rejected.length - 2} más` : '';
+  return {
+    tone: acceptedCount ? 'warning' : 'error',
+    message: acceptedCount
+      ? `Subiremos solo las que sí se pueden usar. No pude abrir ${rejectedNames}${suffix}.`
+      : `No pude usar ${rejectedNames}${suffix}. Revisa el formato de esa foto y vuelve a intentarlo.`
+  };
+}
+
+function canCandidateLookLikeImage(file) {
+  const type = String(file?.type || '').toLowerCase();
+  const extension = getUploadFileExtension(file);
+  return type.startsWith('image/') || SUPPORTED_UPLOAD_EXTENSIONS.has(extension) || COMMON_UNSUPPORTED_MOBILE_EXTENSIONS.has(extension);
+}
+
+async function canRenderUploadImage(file) {
+  if (!file) return false;
+  const tempUrl = URL.createObjectURL(file);
+  try {
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      const cleanup = () => {
+        img.onload = null;
+        img.onerror = null;
+      };
+      const timer = window.setTimeout(() => {
+        cleanup();
+        reject(new Error('timeout'));
+      }, 4000);
+      img.onload = () => {
+        window.clearTimeout(timer);
+        cleanup();
+        resolve(true);
+      };
+      img.onerror = () => {
+        window.clearTimeout(timer);
+        cleanup();
+        reject(new Error('decode-error'));
+      };
+      img.src = tempUrl;
+    });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    URL.revokeObjectURL(tempUrl);
+  }
+}
+
+async function prepareUploadFiles(rawFiles = []) {
+  const accepted = [];
+  const rejected = [];
+
+  for (const file of Array.from(rawFiles || [])) {
+    const extension = getUploadFileExtension(file);
+    if (!canCandidateLookLikeImage(file)) {
+      rejected.push({ file, extension, reason: 'Ese archivo no parece ser una imagen válida.' });
+      continue;
+    }
+
+    const canRender = await canRenderUploadImage(file);
+    if (!canRender) {
+      const reason = COMMON_UNSUPPORTED_MOBILE_EXTENSIONS.has(extension)
+        ? 'Tu navegador no pudo abrir esa foto HEIC/HEIF.'
+        : 'No pude abrir esa imagen en este dispositivo.';
+      rejected.push({ file, extension, reason });
+      continue;
+    }
+
+    accepted.push(file);
+  }
+
+  return { accepted, rejected };
+}
+
+async function handleIncomingUploadFiles(rawFiles = []) {
+  const incoming = Array.from(rawFiles || []);
+  if (!incoming.length) {
+    selectedUploadFiles = [];
+    selectedUploadRejectedFiles = [];
+    setUploadInlineAlert('');
+    refreshUploadPreview();
+    return;
+  }
+
+  setUploadInlineAlert('Revisando tus fotos para asegurarnos de que sí se puedan usar...', 'info');
+  const { accepted, rejected } = await prepareUploadFiles(incoming);
+  selectedUploadFiles = accepted;
+  selectedUploadRejectedFiles = rejected;
+  syncUploadInputFiles();
+  refreshUploadPreview();
+  const feedback = buildUploadValidationMessage(rejected, accepted.length);
+  setUploadInlineAlert(feedback.message, feedback.tone);
 }
 
 function updateEditMapLocationDisplay(label = '') {
@@ -1232,6 +1361,7 @@ function openUpload() {
   uploadModal.classList.remove('hidden');
   uploadModal.setAttribute('aria-hidden', 'false');
   uploadStatus.textContent = '';
+  setUploadInlineAlert('');
   // Actualizar estado de auth cuando se abre el modal
   window.refreshAuthUI?.();
 }
@@ -1245,6 +1375,7 @@ function closeUpload() {
   uploadModal.classList.add('hidden');
   uploadModal.setAttribute('aria-hidden', 'true');
   closeUploadAuthModal();
+  setUploadInlineAlert('');
 }
 
 function openUploadAuthModal() {
@@ -1317,12 +1448,18 @@ function refreshUploadPreview() {
       <img src="${url}" alt="">
       <span>${f.name}</span>
     `;
+    div.querySelector('img')?.addEventListener('error', () => {
+      div.classList.add('is-broken-preview');
+      setUploadInlineAlert(`No pude mostrar la vista previa de ${f.name}. Revisa si esa foto está en un formato compatible.`, 'warning');
+    }, { once: true });
     div.querySelector('.upload-preview-remove')?.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       selectedUploadFiles = selectedUploadFiles.filter((_, i) => i !== index);
+      selectedUploadRejectedFiles = [];
       syncUploadInputFiles();
       refreshUploadPreview();
+      if (!selectedUploadFiles.length) setUploadInlineAlert('');
     });
     uploadPreview.appendChild(div);
   });
@@ -1661,9 +1798,8 @@ function initGallery() {
   btnCloseUploadAuth?.addEventListener('click', closeUploadAuthModal);
 
   // Mostrar/ocultar campo de álbum según cantidad de archivos + generar preview
-  uploadFiles?.addEventListener('change', () => {
-    selectedUploadFiles = Array.from(uploadFiles.files || []);
-    refreshUploadPreview();
+  uploadFiles?.addEventListener('change', async () => {
+    await handleIncomingUploadFiles(uploadFiles.files || []);
   });
 
   const preventDropDefaults = (e) => {
@@ -1679,12 +1815,13 @@ function initGallery() {
   ['dragleave', 'drop'].forEach(evt => {
     uploadDropzone?.addEventListener(evt, () => uploadDropzone.classList.remove('is-dragover'));
   });
-  uploadDropzone?.addEventListener('drop', (e) => {
-    const files = Array.from(e.dataTransfer?.files || []).filter(file => file.type.startsWith('image/'));
-    if (!files.length || !uploadFiles) return;
-    selectedUploadFiles = files;
-    syncUploadInputFiles();
-    refreshUploadPreview();
+  uploadDropzone?.addEventListener('drop', async (e) => {
+    const files = Array.from(e.dataTransfer?.files || []).filter(canCandidateLookLikeImage);
+    if (!files.length || !uploadFiles) {
+      setUploadInlineAlert('Solo puedes arrastrar fotos compatibles aquí.', 'warning');
+      return;
+    }
+    await handleIncomingUploadFiles(files);
   });
 
   // Subir (guardar en Supabase Storage + insertar en tabla photos)
@@ -1692,17 +1829,34 @@ function initGallery() {
     const files = selectedUploadFiles;
     if (!files || !files.length) {
       uploadStatus.textContent = 'Selecciona al menos una foto.';
+      setUploadInlineAlert('Antes de guardar, elige al menos una foto que sí se pueda abrir aquí.', 'warning');
+      return;
+    }
+
+    const finalValidation = await prepareUploadFiles(files);
+    if (finalValidation.rejected.length) {
+      selectedUploadFiles = finalValidation.accepted;
+      selectedUploadRejectedFiles = finalValidation.rejected;
+      syncUploadInputFiles();
+      refreshUploadPreview();
+      const feedback = buildUploadValidationMessage(finalValidation.rejected, finalValidation.accepted.length);
+      setUploadInlineAlert(feedback.message, feedback.tone);
+      uploadStatus.textContent = finalValidation.accepted.length
+        ? 'Algunas fotos no se pudieron usar. Revisa el aviso y vuelve a guardar.'
+        : 'Ninguna de las fotos se pudo usar en este dispositivo.';
       return;
     }
 
     if (!supabaseClient) {
       uploadStatus.textContent = 'Supabase no está listo.';
+      setUploadInlineAlert('Ahora mismo el sistema de guardado no está listo. Intenta otra vez en un momento.', 'error');
       return;
     }
 
     // Verificar sesión
     if (!isAuthed) {
       uploadStatus.textContent = 'Inicia sesión para poder subir.';
+      setUploadInlineAlert('Necesitas iniciar sesión para guardar recuerdos en la galería.', 'warning');
       openUploadAuthModal();
       return;
     }
@@ -1738,6 +1892,7 @@ function initGallery() {
     }
 
     uploadStatus.textContent = 'Subiendo a Supabase...';
+    setUploadInlineAlert('Estamos subiendo tus fotos y guardando el recuerdo. Un momentico...', 'info');
 
     try {
       for (const f of files) {
@@ -1754,6 +1909,7 @@ function initGallery() {
 
         if (upErr) {
           uploadStatus.textContent = 'Error subiendo: ' + upErr.message;
+          setUploadInlineAlert(`No pude subir ${f.name}. ${upErr.message || 'Intenta otra vez.'}`, 'error');
           return;
         }
 
@@ -1798,6 +1954,7 @@ function initGallery() {
 
         if (insErr) {
           uploadStatus.textContent = 'Error guardando en BD: ' + insErr.message;
+          setUploadInlineAlert(`La foto subió, pero no pude guardar el recuerdo completo. ${(insErr.message || '').trim()}`.trim(), 'error');
           return;
         }
 
@@ -1808,9 +1965,11 @@ function initGallery() {
       }
 
       uploadStatus.textContent = '¡Listo! 💖';
+      setUploadInlineAlert('Tu recuerdo quedó guardado correctamente. 💖', 'success');
 
       // limpiar
       selectedUploadFiles = [];
+      selectedUploadRejectedFiles = [];
       uploadFiles.value = '';
       uploadPlace.value = '';
       if (uploadMapLocation) {
@@ -1839,6 +1998,7 @@ function initGallery() {
     } catch (e) {
       console.error(e);
       uploadStatus.textContent = 'Error inesperado subiendo.';
+      setUploadInlineAlert('Hubo un error inesperado mientras intentábamos guardar tu recuerdo. Vuelve a intentar.', 'error');
     }
   });
 
@@ -1859,7 +2019,8 @@ function initGallery() {
 window.galleryModule = {
   initGallery,
   allItems: () => allItems,
-  viewItems: () => viewItems
+  viewItems: () => viewItems,
+  openLightbox
 };
 
 // Cargar desde la BD al final del archivo (siempre que el cliente exista)

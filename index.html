@@ -114,6 +114,24 @@
       </div>
     </section>
 
+    <section class="memory-carousel full-bleed" aria-label="Carrusel de recuerdos">
+      <div class="memory-carousel-inner">
+        <div class="memory-carousel-head">
+          <span class="memory-carousel-eyebrow">Más de nosotros</span>
+          <h4>Un carrusel de nuestros momenticos 💗</h4>
+          <p class="muted">Un paseo de foticos lindas para seguir bajando y sonriendo.</p>
+        </div>
+
+        <div class="memory-carousel-shell">
+          <button id="memory-carousel-prev" class="memory-carousel-nav memory-carousel-nav--prev" type="button" aria-label="Foto anterior"><span class="memory-carousel-nav-icon" aria-hidden="true">←</span></button>
+          <div class="memory-carousel-viewport">
+            <div id="memory-carousel-track" class="memory-carousel-track"></div>
+          </div>
+          <button id="memory-carousel-next" class="memory-carousel-nav memory-carousel-nav--next" type="button" aria-label="Foto siguiente"><span class="memory-carousel-nav-icon" aria-hidden="true">→</span></button>
+        </div>
+      </div>
+    </section>
+
     
   </main>
 
@@ -161,13 +179,14 @@
 
       <div class="field">
         <span>Fotos</span>
-        <input id="upload-files" class="upload-input-native" type="file" accept="image/*" multiple>
+        <input id="upload-files" class="upload-input-native" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,image/jpeg,image/png,image/webp,image/gif,image/bmp,image/avif" multiple>
         <label for="upload-files" id="upload-dropzone" class="upload-dropzone">
           <div class="upload-dropzone-icon">📸</div>
           <div class="upload-dropzone-title">Arrastra tus fotos</div>
           <div class="upload-dropzone-copy">o toca para seleccionarlas</div>
         </label>
         <div id="upload-preview" class="upload-preview"></div>
+        <div id="upload-file-alert" class="upload-inline-alert hidden" aria-live="polite"></div>
       </div>
 
       <div class="row">
@@ -375,13 +394,78 @@
     </figure>
   </div>
 
-  <div class="certificate-full" aria-hidden="false">
-    <img id="certificate-img" src="img/certificado_adopcion_perro_ilustrado_verde.png" alt="Certificado" />
-  </div>
 <footer class="footer">
       <p>Hecho con cariño. Para la niña mas HERMOSOSOSOSOSOSISIMA</p>
       <p class="muted">No olvides lo mucho que te quiero</p>
     </footer>
+
+  <aside id="love-counter" class="love-counter" aria-label="Tiempo que llevamos juntos">
+    <button id="love-counter-toggle" class="love-counter-toggle" type="button" aria-label="Abrir contador de nuestro tiempo" aria-expanded="false">
+      <span class="love-counter-toggle-heart" aria-hidden="true">💗</span>
+    </button>
+
+    <div id="love-counter-panel" class="love-counter-panel" data-start-label="Desde el 8 de noviembre de 2025">
+      <span class="love-counter-accent" aria-hidden="true"></span>
+      <div class="love-counter-hovercopy love-counter-hovercopy--top">Llevamos juntos</div>
+
+      <div class="love-counter-stack">
+        <div class="love-counter-top-icon" aria-hidden="true">💗</div>
+
+        <div id="love-counter-years-unit" class="love-counter-unit love-counter-unit--years hidden">
+          <span id="love-counter-years" class="love-counter-value">0</span>
+          <span id="love-counter-years-label" class="love-counter-label">AÑO</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--months">
+          <span id="love-counter-months" class="love-counter-value">0</span>
+          <span id="love-counter-months-label" class="love-counter-label">MESES</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--days">
+          <span id="love-counter-days" class="love-counter-value">0</span>
+          <span id="love-counter-days-label" class="love-counter-label">DÍAS</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--hours">
+          <span id="love-counter-hours" class="love-counter-value">00</span>
+          <span class="love-counter-label">HRS</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--minutes">
+          <span id="love-counter-minutes" class="love-counter-value">00</span>
+          <span class="love-counter-label">MIN</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--seconds">
+          <span id="love-counter-seconds" class="love-counter-value">00</span>
+          <span class="love-counter-label">SEG</span>
+        </div>
+
+        <div class="love-counter-bottom-icon" aria-hidden="true">✨</div>
+      </div>
+
+      <div class="love-counter-hovercopy love-counter-hovercopy--bottom">con todo mi amor</div>
+    </div>
+  </aside>
+
+  <div id="love-counter-modal" class="love-counter-modal hidden" aria-hidden="true">
+    <div class="love-counter-modal-card" role="dialog" aria-modal="true" aria-labelledby="love-counter-modal-title">
+      <button id="love-counter-modal-close" class="love-counter-modal-close" type="button" aria-label="Cerrar">✕</button>
+      <div class="love-counter-modal-eyebrow">Nuestro tiempo</div>
+      <h3 id="love-counter-modal-title" class="love-counter-modal-title">Llevamos juntos</h3>
+      <p id="love-counter-modal-text" class="love-counter-modal-text"></p>
+    </div>
+  </div>
 
   <!-- FAB Notas + Iniciar sesión -->
   <div class="notes-login-row">

@@ -17,8 +17,8 @@
     "is_active": true,
     "preferred_hour": 6,
     "preferred_minute": 0,
-    "updated_at": "2026-03-31T22:21:12.556Z",
-    "last_sent_at": "2026-03-31T22:21:12.556Z"
+    "updated_at": "2026-03-31T22:42:27.848Z",
+    "last_sent_at": "2026-03-31T22:42:27.848Z"
   },
   {
     "endpoint": "https://fcm.googleapis.com/fcm/send/dfhQutNv1cA:APA91bExYmTi_ijVhEevlgUTd3uP0CCo_77l9oJYKSg6pFThGZNpMvI9gYQ6bPElb3Cpo4chMUOqF7Osh92f54mPpILDfzFjs-_NjG5dkFc7a9ndTmdFGtbD4fm8x7cN5ZiTsV8ASvA4",
@@ -34,11 +34,11 @@
       "p256dh": "BBkNOoEcoYpi0vWCGcuq4LtXJsaGW4RyOtsK6GANHY67u0b4xm2NeLE0ouiLi7ovwMDB9A5X0ZCgNQf_zVZ_I_k",
       "auth": "OttOUpAb4kEH9MD9DrnmWQ"
     },
-    "user_agent": "Mozilla/5.0 (Linux; Android 13; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Mobile Safari/537.36",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
     "is_active": true,
     "preferred_hour": 12,
     "preferred_minute": 20,
-    "updated_at": "2026-03-31T22:21:12.733Z",
-    "last_sent_at": "2026-03-31T22:21:12.733Z"
+    "updated_at": "2026-03-31T22:42:28.016Z",
+    "last_sent_at": "2026-03-31T22:42:28.016Z"
   }
 ]
