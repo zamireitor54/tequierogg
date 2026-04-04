@@ -457,8 +457,67 @@
       <div class="love-counter-hovercopy love-counter-hovercopy--bottom">con todo mi amor</div>
     </div>
   </aside>
+  <aside id="countdown" class="love-counter" aria-label="Cuenta regresiva"><button id="countdown-toggle" class="love-counter-toggle" type="button" aria-label="Abrir contador hacia el 11 de enero" aria-expanded="false">
+      <span class="love-counter-toggle-heart" aria-hidden="true">✨</span>
+    </button>
 
-  <div id="love-counter-modal" class="love-counter-modal hidden" aria-hidden="true">
+    <div id="countdown-panel" class="love-counter-panel" data-start-label="Cuenta regresiva">
+      <span class="love-counter-accent" aria-hidden="true"></span>
+      <div class="love-counter-hovercopy love-counter-hovercopy--top">Falta para el</div>
+
+      <div class="love-counter-stack">
+        <div class="love-counter-top-icon" aria-hidden="true">💗</div>
+
+        <div class="love-counter-unit love-counter-unit--months">
+          <span id="countdown-months" class="love-counter-value">0</span>
+          <span id="countdown-months-label" class="love-counter-label">MESES</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--days">
+          <span id="countdown-days" class="love-counter-value">0</span>
+          <span id="countdown-days-label" class="love-counter-label">DÍAS</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--hours">
+          <span id="countdown-hours" class="love-counter-value">00</span>
+          <span class="love-counter-label">HRS</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--minutes">
+          <span id="countdown-minutes" class="love-counter-value">00</span>
+          <span class="love-counter-label">MIN</span>
+        </div>
+
+        <div class="love-counter-separator" aria-hidden="true"></div>
+
+        <div class="love-counter-unit love-counter-unit--seconds">
+          <span id="countdown-seconds" class="love-counter-value">00</span>
+          <span class="love-counter-label">SEG</span>
+        </div>
+
+        <div class="love-counter-bottom-icon" aria-hidden="true">✨</div>
+      </div>
+
+      <div class="love-counter-hovercopy love-counter-hovercopy--bottom">11 de enero a las 11:11 PM</div>
+    </div>
+
+    <div id="countdown-modal" class="love-counter-modal hidden" aria-hidden="true">
+    <div class="love-counter-modal-card" role="dialog" aria-modal="true" aria-labelledby="countdown-modal-title">
+      <button id="countdown-modal-close" class="love-counter-modal-close" type="button" aria-label="Cerrar">✕</button>
+      <div class="love-counter-modal-eyebrow">Cuenta regresiva</div>
+      <h3 id="countdown-modal-title" class="love-counter-modal-title">Falta para el 11 de enero</h3>
+      <p id="countdown-modal-text" class="love-counter-modal-text"></p>
+    </div>
+  </div>
+  </aside>
+
+    <div id="love-counter-modal" class="love-counter-modal hidden" aria-hidden="true">
     <div class="love-counter-modal-card" role="dialog" aria-modal="true" aria-labelledby="love-counter-modal-title">
       <button id="love-counter-modal-close" class="love-counter-modal-close" type="button" aria-label="Cerrar">✕</button>
       <div class="love-counter-modal-eyebrow">Nuestro tiempo</div>
