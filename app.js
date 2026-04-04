@@ -3,7 +3,7 @@
  * Inicialización general de la página y helpers visuales.
  */
 (function(){
-  const LOVE_COUNTER_START_DATE = new Date('2025-11-08T00:00:00-05:00');
+  const LOVE_COUNTER_START_DATE = new Date('2026-01-11T23:11:00-05:00');
 
   function shuffleArray(list = []) {
     const copy = Array.isArray(list) ? [...list] : [];
@@ -464,28 +464,41 @@
     return String(Math.max(0, Number(value) || 0)).padStart(2, '0');
   }
 
-  function getLoveCounterDiff(startDate, nowDate = new Date()) {
+  function getLoveCounterDiff(targetDate, nowDate = new Date()) {
     const now = new Date(nowDate);
-    const start = new Date(startDate);
-    if (Number.isNaN(start.getTime()) || Number.isNaN(now.getTime()) || now < start) {
+    const target = new Date(targetDate);
+    if (Number.isNaN(target.getTime()) || Number.isNaN(now.getTime())) {
       return null;
     }
 
-    let anchor = new Date(start);
+    if (now >= target) {
+      return {
+        years: 0,
+        months: 0,
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        totalMonths: 0,
+        start: target
+      };
+    }
+
+    let anchor = new Date(now);
     let years = 0;
     let months = 0;
 
-    while (addYearsClamped(anchor, 1) <= now) {
+    while (addYearsClamped(anchor, 1) <= target) {
       anchor = addYearsClamped(anchor, 1);
       years += 1;
     }
 
-    while (addMonthsClamped(anchor, 1) <= now) {
+    while (addMonthsClamped(anchor, 1) <= target) {
       anchor = addMonthsClamped(anchor, 1);
       months += 1;
     }
 
-    let remainingMs = now.getTime() - anchor.getTime();
+    let remainingMs = target.getTime() - anchor.getTime();
     const days = Math.floor(remainingMs / 86400000);
     remainingMs -= days * 86400000;
     const hours = Math.floor(remainingMs / 3600000);
@@ -502,7 +515,7 @@
       minutes,
       seconds,
       totalMonths: years * 12 + months,
-      start
+      start: target
     };
   }
 
@@ -575,13 +588,9 @@
         fields.seconds.classList.add('is-ticking');
       }
 
-      modalTitle.textContent = diff.years > 0
-        ? `Llevamos ${diff.years} ${pluralizeCounterLabel(diff.years, 'año', 'años')} juntos`
-        : `Llevamos ${diff.totalMonths} ${pluralizeCounterLabel(diff.totalMonths, 'mes', 'meses')} juntos`;
+      modalTitle.textContent = `Faltan ${diff.months} ${pluralizeCounterLabel(diff.months, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')}`;
 
-      modalText.textContent = diff.years > 0
-        ? `Desde el ${formatCounterStartDate(diff.start)} han pasado ${diff.years} ${pluralizeCounterLabel(diff.years, 'año', 'años')}, ${diff.months} ${pluralizeCounterLabel(diff.months, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')} y ${formatCounterClockValue(diff.hours)} horas. Y todavía se siente igual de bonito seguir contando este tiempo contigo.`
-        : `Desde el ${formatCounterStartDate(diff.start)} ya van ${diff.totalMonths} ${pluralizeCounterLabel(diff.totalMonths, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')} y ${formatCounterClockValue(diff.hours)} horas desde que nos hicimos novios. Cada segundo contigo le suma algo lindo a mi vida.`;
+      modalText.textContent = `${diff.hours}:${formatCounterClockValue(diff.minutes)}:${formatCounterClockValue(diff.seconds)} para las 11:11 PM del 11 de enero`;
 
       lastSnapshot = nextSnapshot;
     }
@@ -641,182 +650,6 @@
 
     renderCounter();
     window.setInterval(renderCounter, 1000);
-  }
-
-  function getCountdownDiff(targetDate, nowDate = new Date()) {
-    const now = new Date(nowDate);
-    const target = new Date(targetDate);
-    if (Number.isNaN(target.getTime()) || Number.isNaN(now.getTime())) {
-      return null;
-    }
-
-    if (now >= target) {
-      return {
-        months: 0,
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        totalMonths: 0,
-        isExpired: true
-      };
-    }
-
-    let anchor = new Date(now);
-    let months = 0;
-
-    while (addMonthsClamped(anchor, 1) <= target) {
-      anchor = addMonthsClamped(anchor, 1);
-      months += 1;
-    }
-
-    let remainingMs = target.getTime() - anchor.getTime();
-    const days = Math.floor(remainingMs / 86400000);
-    remainingMs -= days * 86400000;
-    const hours = Math.floor(remainingMs / 3600000);
-    remainingMs -= hours * 3600000;
-    const minutes = Math.floor(remainingMs / 60000);
-    remainingMs -= minutes * 60000;
-    const seconds = Math.floor(remainingMs / 1000);
-
-    return {
-      months,
-      days,
-      hours,
-      minutes,
-      seconds,
-      totalMonths: months,
-      isExpired: false
-    };
-  }
-
-  function initCountdownTimer() {
-    const root = document.getElementById('countdown');
-    const panel = document.getElementById('countdown-panel');
-    const toggle = document.getElementById('countdown-toggle');
-    const modal = document.getElementById('countdown-modal');
-    const modalClose = document.getElementById('countdown-modal-close');
-    const modalTitle = document.getElementById('countdown-modal-title');
-    const modalText = document.getElementById('countdown-modal-text');
-
-    if (!root || !panel || !toggle || !modal || !modalClose || !modalTitle || !modalText) return;
-
-    // Target date: January 11, 2026 at 23:11 (11:11 PM)
-    const targetDate = new Date('2026-01-11T23:11:00');
-    if (Number.isNaN(targetDate.getTime())) return;
-
-    const fields = {
-      months: document.getElementById('countdown-months'),
-      monthsLabel: document.getElementById('countdown-months-label'),
-      days: document.getElementById('countdown-days'),
-      daysLabel: document.getElementById('countdown-days-label'),
-      hours: document.getElementById('countdown-hours'),
-      minutes: document.getElementById('countdown-minutes'),
-      seconds: document.getElementById('countdown-seconds')
-    };
-
-    let lastSnapshot = null;
-    const mobileQuery = window.matchMedia('(max-width: 820px)');
-
-    function animateValue(node, nextValue) {
-      if (!node) return;
-      const currentValue = node.textContent;
-      const incomingValue = String(nextValue);
-      if (currentValue === incomingValue) return;
-      node.textContent = incomingValue;
-      node.classList.remove('is-ticking');
-      void node.offsetWidth;
-      node.classList.add('is-ticking');
-    }
-
-    function renderCountdown() {
-      const diff = getCountdownDiff(targetDate, new Date());
-      if (!diff) return;
-
-      const nextSnapshot = JSON.stringify(diff);
-      const changedSeconds = !lastSnapshot || JSON.parse(lastSnapshot).seconds !== diff.seconds;
-
-      fields.monthsLabel.textContent = pluralizeCounterLabel(diff.months, 'MES', 'MESES');
-      fields.daysLabel.textContent = pluralizeCounterLabel(diff.days, 'DÍA', 'DÍAS');
-
-      animateValue(fields.months, diff.months);
-      animateValue(fields.days, diff.days);
-      animateValue(fields.hours, formatCounterClockValue(diff.hours));
-      animateValue(fields.minutes, formatCounterClockValue(diff.minutes));
-      animateValue(fields.seconds, formatCounterClockValue(diff.seconds));
-
-      if (changedSeconds && fields.seconds) {
-        fields.seconds.classList.remove('is-ticking');
-        void fields.seconds.offsetWidth;
-        fields.seconds.classList.add('is-ticking');
-      }
-
-      if (diff.isExpired) {
-        modalTitle.textContent = '¡Llegó el momento!';
-        modalText.textContent = 'El 11 de enero a las 11:11 PM ha llegado. ¡Es el momento especial que estábamos esperando!';
-      } else {
-        modalTitle.textContent = `Faltan ${diff.months} ${pluralizeCounterLabel(diff.months, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')}`;
-        modalText.textContent = `Cada segundo que falta es una cuenta regresiva hacia nuestro momento especial. ${diff.hours}:${formatCounterClockValue(diff.minutes)}:${formatCounterClockValue(diff.seconds)} horas más.`;
-      }
-
-      lastSnapshot = nextSnapshot;
-    }
-
-    function setMobileOpen(forceOpen) {
-      const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !root.classList.contains('is-open');
-      root.classList.toggle('is-open', shouldOpen);
-      toggle.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
-    }
-
-    function closeModal() {
-      modal.classList.add('hidden');
-      modal.setAttribute('aria-hidden', 'true');
-      modalClose.blur();
-    }
-
-    function openModal() {
-      modal.classList.remove('hidden');
-      modal.setAttribute('aria-hidden', 'false');
-    }
-
-    toggle.addEventListener('click', (event) => {
-      event.stopPropagation();
-      setMobileOpen();
-    });
-
-    panel.addEventListener('click', () => {
-      if (mobileQuery.matches && !root.classList.contains('is-open')) {
-        setMobileOpen(true);
-        return;
-      }
-      openModal();
-    });
-
-    modalClose.addEventListener('click', closeModal);
-    modal.addEventListener('click', (event) => {
-      if (event.target === modal) closeModal();
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        closeModal();
-        if (mobileQuery.matches) setMobileOpen(false);
-      }
-    });
-
-    document.addEventListener('click', (event) => {
-      if (!mobileQuery.matches) return;
-      if (!root.classList.contains('is-open')) return;
-      if (root.contains(event.target)) return;
-      setMobileOpen(false);
-    });
-
-    mobileQuery.addEventListener('change', (event) => {
-      if (!event.matches) setMobileOpen(false);
-    });
-
-    renderCountdown();
-    window.setInterval(renderCountdown, 1000);
   }
 
   function show100ReasonsModal() {
@@ -925,7 +758,6 @@
     try { window.pushNotificationsModule?.initNotifications?.(); } catch(e) { console.error('Error inicializando notificaciones push:', e); }
     try { initMemoryCarousel(); } catch(e) { console.error('Error inicializando carrusel de recuerdos:', e); }
     try { initLoveCounter(); } catch(e) { console.error('Error inicializando contador de amor:', e); }
-  try { initCountdownTimer(); } catch(e) { console.error('Error inicializando countdown timer:', e); }
 
     const specialMessageBanner = document.getElementById('special-message-banner');
     if (specialMessageBanner) {
