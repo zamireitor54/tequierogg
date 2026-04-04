@@ -464,41 +464,28 @@
     return String(Math.max(0, Number(value) || 0)).padStart(2, '0');
   }
 
-  function getLoveCounterDiff(targetDate, nowDate = new Date()) {
+  function getLoveCounterDiff(startDate, nowDate = new Date()) {
     const now = new Date(nowDate);
-    const target = new Date(targetDate);
-    if (Number.isNaN(target.getTime()) || Number.isNaN(now.getTime())) {
+    const start = new Date(startDate);
+    if (Number.isNaN(start.getTime()) || Number.isNaN(now.getTime()) || now < start) {
       return null;
     }
 
-    if (now >= target) {
-      return {
-        years: 0,
-        months: 0,
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-        totalMonths: 0,
-        start: target
-      };
-    }
-
-    let anchor = new Date(now);
+    let anchor = new Date(start);
     let years = 0;
     let months = 0;
 
-    while (addYearsClamped(anchor, 1) <= target) {
+    while (addYearsClamped(anchor, 1) <= now) {
       anchor = addYearsClamped(anchor, 1);
       years += 1;
     }
 
-    while (addMonthsClamped(anchor, 1) <= target) {
+    while (addMonthsClamped(anchor, 1) <= now) {
       anchor = addMonthsClamped(anchor, 1);
       months += 1;
     }
 
-    let remainingMs = target.getTime() - anchor.getTime();
+    let remainingMs = now.getTime() - anchor.getTime();
     const days = Math.floor(remainingMs / 86400000);
     remainingMs -= days * 86400000;
     const hours = Math.floor(remainingMs / 3600000);
@@ -515,7 +502,7 @@
       minutes,
       seconds,
       totalMonths: years * 12 + months,
-      start: target
+      start
     };
   }
 
@@ -588,9 +575,13 @@
         fields.seconds.classList.add('is-ticking');
       }
 
-      modalTitle.textContent = `Faltan ${diff.months} ${pluralizeCounterLabel(diff.months, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')}`;
+      modalTitle.textContent = diff.years > 0
+        ? `Llevamos ${diff.years} ${pluralizeCounterLabel(diff.years, 'año', 'años')} juntos`
+        : `Llevamos ${diff.totalMonths} ${pluralizeCounterLabel(diff.totalMonths, 'mes', 'meses')} juntos`;
 
-      modalText.textContent = `${diff.hours}:${formatCounterClockValue(diff.minutes)}:${formatCounterClockValue(diff.seconds)} para las 11:11 PM del 11 de enero`;
+      modalText.textContent = diff.years > 0
+        ? `Desde el ${formatCounterStartDate(diff.start)} han pasado ${diff.years} ${pluralizeCounterLabel(diff.years, 'año', 'años')}, ${diff.months} ${pluralizeCounterLabel(diff.months, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')} y ${formatCounterClockValue(diff.hours)} horas. Y todavía se siente igual de bonito seguir contando este tiempo contigo.`
+        : `Desde el ${formatCounterStartDate(diff.start)} ya van ${diff.totalMonths} ${pluralizeCounterLabel(diff.totalMonths, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')} y ${formatCounterClockValue(diff.hours)} horas desde que nos hicimos novios. Cada segundo contigo le suma algo lindo a mi vida.`;
 
       lastSnapshot = nextSnapshot;
     }
