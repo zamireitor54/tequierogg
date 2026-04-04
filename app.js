@@ -579,9 +579,7 @@
         ? `Somos noviecitos hace ${diff.years} ${pluralizeCounterLabel(diff.years, 'año', 'años')}`
         : `Somos noviecitos hace ${diff.totalMonths} ${pluralizeCounterLabel(diff.totalMonths, 'mes', 'meses')}`;
 
-      modalText.textContent = diff.years > 0
-        ? `Desde el ${formatCounterStartDate(diff.start)} han pasado ${diff.years} ${pluralizeCounterLabel(diff.years, 'año', 'años')}, ${diff.months} ${pluralizeCounterLabel(diff.months, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')} y ${formatCounterClockValue(diff.hours)} horas. Y todavía se siente igual de bonito seguir contando este tiempo contigo.`
-        : `Desde el ${formatCounterStartDate(diff.start)} ya van ${diff.totalMonths} ${pluralizeCounterLabel(diff.totalMonths, 'mes', 'meses')}, ${diff.days} ${pluralizeCounterLabel(diff.days, 'día', 'días')} y ${formatCounterClockValue(diff.hours)} horas desde que nos hicimos novios. Cada segundo contigo le suma algo lindo a mi vida.`;
+      modalText.textContent = `Desde el ${formatCounterStartDate(diff.start)}`;
 
       lastSnapshot = nextSnapshot;
     }
@@ -596,11 +594,15 @@
       modal.classList.add('hidden');
       modal.setAttribute('aria-hidden', 'true');
       modalClose.blur();
+      document.getElementById('notes-fab')?.classList.remove('hidden');
+      document.getElementById('btn-open-login-footer')?.classList.remove('hidden');
     }
 
     function openModal() {
       modal.classList.remove('hidden');
       modal.setAttribute('aria-hidden', 'false');
+      document.getElementById('notes-fab')?.classList.add('hidden');
+      document.getElementById('btn-open-login-footer')?.classList.add('hidden');
     }
 
     toggle.addEventListener('click', (event) => {
