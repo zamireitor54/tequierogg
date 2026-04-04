@@ -641,6 +641,41 @@
       if (!event.matches) setMobileOpen(false);
     });
 
+    // Ocultar contador cuando se abren modales/galerías
+    const observer = new MutationObserver(() => {
+      const hasLightbox = document.body.classList.contains('lightbox-open');
+      const hasNotesModal = !document.getElementById('notes-modal')?.classList.contains('hidden');
+      const hasLoginModal = document.querySelector('[role="dialog"]:not(.hidden)') && !document.getElementById('love-counter-modal')?.classList.contains('hidden');
+      
+      if (hasLightbox || hasNotesModal || hasLoginModal) {
+        root.classList.add('hidden');
+      } else {
+        root.classList.remove('hidden');
+      }
+    });
+
+    observer.observe(document.body, { 
+      attributes: true, 
+      attributeFilter: ['class'] 
+    });
+
+    const modalObserver = new MutationObserver(() => {
+      const hasLightbox = document.body.classList.contains('lightbox-open');
+      const hasNotesModal = !document.getElementById('notes-modal')?.classList.contains('hidden');
+      const hasLoginModal = document.querySelector('[role="dialog"]:not(.hidden)') && !document.getElementById('love-counter-modal')?.classList.contains('hidden');
+      
+      if (hasLightbox || hasNotesModal || hasLoginModal) {
+        root.classList.add('hidden');
+      } else {
+        root.classList.remove('hidden');
+      }
+    });
+
+    modalObserver.observe(document.getElementById('notes-modal') || document.body, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
     renderCounter();
     window.setInterval(renderCounter, 1000);
   }
