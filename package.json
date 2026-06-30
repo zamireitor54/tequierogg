@@ -8,6 +8,7 @@
     "check:server": "node --check server.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.96.0",
     "@supabase/supabase-js": "^2.53.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",

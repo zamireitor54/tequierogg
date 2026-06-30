@@ -1,0 +1,2030 @@
+/* ==========================================================
+   POLISH LAYER · Mejoras visuales premium
+   Se carga después de styles.css. Solo refina la UI existente
+   sin romper clases ni identidades.
+   ========================================================== */
+
+/* === Variables suaves === */
+:root {
+  --pol-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --pol-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --pol-soft: 0 18px 50px rgba(124, 73, 255, 0.10);
+  --pol-strong: 0 26px 70px rgba(124, 73, 255, 0.18);
+  --pol-glow: 0 0 40px rgba(255, 111, 191, 0.22);
+}
+
+/* === Comportamientos globales === */
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(124, 73, 255, 0.22);
+  color: #2c1437;
+}
+
+/* Scrollbar más bonita */
+@media (hover: hover) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 245, 252, 0.4);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 111, 191, 0.55), rgba(124, 73, 255, 0.65));
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 111, 191, 0.85), rgba(124, 73, 255, 0.85));
+    background-clip: padding-box;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ==========================================================
+   1. Ambiente de fondo (gradiente suave que respira)
+   ========================================================== */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -10%;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    radial-gradient(620px 480px at 18% 22%, rgba(255, 111, 191, 0.10), transparent 60%),
+    radial-gradient(720px 520px at 82% 78%, rgba(124, 73, 255, 0.09), transparent 60%),
+    radial-gradient(420px 380px at 60% 12%, rgba(255, 200, 230, 0.06), transparent 65%);
+  animation: bgDrift 28s ease-in-out infinite alternate;
+}
+
+@keyframes bgDrift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to   { transform: translate3d(20px, 24px, 0) rotate(6deg); }
+}
+
+/* ==========================================================
+   2. Partículas flotantes (corazones/sparkles)
+   ========================================================== */
+.floating-hearts {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.floating-hearts .heart {
+  position: absolute;
+  bottom: -50px;
+  font-size: var(--size, 1rem);
+  opacity: 0;
+  filter: drop-shadow(0 6px 14px rgba(255, 111, 191, 0.18));
+  animation: heartFloat var(--duration, 22s) linear infinite;
+  animation-delay: var(--delay, 0s);
+  will-change: transform, opacity;
+}
+
+@keyframes heartFloat {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(0.85); opacity: 0; }
+  8%   { opacity: var(--max-opacity, 0.18); }
+  92%  { opacity: var(--max-opacity, 0.18); }
+  100% { transform: translate3d(0, calc(-100vh - 80px), 0) rotate(360deg) scale(1.05); opacity: 0; }
+}
+
+/* ==========================================================
+   3. Barra de progreso de scroll (arriba del todo)
+   ========================================================== */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 99999;
+  background: linear-gradient(90deg, #ff6fbf, #c46cff, #7c49ff, #ff6fbf);
+  background-size: 300% 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 120ms linear;
+  pointer-events: none;
+  box-shadow: 0 0 14px rgba(255, 111, 191, 0.5);
+  animation: progressShimmer 6s linear infinite;
+}
+
+@keyframes progressShimmer {
+  to { background-position: -300% 0; }
+}
+
+/* ==========================================================
+   4. Scroll reveals
+   ========================================================== */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(38px);
+  transition:
+    opacity 0.95s var(--pol-ease-out),
+    transform 0.95s var(--pol-ease-out);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-stagger-1 { transition-delay: 0.08s; }
+.reveal-stagger-2 { transition-delay: 0.18s; }
+.reveal-stagger-3 { transition-delay: 0.28s; }
+
+/* ==========================================================
+   5. Hero refinado
+   ========================================================== */
+.hero {
+  animation: heroEntrance 1.1s var(--pol-ease-out) both;
+}
+
+@keyframes heroEntrance {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Título con gradiente animado */
+.title {
+  background: linear-gradient(
+    120deg,
+    #3b1b4a 0%,
+    #7c49ff 35%,
+    #ff6fbf 65%,
+    #7c49ff 100%
+  ) !important;
+  background-size: 220% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  animation: titleGradient 8s linear infinite;
+}
+
+@keyframes titleGradient {
+  to { background-position: 220% center; }
+}
+
+/* Subtítulo con destellito */
+.subtitle::after {
+  content: " ✦";
+  color: rgba(255, 111, 191, 0.7);
+  display: inline-block;
+  animation: subtitleSparkle 3.4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes subtitleSparkle {
+  0%, 100% { opacity: 0.6; transform: rotate(0deg) scale(1); }
+  50%      { opacity: 1;   transform: rotate(180deg) scale(1.2); }
+}
+
+/* Foto del hero: glow + flotar */
+.hero-photo {
+  position: relative;
+  isolation: isolate;
+}
+
+.hero-photo::before {
+  content: "";
+  position: absolute;
+  inset: -28px;
+  z-index: -1;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 111, 191, 0.35), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(124, 73, 255, 0.32), transparent 55%);
+  filter: blur(36px);
+  opacity: 0.7;
+  animation: heroGlow 5.5s ease-in-out infinite;
+}
+
+@keyframes heroGlow {
+  0%, 100% { opacity: 0.45; transform: scale(0.94); }
+  50%      { opacity: 0.85; transform: scale(1.05); }
+}
+
+.hero-photo img {
+  animation: photoFloat 6.5s ease-in-out infinite;
+  transition: transform 0.5s var(--pol-ease) !important;
+}
+
+@keyframes photoFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+.hero-photo img:hover {
+  transform: translateY(-4px) scale(1.025) !important;
+}
+
+/* Botón principal: shimmer al hover */
+.hero-actions .btn,
+.btn:not(.outline) {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero-actions .btn::after,
+.btn:not(.outline)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  transform: skewX(-22deg);
+  transition: left 0.75s var(--pol-ease);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-actions .btn:hover::after,
+.btn:not(.outline):hover::after {
+  left: 180%;
+}
+
+/* ==========================================================
+   6. Cards con spotlight al hover
+   ========================================================== */
+.cards-section .card {
+  position: relative !important;
+  overflow: hidden !important;
+  isolation: isolate;
+  transition:
+    transform 0.45s var(--pol-ease-out),
+    box-shadow 0.45s var(--pol-ease-out) !important;
+}
+
+.cards-section .card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 111, 191, 0.14),
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.32s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cards-section .card:hover {
+  transform: translateY(-6px) !important;
+  box-shadow:
+    0 30px 60px rgba(124, 73, 255, 0.18),
+    0 14px 32px rgba(255, 111, 191, 0.14) !important;
+}
+
+.cards-section .card:hover::after {
+  opacity: 1;
+}
+
+.cards-section .card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Mensajitos individuales: micro-rebote al hover */
+.cards-section .msg {
+  transition:
+    transform 220ms var(--pol-ease-out),
+    box-shadow 220ms var(--pol-ease-out),
+    background-color 220ms ease !important;
+}
+
+.cards-section .msg:hover {
+  transform: translateX(4px) translateY(-1px) !important;
+}
+
+/* ==========================================================
+   7. Divisores entre secciones (insertados por JS)
+   ========================================================== */
+.section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  width: min(360px, 80%);
+  margin: 28px auto;
+  opacity: 0;
+  animation: dividerFadeIn 1.1s var(--pol-ease-out) 0.2s forwards;
+}
+
+@keyframes dividerFadeIn {
+  to { opacity: 1; }
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(124, 73, 255, 0.32),
+    transparent
+  );
+}
+
+.section-divider-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 1.05rem;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(247, 240, 255, 0.85)),
+    linear-gradient(135deg, rgba(255, 111, 191, 0.18), rgba(124, 73, 255, 0.18));
+  border: 1px solid rgba(124, 73, 255, 0.22);
+  box-shadow:
+    0 10px 22px rgba(124, 73, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  animation: dividerPulse 3.8s ease-in-out infinite;
+}
+
+@keyframes dividerPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow:
+      0 10px 22px rgba(124, 73, 255, 0.12),
+      0 0 0 0 rgba(124, 73, 255, 0.30),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow:
+      0 10px 22px rgba(124, 73, 255, 0.12),
+      0 0 0 10px rgba(124, 73, 255, 0),
+      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+}
+
+/* ==========================================================
+   8. Calendario: pulso del día actual + transiciones suaves
+   ========================================================== */
+.calendar-day {
+  transition:
+    transform 0.22s var(--pol-ease),
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    color 0.22s ease !important;
+}
+
+.calendar-day.available.today:not(.selected):not(.today-selected) {
+  animation: todayPulse 2.6s ease-in-out infinite;
+}
+
+@keyframes todayPulse {
+  0%, 100% {
+    box-shadow:
+      0 4px 12px rgba(124, 73, 255, 0.30),
+      0 0 0 0 rgba(255, 111, 191, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 4px 12px rgba(124, 73, 255, 0.30),
+      0 0 0 8px rgba(255, 111, 191, 0);
+  }
+}
+
+/* Mensaje del día: aparece suave */
+.message-display:not(.empty) {
+  animation: msgFadeIn 0.55s var(--pol-ease-out);
+}
+
+@keyframes msgFadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Adorno discreto en el panel del mensaje */
+.message-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.message-panel::before {
+  content: "💌";
+  position: absolute;
+  top: 16px;
+  right: 22px;
+  font-size: 1.4rem;
+  opacity: 0.16;
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+
+.message-panel-secondary::before {
+  content: "✨";
+  opacity: 0.25;
+}
+
+/* ==========================================================
+   9. Súper galería: hover más cariñoso
+   ========================================================== */
+.sg-item {
+  transition:
+    transform 0.4s var(--pol-ease-out),
+    box-shadow 0.4s var(--pol-ease-out),
+    border-color 0.3s ease !important;
+}
+
+.sg-item:hover {
+  transform: translateY(-5px) scale(1.012) !important;
+  box-shadow:
+    0 26px 50px rgba(124, 73, 255, 0.22),
+    0 14px 30px rgba(255, 111, 191, 0.16) !important;
+  border-color: rgba(255, 111, 191, 0.28) !important;
+}
+
+.sg-item img {
+  transition: transform 0.5s var(--pol-ease) !important;
+}
+
+.sg-item:hover img {
+  transform: scale(1.04) !important;
+}
+
+/* Pill del lugar/álbum con micro-rebote */
+.sg-pill {
+  transition: transform 0.25s var(--pol-ease) !important;
+}
+
+.sg-item:hover .sg-pill {
+  transform: translateY(-1px) !important;
+}
+
+/* ==========================================================
+   10. Mapa: foto pocket más integrada
+   ========================================================== */
+.map-photo-pocket {
+  filter: drop-shadow(0 22px 44px rgba(124, 73, 255, 0.22));
+  transition: transform 0.4s var(--pol-ease) !important;
+}
+
+.map-photo-pocket:hover {
+  transform: translateY(-3px) !important;
+}
+
+.print-gallery--embedded .photo-frame {
+  transition:
+    transform 0.45s var(--pol-ease),
+    box-shadow 0.45s var(--pol-ease) !important;
+}
+
+/* Refinamos el copy del mapa */
+.map-placeholder-copy {
+  letter-spacing: 0.02em !important;
+}
+
+/* ==========================================================
+   11. Acciones de la galería con mejor presencia
+   ========================================================== */
+.super-gallery-actions #btn-open-upload {
+  position: relative;
+  overflow: hidden;
+}
+
+.super-gallery-actions #btn-open-upload::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    transparent 100%
+  );
+  transform: skewX(-22deg);
+  transition: left 0.8s var(--pol-ease);
+  pointer-events: none;
+}
+
+.super-gallery-actions #btn-open-upload:hover::after {
+  left: 180%;
+}
+
+/* ==========================================================
+   12. Footer enamorado
+   ========================================================== */
+.footer {
+  position: relative;
+  padding: 50px 14px 36px !important;
+  margin-top: 36px !important;
+  font-size: 1rem !important;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(160px, 70%);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(124, 73, 255, 0.45),
+    transparent
+  );
+}
+
+.footer p:first-child {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(1.6rem, 4vw, 2.1rem) !important;
+  font-weight: 400 !important;
+  color: #5a2d8a !important;
+  margin: 0 0 8px !important;
+  line-height: 1.15 !important;
+  background: linear-gradient(120deg, #5a2d8a, #c43d8c, #7c49ff, #5a2d8a);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleGradient 10s linear infinite;
+}
+
+.footer .muted {
+  font-size: 0.92rem !important;
+  color: rgba(76, 51, 88, 0.7) !important;
+  font-style: italic;
+}
+
+.footer::after {
+  content: "💗";
+  display: block;
+  margin: 18px auto 0;
+  font-size: 1.6rem;
+  width: fit-content;
+  animation: heartBeat 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 6px 14px rgba(255, 111, 191, 0.35));
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  18%      { transform: scale(1.18); }
+  36%      { transform: scale(0.96); }
+  54%      { transform: scale(1.10); }
+  72%      { transform: scale(1); }
+}
+
+/* ==========================================================
+   13. Botón "Volver arriba"
+   ========================================================== */
+.back-to-top {
+  position: fixed;
+  bottom: 100px;
+  left: 18px;
+  width: 50px;
+  height: 50px;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff6fbf, #7c49ff);
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 16px 32px rgba(124, 73, 255, 0.30),
+    0 8px 18px rgba(255, 111, 191, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px) scale(0.92);
+  transition:
+    opacity 0.32s ease,
+    transform 0.32s var(--pol-ease-out),
+    box-shadow 0.32s ease;
+  z-index: 11500;
+}
+
+.back-to-top.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.back-to-top:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow:
+    0 22px 40px rgba(124, 73, 255, 0.40),
+    0 12px 22px rgba(255, 111, 191, 0.22);
+}
+
+.back-to-top:active {
+  transform: translateY(0) scale(0.97);
+}
+
+body.lightbox-open .back-to-top,
+body.lightbox-open .floating-hearts {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 560px) {
+  .back-to-top {
+    bottom: 86px;
+    left: 14px;
+    width: 46px;
+    height: 46px;
+    font-size: 1.15rem;
+  }
+}
+
+/* ==========================================================
+   14. FABs (notas, login, push) con pulso de bienvenida
+   ========================================================== */
+.notes-fab {
+  animation: fabIntro 600ms var(--pol-ease-out) 800ms both,
+             fabIdleGlow 4s ease-in-out 2s infinite;
+}
+
+@keyframes fabIntro {
+  from { opacity: 0; transform: scale(0.6) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fabIdleGlow {
+  0%, 100% { box-shadow: 0 18px 60px rgba(124, 73, 255, 0.22), 0 12px 32px rgba(255, 77, 184, 0.18), 0 0 0 0 rgba(255, 77, 184, 0.45); }
+  50%      { box-shadow: 0 18px 60px rgba(124, 73, 255, 0.22), 0 12px 32px rgba(255, 77, 184, 0.18), 0 0 0 12px rgba(255, 77, 184, 0); }
+}
+
+#btn-open-login-footer,
+#btn-push-settings {
+  animation: fabIntro 600ms var(--pol-ease-out) 1000ms both;
+}
+
+#btn-open-login-footer:hover,
+#btn-push-settings:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+/* ==========================================================
+   15. Tarjetitas del calendario: animación de aparición
+   ========================================================== */
+.calendar-grid-animate .calendar-day {
+  animation: calDayPop 320ms var(--pol-ease-out) both;
+}
+
+@keyframes calDayPop {
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ==========================================================
+   16. Contador de amor: entrada más bonita
+   ========================================================== */
+.love-counter {
+  animation: loveCounterIntro 900ms var(--pol-ease-out) 600ms both;
+}
+
+@keyframes loveCounterIntro {
+  from { opacity: 0; transform: translateY(-50%) translateX(60px); }
+  to   { opacity: 1; transform: translateY(-50%) translateX(0); }
+}
+
+.love-counter-value {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5),
+    0 2px 6px rgba(124, 73, 255, 0.12) !important;
+}
+
+/* ==========================================================
+   17. Inputs y selects: foco más cariñoso
+   ========================================================== */
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: rgba(255, 111, 191, 0.55) !important;
+  box-shadow:
+    0 0 0 5px rgba(255, 111, 191, 0.12),
+    0 12px 30px rgba(180, 125, 255, 0.14) !important;
+}
+
+/* ==========================================================
+   18. Mini-detalles
+   ========================================================== */
+
+/* Banner especial: gradiente vivo */
+.special-message-banner:not([style*="display: none"]) {
+  position: relative;
+  overflow: hidden;
+}
+
+.special-message-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: bannerShine 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes bannerShine {
+  0%   { transform: translateX(-100%); }
+  40%  { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Botones outline: mejor borde al hover */
+.btn.outline {
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s var(--pol-ease) !important;
+}
+
+.btn.outline:hover {
+  border-color: rgba(124, 73, 255, 0.32) !important;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================
+   19. Ajustes responsive
+   ========================================================== */
+@media (max-width: 820px) {
+  body::before {
+    inset: -20%;
+  }
+  .section-divider {
+    margin: 22px auto;
+  }
+  .section-divider-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 560px) {
+  /* En móvil reducimos un poco las partículas para no recargar */
+  .floating-hearts .heart {
+    font-size: var(--size, 0.85rem);
+  }
+  .footer p:first-child {
+    font-size: 1.55rem !important;
+  }
+}
+
+/* ==========================================================
+   20. Accesibilidad: focus visible mejor
+   ========================================================== */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid rgba(255, 111, 191, 0.7);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+/* ==========================================================
+   ====================  V2 · MEJORAS EXTRA  ================
+   Intro cinematográfica, cursor trail, tilt 3D, esquinas en
+   la foto, HOY badge, confetti, divisores ornamentados,
+   parallax del hero y press feedback.
+   ========================================================== */
+
+/* ==========================================================
+   V2.1 · Intro cinematográfica (primer load por sesión)
+   ========================================================== */
+.page-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 30% 30%, #ffdcec, transparent 60%),
+    radial-gradient(circle at 70% 70%, #e2cfff, transparent 60%),
+    linear-gradient(135deg, #fff0f8 0%, #f0e6ff 100%);
+  pointer-events: all;
+  transition: opacity 700ms ease;
+  overflow: hidden;
+}
+
+.page-intro.is-done {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.page-intro-glow {
+  position: absolute;
+  inset: -20%;
+  z-index: 1;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.6), transparent 55%),
+    radial-gradient(circle at 30% 70%, rgba(255, 200, 230, 0.5), transparent 50%);
+  animation: introPulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes introPulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.95); }
+  50%      { opacity: 0.85; transform: scale(1.08); }
+}
+
+.page-intro-card {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  padding: 20px;
+}
+
+.page-intro-heart {
+  font-size: clamp(4rem, 12vw, 6rem);
+  display: inline-block;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 18px 36px rgba(255, 111, 191, 0.5));
+  animation: introHeart 1.3s var(--pol-ease-out) both,
+             introHeartBeat 1s ease-in-out 1.2s infinite;
+}
+
+@keyframes introHeart {
+  0%   { opacity: 0; transform: scale(0.3) rotate(-12deg); }
+  60%  { opacity: 1; transform: scale(1.25) rotate(4deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes introHeartBeat {
+  0%, 100% { transform: scale(1); }
+  18%      { transform: scale(1.15); }
+  36%      { transform: scale(0.96); }
+  54%      { transform: scale(1.08); }
+}
+
+.page-intro-text {
+  font-family: "Sacramento", "Poppins", serif;
+  font-size: clamp(2.4rem, 6vw, 3.6rem);
+  line-height: 1.1;
+  background: linear-gradient(120deg, #5a2d8a, #c43d8c, #7c49ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: introText 1s var(--pol-ease-out) 0.55s both;
+}
+
+@keyframes introText {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================
+   V2.2 · Cursor trail (corazoncitos siguiendo el mouse)
+   ========================================================== */
+.cursor-heart {
+  position: fixed;
+  pointer-events: none;
+  z-index: 99998;
+  user-select: none;
+  transform: translate(-50%, -50%);
+  animation: cursorTrail 950ms ease-out forwards;
+  filter: drop-shadow(0 6px 12px rgba(255, 111, 191, 0.45));
+  will-change: transform, opacity;
+}
+
+@keyframes cursorTrail {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4) rotate(0deg); }
+  18%  { opacity: 0.92; transform: translate(-50%, -50%) scale(1.1) rotate(8deg); }
+  100% { transform: translate(-50%, -180%) scale(0.5) rotate(-18deg); opacity: 0; }
+}
+
+body.lightbox-open .cursor-heart,
+body.lightbox-open .scroll-down,
+body.lightbox-open .scroll-progress {
+  display: none !important;
+}
+
+/* ==========================================================
+   V2.3 · Esquinas decorativas en la foto del hero
+   ========================================================== */
+.hero-photo {
+  position: relative;
+}
+
+.photo-corner {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+  animation: cornerFadeIn 0.9s var(--pol-ease-out) forwards;
+}
+
+.photo-corner::before,
+.photo-corner::after {
+  content: "";
+  position: absolute;
+  background: linear-gradient(135deg, #ff6fbf, #7c49ff);
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(255, 111, 191, 0.35);
+}
+
+.photo-corner::before { width: 100%; height: 2.5px; }
+.photo-corner::after  { width: 2.5px; height: 100%; }
+
+.photo-corner-tl { top: -10px; left: -10px; }
+.photo-corner-tl::before { top: 0; left: 0; }
+.photo-corner-tl::after  { top: 0; left: 0; }
+
+.photo-corner-tr { top: -10px; right: -10px; }
+.photo-corner-tr::before { top: 0; right: 0; }
+.photo-corner-tr::after  { top: 0; right: 0; }
+
+.photo-corner-bl { bottom: -10px; left: -10px; }
+.photo-corner-bl::before { bottom: 0; left: 0; }
+.photo-corner-bl::after  { bottom: 0; left: 0; }
+
+.photo-corner-br { bottom: -10px; right: -10px; }
+.photo-corner-br::before { bottom: 0; right: 0; }
+.photo-corner-br::after  { bottom: 0; right: 0; }
+
+@keyframes cornerFadeIn {
+  to { opacity: 0.9; }
+}
+
+/* ==========================================================
+   V2.4 · Tilt 3D en las tarjetas de mensajitos
+   El transform inline lo aplica enhance.js (incluyendo el lift),
+   aquí solo aseguramos perspective base.
+   ========================================================== */
+.cards-section {
+  perspective: 1400px;
+}
+
+.cards-section .card {
+  transform-style: preserve-3d;
+}
+
+/* ==========================================================
+   V2.5 · Indicador "Bajar para ver más" debajo del hero
+   ========================================================== */
+.scroll-down {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(124, 73, 255, 0.30);
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,242,255,0.92));
+  color: #6d28d9;
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    0 16px 30px rgba(124, 73, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  z-index: 11000;
+  transition: opacity 0.4s ease, transform 0.35s var(--pol-ease-out), box-shadow 0.3s ease;
+  animation: scrollBounce 2.2s ease-in-out infinite;
+}
+
+.scroll-down.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(22px) scale(0.85);
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(10px); }
+}
+
+.scroll-down:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,1), rgba(245,236,255,1));
+  box-shadow:
+    0 20px 36px rgba(124, 73, 255, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.scroll-down-icon {
+  display: inline-block;
+  font-weight: 700;
+  line-height: 1;
+}
+
+@media (max-width: 560px) {
+  .scroll-down {
+    bottom: 24px;
+    width: 42px;
+    height: 42px;
+    font-size: 1.05rem;
+  }
+}
+
+/* ==========================================================
+   V2.6 · Badge "HOY" en el día actual del calendario
+   ========================================================== */
+.calendar-day.available.today {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.calendar-day.available.today::before {
+  content: "HOY";
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  color: white;
+  background: linear-gradient(135deg, #ff6fbf, #7c49ff);
+  padding: 3px 9px;
+  border-radius: 999px;
+  box-shadow:
+    0 6px 14px rgba(255, 111, 191, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+  z-index: 5;
+  animation: todayBadge 0.7s var(--pol-ease-out) 0.4s both;
+  white-space: nowrap;
+}
+
+@keyframes todayBadge {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.5); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* Si el día actual ya está seleccionado, el badge queda blanco */
+.calendar-day.available.today-selected::before,
+.calendar-day.available.today.selected::before {
+  background: white;
+  color: #7c49ff;
+}
+
+/* ==========================================================
+   V2.7 · Confetti al seleccionar un día
+   ========================================================== */
+.confetti-particle {
+  position: fixed;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 12800;
+  transform: translate(-50%, -50%);
+  animation: confettiBurst 1.05s ease-out forwards;
+  will-change: transform, opacity;
+  box-shadow: 0 4px 10px rgba(124, 73, 255, 0.18);
+}
+
+@keyframes confettiBurst {
+  to {
+    transform: translate(
+      calc(-50% + var(--tx, 0)),
+      calc(-50% + var(--ty, 0))
+    ) scale(0.3) rotate(180deg);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================
+   V2.8 · Divisores ornamentados (con SVG decorativo)
+   ========================================================== */
+.section-divider.ornate-divider {
+  gap: 14px;
+  width: min(440px, 86%);
+  margin: 34px auto;
+}
+
+.ornate-divider-line {
+  flex: 1;
+  height: 14px;
+  fill: none;
+  stroke: rgba(124, 73, 255, 0.55);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  display: block;
+}
+
+.ornate-divider-line--left {
+  mask-image: linear-gradient(90deg, transparent, black 36%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 36%);
+}
+
+.ornate-divider-line--right {
+  mask-image: linear-gradient(90deg, black, transparent 64%);
+  -webkit-mask-image: linear-gradient(90deg, black, transparent 64%);
+}
+
+.ornate-divider .section-divider-icon {
+  font-size: 1.1rem;
+  width: 42px;
+  height: 42px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.98), rgba(247, 240, 255, 0.85)),
+    linear-gradient(135deg, rgba(255, 111, 191, 0.2), rgba(124, 73, 255, 0.2));
+  border: 1.5px solid rgba(124, 73, 255, 0.26);
+  box-shadow:
+    0 12px 24px rgba(124, 73, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+/* Cuando llevan ornate-divider, ocultamos las líneas pseudo originales */
+.section-divider.ornate-divider::before,
+.section-divider.ornate-divider::after {
+  display: none;
+}
+
+/* ==========================================================
+   V2.9 · Press feedback en todos los botones
+   ========================================================== */
+.btn:active:not(:disabled),
+.notes-fab:active,
+.notes-tab:active,
+.note-btn:active,
+.back-to-top:active,
+.scroll-down:active,
+.nav-button:active,
+.calendar-day.available:active,
+.lb-fab:active,
+.lb-panel-tool:active,
+.upload-x:active,
+.upload-auth-x:active,
+.lb-x:active,
+.lb-delete-x:active,
+.push-settings-x:active,
+.map-picker-x:active,
+.map-picker-quick-chip:active,
+.sg-group-btn:active,
+.push-meridiem-btn:active,
+.memory-carousel-eyebrow:active {
+  transform: scale(0.96) translateY(0) !important;
+  transition: transform 0.1s ease !important;
+}
+
+/* ==========================================================
+   V2.10 · Hero parallax helper (offset se aplica vía inline)
+   ========================================================== */
+.hero-photo {
+  will-change: transform;
+}
+
+/* ==========================================================
+   V2.11 · Decoración tipo carta en el panel de mensaje del día
+   ========================================================== */
+.message-display:not(.empty) {
+  position: relative;
+}
+
+.message-display:not(.empty)::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  right: 18px;
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, #ff6fbf, #7c49ff);
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  opacity: 0.18;
+  pointer-events: none;
+  filter: blur(0.5px);
+}
+
+/* ==========================================================
+   V2.12 · Mejora sutil del hero (foto con halo extra)
+   ========================================================== */
+.hero-photo img {
+  border-color: rgba(255, 255, 255, 0.85) !important;
+  box-shadow:
+    0 14px 38px rgba(36, 19, 50, 0.15),
+    0 4px 12px rgba(255, 111, 191, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ==========================================================
+   V2.13 · Calendario: cabecera de días con más cariño
+   ========================================================== */
+.calendar-header-day {
+  position: relative;
+  padding: 10px 0 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem !important;
+  color: #7c49ff !important;
+}
+
+.calendar-header-day::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(124, 73, 255, 0.4), transparent);
+  border-radius: 999px;
+}
+
+/* ==========================================================
+   V2.14 · Galería: contador con corazoncito a la izquierda
+   ========================================================== */
+.super-gallery-count::before {
+  content: "💗 ";
+  margin-right: 2px;
+  filter: drop-shadow(0 2px 6px rgba(255, 111, 191, 0.3));
+}
+
+/* ==========================================================
+   V2.15 · Filter pills + buscador con más alma
+   ========================================================== */
+.super-gallery-actions #filter-place:hover,
+.super-gallery-actions #search-caption:hover {
+  border-color: rgba(124, 73, 255, 0.28) !important;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 14px 28px rgba(124, 73, 255, 0.10) !important;
+}
+
+.super-gallery-actions #filter-place,
+.super-gallery-actions #search-caption {
+  transition:
+    transform 0.22s var(--pol-ease),
+    border-color 0.22s ease,
+    box-shadow 0.22s ease !important;
+}
+
+/* ==========================================================
+   V2.16 · Mejor presencia del love-counter (toggle móvil)
+   ========================================================== */
+.love-counter-toggle {
+  transition: transform 0.22s var(--pol-ease), box-shadow 0.22s ease !important;
+}
+
+.love-counter-toggle:hover {
+  transform: scale(1.07) !important;
+  box-shadow:
+    -12px 16px 34px rgba(86, 47, 124, 0.24),
+    0 0 0 4px rgba(255, 111, 191, 0.16) !important;
+}
+
+/* ==========================================================
+   V2.17 · Notas FAB: corazón pequeño orbitando al hover
+   ========================================================== */
+.notes-fab {
+  position: relative;
+}
+
+.notes-fab:hover::after {
+  content: "💗";
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1rem;
+  animation: fabOrbit 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(255, 111, 191, 0.45));
+  pointer-events: none;
+}
+
+@keyframes fabOrbit {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-4px) rotate(15deg); }
+}
+
+/* ==========================================================
+   V2.18 · Refinos finales tipográficos
+   ========================================================== */
+.subtitle {
+  letter-spacing: 0.01em;
+  line-height: 1.7 !important;
+}
+
+.title {
+  letter-spacing: -0.005em !important;
+  text-rendering: optimizeLegibility;
+}
+
+.card .desc {
+  letter-spacing: 0.005em !important;
+}
+
+.footer p:first-child {
+  letter-spacing: 0.01em !important;
+}
+
+/* ==========================================================
+   V2.19 · Responsive ajustes finos
+   ========================================================== */
+@media (max-width: 820px) {
+  .ornate-divider {
+    width: min(360px, 86%);
+  }
+  .photo-corner {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+@media (max-width: 560px) {
+  .page-intro-heart {
+    font-size: clamp(3.6rem, 14vw, 5rem);
+  }
+  .page-intro-text {
+    font-size: clamp(2.1rem, 8vw, 3rem);
+  }
+  .photo-corner {
+    width: 22px;
+    height: 22px;
+  }
+  .photo-corner-tl, .photo-corner-bl { left: -8px; }
+  .photo-corner-tr, .photo-corner-br { right: -8px; }
+  .photo-corner-tl, .photo-corner-tr { top: -8px; }
+  .photo-corner-bl, .photo-corner-br { bottom: -8px; }
+}
+
+/* ==========================================================
+   ====================  V3 · CAPA EXTRA  ===================
+   Saludo según hora, contador de toques en la foto, cita
+   rotante en el footer, easter egg Konami (lluvia de
+   corazones), pulse del título de pestaña, onda inferior
+   del hero y subrayado del title.
+   ========================================================== */
+
+/* ==========================================================
+   V3.1 · Saludo personalizado según la hora
+   ========================================================== */
+.time-greeting {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(252, 244, 255, 0.88));
+  border: 1px solid rgba(124, 73, 255, 0.20);
+  color: rgba(98, 56, 138, 0.94);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  box-shadow: 0 10px 22px rgba(124, 73, 255, 0.10);
+  animation: timeGreetIn 800ms var(--pol-ease-out) 350ms both;
+}
+
+.time-greeting-emoji {
+  display: inline-block;
+  font-size: 1.05rem;
+  line-height: 1;
+  animation: timeGreetWave 2.4s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes timeGreetIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes timeGreetWave {
+  0%, 100% { transform: rotate(0deg); }
+  25%      { transform: rotate(18deg); }
+  75%      { transform: rotate(-12deg); }
+}
+
+/* ==========================================================
+   V3.2 · Contador de "toques" en la foto del hero
+   ========================================================== */
+.heart-counter {
+  position: absolute;
+  bottom: -2px;
+  right: -8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 11px 6px 9px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff6fbf, #7c49ff);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  z-index: 6;
+  box-shadow:
+    0 12px 26px rgba(124, 73, 255, 0.36),
+    0 4px 10px rgba(255, 111, 191, 0.32),
+    0 0 0 3px rgba(255, 255, 255, 0.96);
+  transform: translateY(8px) scale(0.6);
+  opacity: 0;
+  animation: heartCounterIn 700ms var(--pol-ease-out) 1.8s forwards;
+}
+
+.heart-counter.is-bumping {
+  animation: heartCounterIn 0s 0s forwards, heartCounterBump 600ms var(--pol-ease-out);
+}
+
+@keyframes heartCounterIn {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes heartCounterBump {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.35) rotate(-4deg); }
+  70%  { transform: scale(0.96) rotate(2deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+.heart-counter-icon {
+  display: inline-block;
+  font-size: 0.92rem;
+  line-height: 1;
+  animation: counterHeartBeat 1.5s ease-in-out infinite;
+}
+
+@keyframes counterHeartBeat {
+  0%, 100% { transform: scale(1); }
+  20%      { transform: scale(1.18); }
+  40%      { transform: scale(0.96); }
+}
+
+.heart-counter-num {
+  font-variant-numeric: tabular-nums;
+  min-width: 0.8em;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .heart-counter {
+    bottom: -6px;
+    right: -6px;
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+}
+
+/* ==========================================================
+   V3.3 · Cita romántica rotante en el footer
+   ========================================================== */
+.rotating-quote {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(1.32rem, 3.2vw, 1.7rem) !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+  color: #7c49ff !important;
+  letter-spacing: 0.01em !important;
+  max-width: 36ch !important;
+  margin: 12px auto !important;
+  text-align: center !important;
+  line-height: 1.25 !important;
+  min-height: 1.6em;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background: linear-gradient(120deg, #c43d8c, #7c49ff, #ff6fbf);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleGradient 12s linear infinite;
+}
+
+.rotating-quote.is-visible {
+  opacity: 1;
+}
+
+/* ==========================================================
+   V3.4 · Easter egg Konami: lluvia de corazones + toast
+   ========================================================== */
+.rain-heart {
+  position: fixed;
+  top: -60px;
+  z-index: 99999;
+  pointer-events: none;
+  user-select: none;
+  animation: rainFall var(--duration, 3.2s) linear forwards;
+  filter: drop-shadow(0 6px 14px rgba(255, 111, 191, 0.35));
+  will-change: transform;
+}
+
+@keyframes rainFall {
+  to {
+    transform: translateY(calc(100vh + 100px)) rotate(540deg);
+  }
+}
+
+.easter-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.3);
+  padding: 26px 44px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff6fbf, #c46cff, #7c49ff);
+  background-size: 200% auto;
+  color: white;
+  font-family: "Sacramento", "Poppins", serif;
+  font-size: clamp(2.2rem, 7vw, 3.8rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  box-shadow:
+    0 36px 90px rgba(124, 73, 255, 0.45),
+    0 16px 36px rgba(255, 111, 191, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0;
+  animation:
+    toastIn 3.6s ease-out forwards,
+    titleGradient 4s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes toastIn {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3) rotate(-8deg); }
+  15%  { opacity: 1; transform: translate(-50%, -50%) scale(1.08) rotate(2deg); }
+  25%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+  85%  { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2) rotate(0deg); }
+}
+
+/* ==========================================================
+   V3.5 · Onda inferior del hero
+   ========================================================== */
+.hero-wave {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  height: 70px;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.hero-wave svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-wave-path {
+  animation: heroWaveDrift 9s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes heroWaveDrift {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-30px); }
+}
+
+/* Solo aplicar overflow visible si la onda existe para no romper hero */
+.hero:has(.hero-wave) {
+  overflow: hidden;
+  padding-bottom: clamp(50px, 8vw, 80px) !important;
+}
+
+@media (max-width: 560px) {
+  .hero-wave { height: 50px; }
+}
+
+/* ==========================================================
+   V3.6 · Subrayado animado del título del hero
+   ========================================================== */
+.title-underline {
+  display: block;
+  width: clamp(140px, 26%, 240px);
+  height: 4px;
+  margin: 12px 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #ff6fbf 30%,
+    #7c49ff 70%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: scaleX(0.6);
+  transform-origin: left center;
+  animation: titleUnderlineIn 1s var(--pol-ease-out) 0.5s forwards;
+}
+
+@keyframes titleUnderlineIn {
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+@media (max-width: 920px) {
+  .title-underline {
+    margin-left: auto;
+    margin-right: auto;
+    transform-origin: center;
+  }
+}
+
+/* ==========================================================
+   V3.7 · Detalles finales en super-galería
+   ========================================================== */
+
+/* Saturación más viva al pasar el cursor */
+.sg-item:hover img {
+  filter: saturate(1.10) contrast(1.03) !important;
+}
+
+/* Botón de subir: micro-glow al hover */
+.super-gallery-actions #btn-open-upload:hover {
+  box-shadow:
+    0 26px 50px rgba(155, 84, 255, 0.36),
+    0 14px 28px rgba(255, 104, 182, 0.28),
+    0 0 0 6px rgba(255, 111, 191, 0.10) !important;
+}
+
+/* ==========================================================
+   V3.8 · Botones "Cerrar sesión" / "Iniciar sesión": gradient ring
+   ========================================================== */
+#btn-open-login-footer {
+  position: relative;
+}
+
+#btn-open-login-footer::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 999px;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 111, 191, 0.45),
+    rgba(124, 73, 255, 0.35),
+    rgba(255, 111, 191, 0.45)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+#btn-open-login-footer:hover::before {
+  opacity: 1;
+  animation: borderSpinSlow 8s linear infinite;
+}
+
+@keyframes borderSpinSlow {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================
+   V3.9 · Calendario: brillo sutil cuando flota sobre un día
+   ========================================================== */
+.calendar-day.available:hover {
+  filter: brightness(1.04);
+}
+
+.calendar-day.available.selected:not(.today):not(.today-selected) {
+  animation: selectedDayPop 400ms var(--pol-ease-out);
+}
+
+@keyframes selectedDayPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.10); }
+  100% { transform: scale(1); }
+}
+
+/* ==========================================================
+   V3.10 · Lightbox: pequeñas sparkles cuando entra una foto
+   ========================================================== */
+#lightbox.is-open-sparkle::before {
+  content: "✨";
+  position: fixed;
+  top: 20%;
+  right: 15%;
+  font-size: 2rem;
+  animation: lightboxSparkle 1.4s ease-out forwards;
+  pointer-events: none;
+  z-index: 10025;
+}
+
+@keyframes lightboxSparkle {
+  0%   { opacity: 0; transform: scale(0.4) rotate(0deg); }
+  30%  { opacity: 1; transform: scale(1.1) rotate(180deg); }
+  100% { opacity: 0; transform: scale(0.8) rotate(360deg); }
+}
+
+/* ==========================================================
+   V3.11 · Mensaje del día: bandera lateral decorativa
+   ========================================================== */
+.message-display:not(.empty) .message-panel:first-child {
+  position: relative;
+}
+
+.message-display:not(.empty) .message-panel:first-child::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 16px;
+  bottom: 16px;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff6fbf, #7c49ff);
+  box-shadow: 0 0 12px rgba(255, 111, 191, 0.40);
+}
+
+/* ==========================================================
+   V3.12 · Tooltip mejorado en los dots de nav (si existen)
+   ========================================================== */
+.nav-dot::after {
+  font-family: "Poppins", sans-serif;
+}
+
+/* ==========================================================
+   V3.13 · Botón especial "Sorpresa" en hero
+   ========================================================== */
+.surprise-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  margin-left: 14px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(124, 73, 255, 0.30);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 240, 255, 0.92));
+  color: #5b2ba8;
+  font-size: 0.94rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow:
+    0 12px 26px rgba(124, 73, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  transition:
+    transform 0.25s var(--pol-ease-out),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.surprise-btn:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(255, 111, 191, 0.45) !important;
+  box-shadow:
+    0 18px 38px rgba(124, 73, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94) !important;
+}
+
+.surprise-btn-emoji {
+  font-size: 1.1rem;
+  line-height: 1;
+  animation: surpriseSpin 4s ease-in-out infinite;
+}
+
+@keyframes surpriseSpin {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(360deg); }
+}
+
+@media (max-width: 920px) {
+  .surprise-btn {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+}
+
+/* ==========================================================
+   V3.14 · Popup "Sorpresa" — mensaje aleatorio
+   ========================================================== */
+.surprise-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 13500;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(10, 6, 12, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  animation: surprisePopupIn 360ms ease-out forwards;
+}
+
+.surprise-popup.is-closing {
+  animation: surprisePopupOut 280ms ease-in forwards;
+}
+
+@keyframes surprisePopupIn { to { opacity: 1; } }
+@keyframes surprisePopupOut { to { opacity: 0; } }
+
+.surprise-card {
+  position: relative;
+  width: min(540px, 92vw);
+  padding: 38px 32px 28px;
+  border-radius: 30px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 198, 224, 0.4), transparent 55%),
+    radial-gradient(circle at 80% 90%, rgba(196, 168, 255, 0.34), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #fbf6ff 100%);
+  border: 1px solid rgba(124, 73, 255, 0.18);
+  box-shadow:
+    0 34px 90px rgba(36, 19, 50, 0.26),
+    0 18px 40px rgba(124, 73, 255, 0.16);
+  transform: scale(0.92) translateY(20px);
+  opacity: 0;
+  animation: surpriseCardIn 600ms var(--pol-ease-out) 100ms forwards;
+}
+
+@keyframes surpriseCardIn {
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.surprise-card-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 111, 191, 0.18), rgba(124, 73, 255, 0.18));
+  border: 1px solid rgba(124, 73, 255, 0.22);
+  color: #7c49ff;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.surprise-card-heart {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  display: inline-block;
+  filter: drop-shadow(0 14px 26px rgba(255, 111, 191, 0.35));
+  animation: surpriseHeart 1.4s ease-in-out infinite;
+}
+
+@keyframes surpriseHeart {
+  0%, 100% { transform: scale(1); }
+  20%      { transform: scale(1.18); }
+  40%      { transform: scale(0.96); }
+  60%      { transform: scale(1.10); }
+}
+
+.surprise-card-text {
+  margin: 6px auto 24px;
+  font-family: "Playfair Display", "Poppins", serif;
+  font-size: clamp(1.15rem, 2.6vw, 1.42rem);
+  line-height: 1.45;
+  color: #3b1b4a;
+  font-style: italic;
+  max-width: 38ch;
+  text-wrap: balance;
+}
+
+.surprise-card-close {
+  border: 0;
+  cursor: pointer;
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff6fbf, #7c49ff);
+  color: white;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow:
+    0 14px 30px rgba(141, 86, 255, 0.30),
+    0 6px 16px rgba(255, 120, 190, 0.24);
+  transition: transform 0.2s var(--pol-ease-out), box-shadow 0.2s ease;
+}
+
+.surprise-card-close:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 38px rgba(141, 86, 255, 0.36),
+    0 8px 18px rgba(255, 120, 190, 0.30);
+}
+
+.surprise-card-close:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.surprise-card-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(124, 73, 255, 0.20);
+  background: rgba(255, 255, 255, 0.92);
+  color: #4b335f;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s var(--pol-ease-out), background 0.2s ease;
+}
+
+.surprise-card-x:hover {
+  transform: scale(1.07);
+  background: white;
+}
+
+/* ==========================================================
+   V3.15 · Ajustes finales del subtitle
+   ========================================================== */
+.hero-content .subtitle {
+  position: relative;
+}
+
+/* ==========================================================
+   V3.16 · Mejor hover del map photo pocket
+   ========================================================== */
+.map-photo-pocket:hover .photo-frame {
+  border-color: rgba(255, 111, 191, 0.60) !important;
+  box-shadow:
+    0 14px 38px rgba(124, 73, 255, 0.28),
+    0 20px 44px rgba(255, 111, 191, 0.18) !important;
+}
+
+/* ==========================================================
+   V3.17 · Mejora del search input con icono de lupa
+   ========================================================== */
+#search-caption {
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 242, 255, 0.92)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='10' cy='10' r='7' fill='none' stroke='%237c49ff' stroke-width='2'/><line x1='15' y1='15' x2='21' y2='21' stroke='%237c49ff' stroke-width='2' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat, no-repeat;
+  background-position: center, calc(100% - 14px) center;
+  background-size: 100% 100%, 18px 18px;
+  padding-right: 42px !important;
+}
+
+/* ==========================================================
+   V3.18 · Botón "Sorpresa" en el hero — ubicación
+   ========================================================== */
+.hero-actions {
+  position: relative;
+  z-index: 2;
+}
+
+/* ==========================================================
+   V3.19 · Responsive final V3
+   ========================================================== */
+@media (max-width: 640px) {
+  .easter-toast {
+    padding: 22px 30px;
+    font-size: clamp(1.8rem, 6vw, 2.8rem);
+  }
+  .rotating-quote {
+    margin: 8px auto !important;
+  }
+  .surprise-card {
+    padding: 30px 22px 22px;
+    border-radius: 24px;
+  }
+}

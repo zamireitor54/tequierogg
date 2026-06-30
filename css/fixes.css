@@ -1,0 +1,581 @@
+/* ==========================================================
+   FIXES LAYER · Correcciones tras revisión visual
+   Se carga DESPUÉS de cinematic.css. Solo arregla problemas
+   puntuales que se ven mal en pantalla.
+   ========================================================== */
+
+/* ==========================================================
+   1. LOVE COUNTER · Tarjeta-contador horizontal premium en el hero
+   - El strip lateral original queda OCULTO
+   - El panel se relocaliza vía JS dentro de .hero-content como .cin-counter-card
+   - Layout horizontal con 5 celdas: meses · días · hrs · min · seg
+   ========================================================== */
+
+/* Esconde el strip lateral original (aside completo) */
+.love-counter {
+  display: none !important;
+}
+
+/* Reset del panel cuando vive en su NUEVA ubicación dentro del hero */
+.cin-counter-card,
+.love-counter-panel.cin-counter-card {
+  /* Anula todo el posicionamiento heredado del strip */
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+
+  /* Tarjeta */
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  width: 100% !important;
+  max-width: 460px !important;
+  height: auto !important;
+  margin-top: 4px !important;
+  padding: 18px 22px 16px !important;
+  border-radius: 22px !important;
+  overflow: visible !important;
+  cursor: pointer;
+
+  /* Glass + halo sutil */
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(252, 244, 255, 0.92)) !important;
+  border: 1px solid rgba(124, 73, 255, 0.18) !important;
+  box-shadow:
+    0 18px 38px rgba(124, 73, 255, 0.14),
+    0 8px 18px rgba(255, 111, 191, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  transition: transform 0.25s var(--cin-ease), box-shadow 0.25s ease !important;
+}
+
+.cin-counter-card:hover {
+  transform: translateY(-2px) !important;
+  box-shadow:
+    0 24px 46px rgba(124, 73, 255, 0.20),
+    0 12px 24px rgba(255, 111, 191, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94) !important;
+}
+
+/* Eyebrow "Somos novios desde ..." (re-usa .love-counter-hovercopy--top) */
+.cin-counter-card .love-counter-hovercopy {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  inset: auto !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: #6b3ce1 !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  margin: 0 0 10px !important;
+}
+
+.cin-counter-card .love-counter-hovercopy--bottom {
+  display: none !important;
+}
+
+/* Stack horizontal de unidades */
+.cin-counter-card .love-counter-stack {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  height: auto !important;
+  gap: 6px !important;
+  padding: 0 !important;
+  left: auto !important;
+  top: auto !important;
+  overflow: visible !important;
+}
+
+/* Ocultamos los iconos top/bottom (💗 / ✨) dentro de la tarjeta */
+.cin-counter-card .love-counter-top-icon,
+.cin-counter-card .love-counter-bottom-icon,
+.cin-counter-card .love-counter-accent {
+  display: none !important;
+}
+
+/* Cada celda con value + label */
+.cin-counter-card .love-counter-unit {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  flex: 1 1 0 !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 56px !important;
+  padding: 8px 6px !important;
+  gap: 4px !important;
+  left: auto !important;
+  top: auto !important;
+  overflow: visible !important;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(124, 73, 255, 0.10);
+  border-radius: 14px;
+}
+
+.cin-counter-card .love-counter-unit.hidden,
+.cin-counter-card #love-counter-years-unit.hidden {
+  display: none !important;
+}
+
+/* Separadores verticales entre unidades (las líneas eran horizontales) */
+.cin-counter-card .love-counter-separator {
+  display: none !important; /* Las unidades ya están separadas por borde+gap */
+}
+
+.cin-counter-card .love-counter-value {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  left: auto !important;
+  top: auto !important;
+  overflow: visible !important;
+  min-width: 0 !important;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: -0.01em !important;
+  background: linear-gradient(180deg, #5a2d8a, #c43d8c) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.6));
+  text-shadow: none !important;
+}
+
+.cin-counter-card .love-counter-label {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  left: auto !important;
+  top: auto !important;
+  overflow: visible !important;
+  font-size: 0.52rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: rgba(76, 51, 88, 0.66) !important;
+  text-align: center !important;
+}
+
+/* Tick pop animado */
+.cin-counter-card .love-counter-value.is-ticking {
+  animation: tickPop 360ms var(--cin-bounce);
+}
+
+/* Pseudos del panel viejo: completamente nukeados en su nueva ubicación */
+.cin-counter-card::before,
+.cin-counter-card::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Responsive */
+@media (max-width: 560px) {
+  .cin-counter-card,
+  .love-counter-panel.cin-counter-card {
+    max-width: 100% !important;
+    padding: 14px 12px 12px !important;
+  }
+  .cin-counter-card .love-counter-value {
+    font-size: 1.2rem !important;
+  }
+  .cin-counter-card .love-counter-label {
+    font-size: 0.46rem !important;
+  }
+  .cin-counter-card .love-counter-unit {
+    min-height: 48px !important;
+    padding: 6px 2px !important;
+    border-radius: 11px;
+  }
+  .cin-counter-card .love-counter-stack {
+    gap: 4px !important;
+  }
+}
+
+/* Modal del love counter: tipografía clara */
+.love-counter-modal-title,
+.love-counter-modal-text {
+  -webkit-text-fill-color: initial !important;
+  color: #3b1b4a !important;
+  background: none !important;
+}
+
+/* ==========================================================
+   2. EMOJIS dentro de títulos con gradiente
+   - Wrappear emojis en .cin-emoji para que no pierdan color
+   ========================================================== */
+.cin-emoji {
+  -webkit-text-fill-color: initial !important;
+  background: none !important;
+  background-clip: initial !important;
+  -webkit-background-clip: initial !important;
+  color: initial !important;
+  display: inline-block;
+  text-shadow: 0 2px 6px rgba(255, 111, 191, 0.18);
+}
+
+/* Si no logramos wrappear (degradación), aseguramos
+   que los headers no rompan los emojis quitándoles el gradient
+   cuando contienen emoji nativo. La regla siguiente es un fallback. */
+.super-gallery-head h4,
+.extras .extra-card h3 {
+  /* Conservamos el gradiente, pero forzamos display block para
+     que el JS pueda wrappear los emojis sin problemas */
+}
+
+/* ==========================================================
+   3. HERO · Botones centrados y del mismo ancho
+   ========================================================== */
+.hero-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  align-items: stretch !important;
+  width: 100%;
+  max-width: 420px;
+}
+
+.hero-actions .btn,
+.hero-actions #btn-random-bday,
+.hero-actions .surprise-btn {
+  width: 100% !important;
+  min-height: 56px !important;
+  padding: 14px 22px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  font-size: 1rem !important;
+  line-height: 1.25 !important;
+  border-radius: 18px !important;
+  gap: 10px !important;
+}
+
+/* El "Sorpréndeme" debe verse igual de cuidado que el principal,
+   pero outline para no competir visualmente */
+.hero-actions .surprise-btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 242, 255, 0.92)) !important;
+  border: 1px solid rgba(124, 73, 255, 0.22) !important;
+  color: #4e2b76 !important;
+  font-weight: 700 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 12px 26px rgba(124, 73, 255, 0.12) !important;
+}
+
+.hero-actions .surprise-btn:hover {
+  transform: translateY(-2px) !important;
+  border-color: rgba(155, 84, 255, 0.38) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 18px 36px rgba(124, 73, 255, 0.20) !important;
+}
+
+/* En la versión mobile/columna del hero, centramos los botones */
+.hero-content {
+  align-items: flex-start;
+}
+
+@media (max-width: 820px) {
+  .hero-content {
+    align-items: center !important;
+    text-align: center !important;
+  }
+  .hero-actions {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    align-items: center !important;
+  }
+}
+
+/* ==========================================================
+   4. NOTES-LOGIN-ROW · Los 3 FABs IDÉNTICOS (mismo size, forma,
+   color, sombra). Reset duro porque hay reglas viejas en
+   styles.css que los hacían ver desbalanceados.
+   ========================================================== */
+.notes-login-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+  padding: 0 !important;
+  /* Anclamos la fila a un punto fijo y desde ahí los hijos se centran */
+  position: fixed !important;
+  right: 22px !important;
+  bottom: 22px !important;
+  width: 52px !important; /* mismo ancho que los botones para alinear perfecto */
+}
+
+/* Reset estructural (todo igual: tamaño exacto, sin transforms residuales) */
+.notes-login-row > #btn-push-settings,
+.notes-login-row > #btn-open-login-footer,
+.notes-login-row > .notes-fab {
+  /* Neutralizamos cualquier posicionamiento heredado de otras capas */
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  float: none !important;
+
+  box-sizing: border-box !important;
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  min-height: 52px !important;
+  max-width: 52px !important;
+  max-height: 52px !important;
+  flex: 0 0 52px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  border-radius: 50% !important;
+
+  /* Centrado del icono interno: flex + line-height controlado */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  font-size: 1.15rem !important;
+  line-height: 1 !important;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", system-ui, sans-serif !important;
+
+  transform: none !important;
+  animation: none !important;
+  --cin-mx: 0px;
+  --cin-my: 0px;
+}
+
+/* El contenido interno de los botones también centrado de forma estricta */
+.notes-login-row > #btn-push-settings > *,
+.notes-login-row > #btn-open-login-footer > *,
+.notes-login-row > .notes-fab > * {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* MISMA estética para los tres (uniforme, profesional) */
+.notes-login-row > #btn-push-settings,
+.notes-login-row > #btn-open-login-footer,
+.notes-login-row > .notes-fab {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 242, 255, 0.96)) !important;
+  border: 1px solid rgba(124, 73, 255, 0.22) !important;
+  color: #4e2b76 !important;
+  box-shadow:
+    0 12px 26px rgba(36, 19, 50, 0.14),
+    0 6px 14px rgba(124, 73, 255, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+.notes-login-row > #btn-push-settings:hover,
+.notes-login-row > #btn-open-login-footer:hover,
+.notes-login-row > .notes-fab:hover {
+  transform: translateY(-2px) scale(1.04) !important;
+  background: #fff !important;
+  border-color: rgba(124, 73, 255, 0.34) !important;
+  box-shadow:
+    0 18px 34px rgba(36, 19, 50, 0.18),
+    0 8px 16px rgba(124, 73, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96) !important;
+}
+
+.notes-login-row > #btn-push-settings:active,
+.notes-login-row > #btn-open-login-footer:active,
+.notes-login-row > .notes-fab:active {
+  transform: translateY(0) scale(0.97) !important;
+}
+
+/* Mata el halo cónico difuso del ::before del notes-fab (es lo que
+   lo hacía parecer más grande/desplazado dentro de la fila) */
+.notes-login-row > .notes-fab::before,
+.notes-login-row > .notes-fab::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* ==========================================================
+   5. SCROLL-DOWN · Lo escondemos (no aporta y choca con el botón
+   "Quitar filtro" del centro)
+   ========================================================== */
+.scroll-down {
+  display: none !important;
+}
+
+/* ==========================================================
+   6. BTN-CLEAR-FILTER · Lo sacamos del centro fijo y lo dejamos
+   inline con las demás acciones de la galería
+   ========================================================== */
+#btn-clear-filter,
+.super-gallery-actions #btn-clear-filter {
+  position: static !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 10px 16px !important;
+  border-radius: 14px !important;
+  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  color: #65437a !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  border: 1px solid rgba(124, 73, 255, 0.18) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 8px 18px rgba(36, 19, 50, 0.08) !important;
+  z-index: auto !important;
+}
+
+#btn-clear-filter:hover,
+.super-gallery-actions #btn-clear-filter:hover {
+  transform: translateY(-1px) !important;
+  border-color: rgba(155, 84, 255, 0.32) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    0 12px 24px rgba(124, 73, 255, 0.16) !important;
+}
+
+/* ==========================================================
+   7. SUPER GALLERY HEAD · Mejor centrado, título y emoji visible
+   ========================================================== */
+.super-gallery-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.super-gallery-title-row {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Removemos el gradient text de h4 para que el emoji se vea bien
+   y dejamos el color sólido */
+.super-gallery-head h4 {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  color: #3b1b4a !important;
+  text-shadow: 0 2px 12px rgba(124, 73, 255, 0.10);
+  margin: 0;
+}
+
+.super-gallery-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.super-gallery-head .muted {
+  text-align: center;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
+/* Igual para los h3 de extras (que tienen emoji) */
+.extras .extra-card h3 {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  color: #3b1b4a !important;
+  text-shadow: 0 2px 12px rgba(124, 73, 255, 0.08);
+}
+
+/* ==========================================================
+   8. PHOTO CAPTION · Que no choque con el botón flotante de
+   la derecha
+   ========================================================== */
+.photo-caption {
+  padding-right: 0 !important;
+}
+
+/* ==========================================================
+   8.b HEART-COUNTER · Lo escondemos.
+   Era un contador de clicks sobre la foto que arrancaba en "💗 0"
+   y confundía al user (no se entiende qué hace).
+   Lo añadía enhance.js → setupHeartCounter().
+   ========================================================== */
+.heart-counter,
+.hero-photo .heart-counter {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ==========================================================
+   9. RESPONSIVE: cuando el viewport es chico, todo apilado
+   ========================================================== */
+@media (max-width: 560px) {
+  .notes-login-row {
+    gap: 10px !important;
+  }
+  .notes-login-row #btn-push-settings,
+  .notes-login-row #btn-open-login-footer,
+  .notes-login-row .notes-fab {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.1rem !important;
+  }
+  .hero-actions .btn {
+    font-size: 0.95rem !important;
+  }
+}
+
+/* ==========================================================
+   10. HEART-COUNTER · Eliminamos el badge de "toques" en la foto
+   (el corazoncito con el 0 que confundía y no aportaba)
+   ========================================================== */
+.heart-counter,
+.hero-photo .heart-counter {
+  display: none !important;
+}

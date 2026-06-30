@@ -204,23 +204,51 @@ async function canRenderUploadImage(file) {
   }
 }
 
+// Convierte HEIC/HEIF a JPEG si la librería heic2any está disponible (CDN).
+// Funciona para fotos de iPhone compartidas a Samsung Gallery.
+async function tryConvertHeicToJpeg(file) {
+  const heic2any = window.heic2any;
+  if (typeof heic2any !== 'function') return null; // librería no cargada
+  try {
+    const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.88 });
+    const out = Array.isArray(blob) ? blob[0] : blob;
+    if (!out) return null;
+    const originalName = (file.name || 'foto').replace(/\.(heic|heif)$/i, '') + '.jpg';
+    return new File([out], originalName, { type: 'image/jpeg', lastModified: file.lastModified || Date.now() });
+  } catch (err) {
+    console.warn('[upload] HEIC conversion failed:', err?.message || err);
+    return null;
+  }
+}
+
 async function prepareUploadFiles(rawFiles = []) {
   const accepted = [];
   const rejected = [];
 
-  for (const file of Array.from(rawFiles || [])) {
-    const extension = getUploadFileExtension(file);
+  for (const original of Array.from(rawFiles || [])) {
+    let file = original;
+    let extension = getUploadFileExtension(file);
+
     if (!canCandidateLookLikeImage(file)) {
       rejected.push({ file, extension, reason: 'Ese archivo no parece ser una imagen válida.' });
       continue;
     }
 
+    // Si es HEIC/HEIF, intentar convertirlo a JPEG antes de seguir
+    if (COMMON_UNSUPPORTED_MOBILE_EXTENSIONS.has(extension)) {
+      const converted = await tryConvertHeicToJpeg(file);
+      if (converted) {
+        file = converted;
+        extension = getUploadFileExtension(file);
+      }
+    }
+
     const canRender = await canRenderUploadImage(file);
     if (!canRender) {
-      const reason = COMMON_UNSUPPORTED_MOBILE_EXTENSIONS.has(extension)
-        ? 'Tu navegador no pudo abrir esa foto HEIC/HEIF.'
+      const reason = COMMON_UNSUPPORTED_MOBILE_EXTENSIONS.has(getUploadFileExtension(original))
+        ? 'Tu navegador no pudo abrir esa foto HEIC/HEIF (convertela a JPG o PNG e intenta de nuevo).'
         : 'No pude abrir esa imagen en este dispositivo.';
-      rejected.push({ file, extension, reason });
+      rejected.push({ file: original, extension: getUploadFileExtension(original), reason });
       continue;
     }
 

@@ -1,0 +1,2513 @@
+/* ==========================================================
+   MEJORAS LAYER · Top layer — se carga al final
+   - Contador de novios premium anclado a la derecha
+   - Botón "Quitar filtro" como floating button centrado
+   - Polish extra de galería + micro-detalles
+   ========================================================== */
+
+:root {
+  --mej-pink: #ff5fb6;
+  --mej-rose: #ff7fc8;
+  --mej-violet: #8a4dff;
+  --mej-deep: #4a2480;
+  --mej-cream: #fff7fc;
+  --mej-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --mej-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --mej-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ==========================================================
+   1. LOVE COUNTER · Escondido a la derecha, solo asoma una
+      pestañita. Hover/click → se desliza el contador completo.
+   ========================================================== */
+
+/* Aside anclado al borde derecho — ancho EXACTO del toggle, nada más.
+   El panel es position: fixed (no relativo al aside). */
+.love-counter,
+aside.love-counter {
+  position: fixed !important;
+  top: 50% !important;
+  right: 0 !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+  z-index: 11000 !important;
+  width: 24px !important;     /* exacto del toggle, no auto */
+  max-width: 24px !important;
+  height: auto !important;
+  pointer-events: none;
+  display: block !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: visible !important;
+}
+
+/* La PESTAÑITA · siempre visible, gradient bonito, se asoma del borde */
+.love-counter .love-counter-toggle,
+aside.love-counter .love-counter-toggle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  transform: none !important;
+
+  width: 34px !important;
+  height: 102px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 22px 0 0 22px !important;
+  cursor: pointer;
+
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.40), transparent 55%),
+    linear-gradient(160deg, #ff5fb6 0%, #c46cff 55%, #7c49ff 100%) !important;
+  color: white !important;
+  font-size: 1.35rem !important;
+  z-index: 3;
+
+  box-shadow:
+    -10px 14px 30px rgba(86, 47, 124, 0.30),
+    -4px 6px 14px rgba(255, 95, 182, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40) !important;
+
+  transition:
+    transform 0.35s var(--mej-ease),
+    box-shadow 0.35s ease,
+    background-position 0.6s var(--mej-ease) !important;
+  animation:
+    mejTabIntro 700ms var(--mej-ease-out) 600ms both,
+    mejTabPulse 2.6s ease-in-out 2.5s infinite;
+}
+
+.love-counter .love-counter-toggle:hover,
+aside.love-counter .love-counter-toggle:hover {
+  transform: translateX(-2px) !important;
+  box-shadow:
+    -16px 18px 38px rgba(86, 47, 124, 0.38),
+    -6px 8px 18px rgba(255, 95, 182, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.46) !important;
+}
+
+.love-counter .love-counter-toggle:active,
+aside.love-counter .love-counter-toggle:active {
+  transform: translateX(0) scale(0.96) !important;
+}
+
+@keyframes mejTabIntro {
+  from { opacity: 0; transform: translateX(80px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes mejTabPulse {
+  0%, 100% {
+    box-shadow:
+      -10px 14px 30px rgba(86, 47, 124, 0.30),
+      -4px 6px 14px rgba(255, 95, 182, 0.30),
+      0 0 0 0 rgba(255, 95, 182, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.40);
+  }
+  50% {
+    box-shadow:
+      -10px 14px 30px rgba(86, 47, 124, 0.30),
+      -4px 6px 14px rgba(255, 95, 182, 0.30),
+      0 0 0 14px rgba(255, 95, 182, 0),
+      inset 0 1px 0 rgba(255, 255, 255, 0.40);
+  }
+}
+
+/* Corazón dentro de la pestañita */
+.love-counter .love-counter-toggle-heart {
+  display: inline-block !important;
+  font-size: 1.4rem !important;
+  line-height: 1 !important;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.2));
+  animation: mejHeartPulse 1.5s ease-in-out infinite;
+}
+
+/* Si fixes.js movió el panel al hero, lo escondemos ahí */
+.hero-content > .love-counter-panel,
+.hero-content > .love-counter-panel.cin-counter-card {
+  display: none !important;
+}
+
+/* PANEL · position FIXED al viewport, fuera del flujo del aside.
+   Cerrado: deslizado completamente a la derecha (off-screen).
+   Abierto: pegado al BORDE DERECHO del viewport (right: 0). */
+.love-counter > .love-counter-panel,
+aside.love-counter > .love-counter-panel {
+  position: fixed !important;
+  top: 50% !important;
+  right: 0 !important; /* pegado al borde derecho */
+  bottom: auto !important;
+  left: auto !important;
+  inset: auto 0 auto auto !important;
+  max-width: none !important;
+  margin: 0 !important;
+  pointer-events: none;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  /* Cerrado: FUERA del viewport por la derecha — completamente oculto */
+  transform: translateY(-50%) translateX(calc(100% + 60px)) !important;
+
+  width: 122px !important;
+  padding: 12px 10px !important;
+  border-radius: 22px 0 0 22px !important;
+  overflow: visible !important;
+  cursor: pointer;
+  z-index: 11001;
+
+  background:
+    radial-gradient(circle at 30% 0%, rgba(255, 200, 230, 0.5), transparent 55%),
+    radial-gradient(circle at 70% 100%, rgba(180, 130, 255, 0.38), transparent 55%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.97), rgba(250, 240, 255, 0.93)) !important;
+  border: 1px solid rgba(255, 111, 191, 0.28) !important;
+  border-right: 0 !important;
+  box-shadow:
+    -16px 20px 44px rgba(124, 73, 255, 0.22),
+    -8px 10px 22px rgba(255, 95, 182, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  transition:
+    transform 0.32s var(--mej-bounce),
+    opacity 0.22s ease,
+    visibility 0s linear 0.32s,
+    box-shadow 0.4s ease,
+    border-color 0.3s ease !important;
+}
+
+/* CLICK (is-open) → panel sale. SIN HOVER. */
+.love-counter.is-open > .love-counter-panel,
+aside.love-counter.is-open > .love-counter-panel,
+.love-counter-panel.is-open {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transform: translateY(-50%) translateX(0) !important;
+  pointer-events: auto !important;
+  transition:
+    transform 0.4s var(--mej-bounce),
+    opacity 0.25s ease,
+    visibility 0s linear 0s,
+    box-shadow 0.4s ease,
+    border-color 0.3s ease !important;
+}
+
+/* Cuando el panel está abierto (SOLO POR CLICK, sin hover):
+   ESCONDEMOS la pestañita del corazón. El hover NO la oculta. */
+.love-counter.is-open .love-counter-toggle,
+aside.love-counter.is-open .love-counter-toggle {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(20px) !important;
+  box-shadow: none !important;
+  transition:
+    opacity 0.25s ease,
+    transform 0.32s var(--mej-bounce),
+    visibility 0s linear 0.25s !important;
+  animation: none !important;
+}
+
+/* Anillo cónico animado sutil */
+.love-counter > .love-counter-panel::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    #ff5fb6, #ffd0e8, #8a4dff, #ffc8e6, #ff5fb6
+  );
+  filter: blur(1px);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.5s ease;
+  animation: mejRingSpin 14s linear infinite;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  padding: 1.5px;
+}
+
+.love-counter > .love-counter-panel:hover::before {
+  opacity: 0.75;
+}
+
+@keyframes mejRingSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Eyebrow "Somos novios desde..." */
+.love-counter > .love-counter-panel > .love-counter-hovercopy,
+aside.love-counter .love-counter-hovercopy {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  inset: auto !important;
+  margin: 0 0 2px !important;
+  padding: 0 !important;
+
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.005em !important;
+  text-transform: none !important;
+  text-align: center !important;
+  font-weight: 400 !important;
+  line-height: 1.05 !important;
+
+  background: linear-gradient(120deg, #5a2d8a, #c43d8c, #7c49ff, #5a2d8a) !important;
+  background-size: 220% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  animation: mejGradientFlow 8s linear infinite;
+}
+
+@keyframes mejGradientFlow {
+  to { background-position: 220% center; }
+}
+
+.love-counter .love-counter-hovercopy--bottom {
+  display: none !important;
+}
+
+/* Corazón superior compacto */
+.love-counter > .love-counter-panel .love-counter-top-icon {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  transform: none !important;
+  inset: auto !important;
+  margin: 0 0 3px !important;
+  font-size: 1.1rem !important;
+  text-align: center !important;
+  filter: drop-shadow(0 4px 10px rgba(255, 95, 182, 0.45));
+  animation: mejHeartPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes mejHeartPulse {
+  0%, 100% { transform: scale(1); }
+  18%      { transform: scale(1.18); }
+  36%      { transform: scale(0.96); }
+  54%      { transform: scale(1.10); }
+  72%      { transform: scale(1); }
+}
+
+/* Sparkle inferior: oculto para compactar */
+.love-counter > .love-counter-panel .love-counter-bottom-icon {
+  display: none !important;
+}
+
+/* Stack vertical de unidades, compacto */
+.love-counter > .love-counter-panel .love-counter-stack {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  width: 100% !important;
+  height: auto !important;
+  gap: 4px !important;
+  padding: 0 !important;
+  margin: 2px 0 0 !important;
+  left: auto !important;
+  top: auto !important;
+  overflow: visible !important;
+}
+
+/* Cada celda */
+.love-counter > .love-counter-panel .love-counter-unit {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  flex: 0 0 auto !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 36px !important;
+  padding: 4px 4px !important;
+  gap: 0 !important;
+  left: auto !important;
+  top: auto !important;
+  overflow: visible !important;
+  border-radius: 11px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(252, 240, 250, 0.78)) !important;
+  border: 1px solid rgba(255, 111, 191, 0.15) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 2px 6px rgba(124, 73, 255, 0.06);
+}
+
+.love-counter > .love-counter-panel .love-counter-unit.hidden,
+.love-counter > .love-counter-panel #love-counter-years-unit.hidden {
+  display: none !important;
+}
+
+.love-counter > .love-counter-panel .love-counter-separator {
+  display: none !important;
+}
+
+/* Números — color sólido púrpura para máxima legibilidad */
+.love-counter > .love-counter-panel .love-counter-value {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  left: auto !important;
+  top: auto !important;
+  overflow: visible !important;
+  min-width: 0 !important;
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: -0.02em !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  color: #6b2dab !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Etiquetas */
+.love-counter > .love-counter-panel .love-counter-label {
+  display: inline-block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  left: auto !important;
+  top: auto !important;
+  overflow: visible !important;
+  font-size: 0.42rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  color: rgba(122, 70, 168, 0.72) !important;
+  text-align: center !important;
+  margin-top: 1px !important;
+}
+
+/* Tick animation */
+.love-counter > .love-counter-panel .love-counter-value.is-ticking {
+  animation: mejTickPop 360ms var(--mej-bounce);
+}
+
+@keyframes mejTickPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+.love-counter > .love-counter-panel::after,
+.love-counter > .love-counter-panel .love-counter-accent {
+  display: none !important;
+  content: none !important;
+}
+
+/* Modal del love-counter: ELIMINADO. Sólo usamos el panel lateral. */
+#love-counter-modal,
+.love-counter-modal {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ----------------------------------------------------------
+   BOTÓN X dentro del panel del contador
+   ---------------------------------------------------------- */
+.mej-counter-close {
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255, 95, 182, 0.32) !important;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(252, 244, 250, 0.92)) !important;
+  color: #c43d8c !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  z-index: 10;
+  box-shadow:
+    0 4px 10px rgba(255, 95, 182, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+  transition: transform 0.25s var(--mej-bounce), background 0.2s ease, border-color 0.2s ease !important;
+}
+
+.mej-counter-close:hover {
+  transform: scale(1.12) rotate(90deg) !important;
+  background: white !important;
+  border-color: rgba(255, 95, 182, 0.55) !important;
+}
+
+.mej-counter-close:active {
+  transform: scale(0.94) !important;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .love-counter,
+  aside.love-counter {
+    right: 8px !important;
+  }
+  .love-counter > .love-counter-panel,
+  aside.love-counter > .love-counter-panel {
+    width: 84px !important;
+    padding: 10px 6px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .love-counter > .love-counter-panel,
+  aside.love-counter > .love-counter-panel {
+    width: 78px !important;
+    padding: 9px 5px !important;
+    border-radius: 18px !important;
+  }
+  .love-counter > .love-counter-panel > .love-counter-hovercopy {
+    font-size: 0.72rem !important;
+  }
+  .love-counter > .love-counter-panel .love-counter-top-icon {
+    font-size: 1rem !important;
+  }
+  .love-counter > .love-counter-panel .love-counter-value {
+    font-size: 0.92rem !important;
+  }
+  .love-counter > .love-counter-panel .love-counter-label {
+    font-size: 0.38rem !important;
+  }
+  .love-counter > .love-counter-panel .love-counter-unit {
+    min-height: 32px !important;
+    padding: 3px 3px !important;
+  }
+}
+
+/* Cuando hay lightbox/modales, escondemos el contador */
+body.lightbox-open .love-counter,
+body.lightbox-open aside.love-counter {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.25s ease;
+}
+
+/* ==========================================================
+   2. BTN-CLEAR-FILTER · Floating button centrado top de pantalla
+   - Aparece sólo cuando hay filtro activo (el JS añade is-visible)
+   - Centrado horizontalmente, en la parte alta de la pantalla
+   - Gradient pill grande, muy llamativo
+   ========================================================== */
+#btn-clear-filter {
+  position: fixed !important;
+  top: 22px !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translateX(-50%) translateY(-120%) scale(0.85) !important;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  padding: 14px 26px 14px 22px !important;
+  min-height: 0 !important;
+  width: auto !important;
+  max-width: calc(100vw - 32px) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+
+  font-family: "Poppins", sans-serif !important;
+  font-size: 0.98rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.01em !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+
+  background: linear-gradient(135deg, #ff5fb6 0%, #c46cff 50%, #7c49ff 100%) !important;
+  background-size: 220% 100% !important;
+  background-position: 0% 50% !important;
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+
+  box-shadow:
+    0 24px 60px rgba(124, 73, 255, 0.55),
+    0 12px 30px rgba(255, 95, 182, 0.42),
+    0 0 0 4px rgba(255, 255, 255, 0.6),
+    0 0 0 5px rgba(255, 95, 182, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  z-index: 99500 !important;
+
+  transition:
+    transform 0.55s var(--mej-bounce),
+    opacity 0.35s ease,
+    visibility 0s linear 0.4s,
+    box-shadow 0.35s ease,
+    background-position 0.7s var(--mej-ease) !important;
+  animation: mejFilterShimmer 4s ease-in-out infinite;
+}
+
+@keyframes mejFilterShimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* Estado visible: cuando JS añade is-visible / display flex.
+   Multiplicamos los selectores por si el navegador serializa diferente. */
+#btn-clear-filter.is-visible,
+#btn-clear-filter[style*="display: inline-flex"],
+#btn-clear-filter[style*="display:inline-flex"],
+#btn-clear-filter[style*="inline-flex"],
+#btn-clear-filter:not([hidden])[style*="display"]:not([style*="none"]) {
+  display: inline-flex !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+  transform: translateX(-50%) translateY(0) scale(1) !important;
+  transition:
+    transform 0.55s var(--mej-bounce),
+    opacity 0.35s ease,
+    visibility 0s linear 0s,
+    box-shadow 0.35s ease,
+    background-position 0.7s var(--mej-ease) !important;
+}
+
+#btn-clear-filter:hover {
+  transform: translateX(-50%) translateY(-2px) scale(1.05) !important;
+  box-shadow:
+    0 30px 70px rgba(124, 73, 255, 0.62),
+    0 16px 38px rgba(255, 95, 182, 0.50),
+    0 0 0 5px rgba(255, 255, 255, 0.7),
+    0 0 0 6px rgba(255, 95, 182, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+#btn-clear-filter:active {
+  transform: translateX(-50%) translateY(0) scale(0.97) !important;
+}
+
+/* Halo pulsante alrededor */
+#btn-clear-filter::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 95, 182, 0.55), rgba(124, 73, 255, 0.55));
+  filter: blur(18px);
+  opacity: 0.6;
+  z-index: -1;
+  pointer-events: none;
+  animation: mejFilterHalo 2.4s ease-in-out infinite;
+}
+
+@keyframes mejFilterHalo {
+  0%, 100% { opacity: 0.5; transform: scale(0.95); }
+  50%      { opacity: 0.85; transform: scale(1.08); }
+}
+
+/* Cuando hay lightbox abierto, lo escondemos */
+body.lightbox-open #btn-clear-filter {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
+/* Mobile */
+@media (max-width: 560px) {
+  #btn-clear-filter {
+    top: 14px !important;
+    padding: 11px 20px 11px 18px !important;
+    font-size: 0.88rem !important;
+  }
+}
+
+/* ==========================================================
+   3. SUPER GALLERY · Cards más bonitas, hover delicioso
+   ========================================================== */
+
+/* Pill de "X recuerdos" más cariñoso */
+.super-gallery-count {
+  background: linear-gradient(135deg, rgba(255, 95, 182, 0.16), rgba(124, 73, 255, 0.16)) !important;
+  border: 1px solid rgba(255, 95, 182, 0.28) !important;
+  color: #6b2dab !important;
+  padding: 6px 14px !important;
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.02em !important;
+  box-shadow: 0 6px 16px rgba(124, 73, 255, 0.12) !important;
+}
+
+/* Acciones de la galería: glass card contenedor */
+.super-gallery-actions {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(252, 244, 255, 0.62)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.7) !important;
+  border-radius: 22px !important;
+  padding: 14px 16px !important;
+  box-shadow:
+    0 18px 40px rgba(124, 73, 255, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+}
+
+/* Botón principal "Subir recuerdo": gradient vivo */
+.super-gallery-actions #btn-open-upload {
+  background: linear-gradient(135deg, #ff5fb6, #c46cff, #7c49ff) !important;
+  background-size: 200% 100% !important;
+  background-position: 0% 50% !important;
+  color: white !important;
+  border: 0 !important;
+  font-weight: 800 !important;
+  padding: 11px 20px !important;
+  box-shadow:
+    0 14px 32px rgba(124, 73, 255, 0.30),
+    0 6px 16px rgba(255, 95, 182, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  transition: background-position 0.6s var(--mej-ease), transform 0.25s var(--mej-ease-out), box-shadow 0.3s ease !important;
+}
+
+.super-gallery-actions #btn-open-upload:hover {
+  background-position: 100% 50% !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* Items de la galería: marco más definido + gradient hover */
+.sg-item {
+  position: relative;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow:
+    0 14px 32px rgba(36, 19, 50, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+  transition:
+    transform 0.45s var(--mej-ease-out),
+    box-shadow 0.45s var(--mej-ease-out),
+    border-color 0.3s ease !important;
+}
+
+.sg-item::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 95, 182, 0.6), rgba(124, 73, 255, 0.6));
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s var(--mej-ease);
+  pointer-events: none;
+}
+
+.sg-item:hover {
+  transform: translateY(-7px) scale(1.018) !important;
+  border-color: transparent !important;
+  box-shadow:
+    0 30px 60px rgba(124, 73, 255, 0.28),
+    0 16px 36px rgba(255, 95, 182, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.94) !important;
+}
+
+.sg-item:hover::before {
+  opacity: 1;
+}
+
+.sg-item img {
+  transition: transform 0.6s var(--mej-ease), filter 0.5s ease !important;
+}
+
+.sg-item:hover img {
+  transform: scale(1.06) !important;
+  filter: saturate(1.15) contrast(1.04) brightness(1.02) !important;
+}
+
+/* Hint del "Quitar filtro" en la cabecera de galería: copy alternativo */
+.super-gallery-head::after {
+  display: none;
+}
+
+/* ==========================================================
+   4. HEADER de galería: aún más bonito
+   ========================================================== */
+.super-gallery-head h4 {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(2.4rem, 5.5vw, 3.4rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.05 !important;
+  letter-spacing: 0.005em !important;
+  background: linear-gradient(120deg, #5a2d8a, #c43d8c, #7c49ff, #5a2d8a) !important;
+  background-size: 220% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  text-shadow: none !important;
+  animation: mejGradientFlow 10s linear infinite;
+}
+
+/* Mantener el emoji visible (no se le aplica gradient gracias a .cin-emoji) */
+
+/* ==========================================================
+   5. NOTES-LOGIN-ROW · Subir un pelín para dejar paso al contador
+   en móvil (que vive en bottom: 18px)
+   ========================================================== */
+@media (max-width: 760px) {
+  .notes-login-row {
+    bottom: 110px !important;
+  }
+  .back-to-top {
+    bottom: 170px !important;
+  }
+}
+
+/* ==========================================================
+   6. HERO · Pequeños refinos extra
+   ========================================================== */
+.hero-content .title {
+  text-shadow: 0 10px 36px rgba(124, 73, 255, 0.22);
+}
+
+/* Subtitle más cuidado */
+.subtitle {
+  font-weight: 400 !important;
+  color: rgba(74, 36, 128, 0.86) !important;
+}
+
+/* ==========================================================
+   7. SCROLL-PROGRESS: aún más vivo
+   ========================================================== */
+.scroll-progress {
+  height: 4px !important;
+  background: linear-gradient(90deg, #ff5fb6, #c46cff, #7c49ff, #ff5fb6) !important;
+  background-size: 300% 100% !important;
+  box-shadow:
+    0 0 16px rgba(255, 95, 182, 0.65),
+    0 0 24px rgba(124, 73, 255, 0.35) !important;
+}
+
+/* ==========================================================
+   8. CARDS de mensajes: micro mejoras
+   ========================================================== */
+.cards-section .card h2 {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(1.9rem, 4vw, 2.6rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.1 !important;
+  background: linear-gradient(120deg, #5a2d8a, #c43d8c, #7c49ff) !important;
+  background-size: 220% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  animation: mejGradientFlow 9s linear infinite;
+  margin-bottom: 8px !important;
+}
+
+/* ==========================================================
+   9. SECTION DIVIDER · Conservar el existente, sólo afinar
+   ========================================================== */
+.section-divider-icon {
+  animation-duration: 3.2s !important;
+}
+
+/* ==========================================================
+   10. EXTRAS · Mejor look del calendario y mapa
+   ========================================================== */
+.extras .extra-card h3 {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(1.7rem, 3.8vw, 2.3rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.1 !important;
+  margin-bottom: 6px !important;
+}
+
+/* ==========================================================
+   11. ACCESSIBILITY: reduce motion
+   ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .love-counter > .love-counter-panel {
+    animation: none !important;
+  }
+  #btn-clear-filter,
+  #btn-clear-filter::before {
+    animation: none !important;
+  }
+  .super-gallery-head h4,
+  .cards-section .card h2 {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================
+   ============   V2 · POLISH EXTRA TODO TODO   ===============
+   - Hero más cinematográfico
+   - Foto del hero con marco doble y reflejo
+   - Modal del love-counter rediseñado
+   - Calendario más cariñoso
+   - Lightbox más premium
+   - Items de mensajes más vivos
+   - Scrollbars suaves dentro de cards
+   ========================================================== */
+
+/* ==========================================================
+   V2.1 · HERO · Aún más vivo
+   ========================================================== */
+.hero {
+  position: relative;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255, 192, 224, 0.35), transparent 50%),
+    radial-gradient(circle at 88% 80%, rgba(180, 130, 255, 0.30), transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.7;
+  animation: mejHeroAmbient 12s ease-in-out infinite alternate;
+}
+
+@keyframes mejHeroAmbient {
+  0%   { opacity: 0.55; transform: scale(1); }
+  100% { opacity: 0.85; transform: scale(1.06); }
+}
+
+/* Botón principal del hero: más brillante */
+.hero-actions #btn-random-bday {
+  background: linear-gradient(135deg, #ff5fb6 0%, #c46cff 50%, #7c49ff 100%) !important;
+  background-size: 220% 100% !important;
+  background-position: 0% 50% !important;
+  color: white !important;
+  box-shadow:
+    0 22px 50px rgba(124, 73, 255, 0.40),
+    0 12px 28px rgba(255, 95, 182, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  transition:
+    background-position 0.8s var(--mej-ease),
+    transform 0.3s var(--mej-bounce),
+    box-shadow 0.35s ease !important;
+}
+
+.hero-actions #btn-random-bday:hover {
+  background-position: 100% 50% !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow:
+    0 30px 60px rgba(124, 73, 255, 0.50),
+    0 16px 36px rgba(255, 95, 182, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ==========================================================
+   V2.2 · FOTO HERO · Marco doble con destello
+   ========================================================== */
+.hero-photo {
+  position: relative;
+}
+
+.hero-photo img {
+  box-shadow:
+    0 22px 50px rgba(36, 19, 50, 0.22),
+    0 8px 18px rgba(255, 111, 191, 0.20),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.6) !important;
+  border: 3px solid rgba(255, 255, 255, 0.92) !important;
+  transition: transform 0.6s var(--mej-ease), box-shadow 0.5s ease !important;
+}
+
+.hero-photo img:hover {
+  transform: translateY(-6px) scale(1.04) rotate(-0.5deg) !important;
+  box-shadow:
+    0 32px 70px rgba(36, 19, 50, 0.30),
+    0 14px 28px rgba(255, 111, 191, 0.32),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.7) !important;
+}
+
+.photo-caption {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(1.1rem, 2.4vw, 1.45rem) !important;
+  font-style: normal !important;
+  color: #6b2dab !important;
+  margin-top: 12px !important;
+  letter-spacing: 0.005em !important;
+}
+
+/* ==========================================================
+   V2.3 · MODAL del LOVE-COUNTER · Más bonito y emotivo
+   ========================================================== */
+.love-counter-modal {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(80, 40, 110, 0.5), transparent 55%),
+    radial-gradient(circle at 70% 80%, rgba(40, 20, 60, 0.55), transparent 55%),
+    rgba(20, 10, 30, 0.62) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.love-counter-modal-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 25% 15%, rgba(255, 200, 230, 0.5), transparent 55%),
+    radial-gradient(circle at 80% 90%, rgba(180, 130, 255, 0.45), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #fbf6ff 100%) !important;
+  border: 1px solid rgba(255, 111, 191, 0.28) !important;
+  box-shadow:
+    0 40px 100px rgba(36, 19, 50, 0.32),
+    0 18px 44px rgba(124, 73, 255, 0.20) !important;
+}
+
+.love-counter-modal-card::before {
+  content: "💗";
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  font-size: 4rem;
+  opacity: 0.12;
+  filter: drop-shadow(0 8px 16px rgba(255, 95, 182, 0.6));
+  transform: rotate(-15deg);
+  pointer-events: none;
+}
+
+.love-counter-modal-card::after {
+  content: "✨";
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  font-size: 3rem;
+  opacity: 0.18;
+  filter: drop-shadow(0 8px 16px rgba(124, 73, 255, 0.5));
+  pointer-events: none;
+  animation: mejSparkleRotate 8s ease-in-out infinite;
+}
+
+@keyframes mejSparkleRotate {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50%      { transform: rotate(180deg) scale(1.15); }
+}
+
+.love-counter-modal-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, rgba(255, 95, 182, 0.18), rgba(124, 73, 255, 0.18)) !important;
+  border: 1px solid rgba(255, 95, 182, 0.32);
+  color: #7c49ff !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  margin-bottom: 14px;
+}
+
+.love-counter-modal-title {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(2rem, 5vw, 3rem) !important;
+  font-weight: 400 !important;
+  line-height: 1.1 !important;
+  margin: 0 0 14px !important;
+}
+
+.love-counter-modal-text {
+  font-family: "Playfair Display", "Poppins", serif !important;
+  font-size: clamp(1.05rem, 2.4vw, 1.3rem) !important;
+  font-style: italic !important;
+  line-height: 1.5 !important;
+  max-width: 38ch !important;
+  margin: 0 auto !important;
+}
+
+.love-counter-modal-close {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(124, 73, 255, 0.20) !important;
+  color: #4b335f !important;
+  font-weight: 800 !important;
+  cursor: pointer;
+  transition: transform 0.25s var(--mej-bounce), background 0.25s ease !important;
+}
+
+.love-counter-modal-close:hover {
+  transform: scale(1.1) rotate(90deg) !important;
+  background: white !important;
+}
+
+/* ==========================================================
+   V2.4 · CALENDARIO · Más cariñoso
+   ========================================================== */
+.calendar-day.available {
+  transition:
+    transform 0.25s var(--mej-bounce),
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.25s ease !important;
+}
+
+.calendar-day.available:not(.locked):hover {
+  transform: translateY(-4px) scale(1.06) !important;
+  box-shadow:
+    0 22px 38px rgba(124, 73, 255, 0.28),
+    0 8px 18px rgba(255, 95, 182, 0.22) !important;
+  z-index: 6 !important;
+}
+
+.calendar-day.locked {
+  opacity: 0.55;
+  filter: grayscale(0.3);
+}
+
+.calendar-day.locked::after {
+  content: "🔒";
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 0.6rem;
+  opacity: 0.7;
+}
+
+/* Botón "Abrir calendario": gradient vivo */
+.calendar-toggle-row #toggle-calendar {
+  background: linear-gradient(135deg, #ff5fb6, #c46cff, #7c49ff) !important;
+  background-size: 200% 100% !important;
+  color: white !important;
+  border: 0 !important;
+  box-shadow:
+    0 14px 30px rgba(124, 73, 255, 0.28),
+    0 6px 14px rgba(255, 95, 182, 0.20) !important;
+  transition: background-position 0.6s var(--mej-ease), transform 0.25s var(--mej-bounce) !important;
+}
+
+.calendar-toggle-row #toggle-calendar:hover {
+  background-position: 100% 50% !important;
+  transform: translateY(-2px) scale(1.03) !important;
+}
+
+/* ==========================================================
+   V2.5 · LIGHTBOX · Más premium
+   ========================================================== */
+.lightbox-close,
+.lightbox-nav {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: white !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.25s var(--mej-bounce), background 0.25s ease, border-color 0.25s ease !important;
+}
+
+.lightbox-close:hover,
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(255, 95, 182, 0.45) !important;
+  transform: scale(1.1) !important;
+}
+
+.lightbox-close:hover {
+  transform: scale(1.1) rotate(90deg) !important;
+}
+
+#lightbox-img {
+  border-radius: 12px;
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.18) !important;
+}
+
+#lightbox-cap {
+  font-family: "Playfair Display", "Poppins", serif !important;
+  font-style: italic !important;
+  color: rgba(255, 255, 255, 0.94) !important;
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+  margin-top: 14px;
+}
+
+/* ==========================================================
+   V2.6 · MENSAJES (items) · Más vivos
+   ========================================================== */
+.message-list .msg,
+.cards-section .msg {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(252, 244, 255, 0.84)) !important;
+  border: 1px solid rgba(124, 73, 255, 0.10) !important;
+  border-left: 3px solid transparent !important;
+  border-image: linear-gradient(180deg, #ff5fb6, #7c49ff) 1 !important;
+  box-shadow:
+    0 8px 18px rgba(124, 73, 255, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+  transition:
+    transform 0.28s var(--mej-bounce),
+    box-shadow 0.28s ease,
+    background 0.25s ease !important;
+}
+
+.message-list .msg:hover,
+.cards-section .msg:hover {
+  transform: translateX(6px) translateY(-2px) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(250, 240, 255, 0.95)) !important;
+  box-shadow:
+    0 16px 32px rgba(124, 73, 255, 0.14),
+    0 6px 14px rgba(255, 95, 182, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Scrollbar suave dentro de las cards de mensajes */
+.message-list::-webkit-scrollbar {
+  width: 6px;
+}
+.message-list::-webkit-scrollbar-track {
+  background: rgba(255, 245, 252, 0.4);
+  border-radius: 999px;
+}
+.message-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 95, 182, 0.55), rgba(124, 73, 255, 0.65));
+  border-radius: 999px;
+}
+.message-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff5fb6, #7c49ff);
+}
+
+/* ==========================================================
+   V2.7 · EXTRA CARDS (calendario + mapa) · Marco con cariño
+   ========================================================== */
+.extras .extra-card {
+  position: relative;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(255, 200, 230, 0.18), transparent 60%),
+    radial-gradient(circle at 85% 100%, rgba(180, 130, 255, 0.16), transparent 60%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(252, 244, 255, 0.72)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow:
+    0 24px 50px rgba(124, 73, 255, 0.14),
+    0 10px 24px rgba(255, 95, 182, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+  transition: transform 0.4s var(--mej-ease), box-shadow 0.4s ease !important;
+}
+
+.extras .extra-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow:
+    0 32px 64px rgba(124, 73, 255, 0.20),
+    0 14px 30px rgba(255, 95, 182, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+/* ==========================================================
+   V2.8 · BOTONES DE CALENDAR-NAV
+   ========================================================== */
+.month-nav .month-btn {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(124, 73, 255, 0.18) !important;
+  color: #5a2d8a !important;
+  transition: transform 0.25s var(--mej-bounce), background 0.25s ease, border-color 0.25s ease !important;
+}
+
+.month-nav .month-btn:hover {
+  background: white !important;
+  border-color: rgba(255, 95, 182, 0.45) !important;
+  transform: translateY(-2px) scale(1.04) !important;
+}
+
+.month-nav .current-month {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(1.4rem, 3.5vw, 1.85rem) !important;
+  font-weight: 400 !important;
+  background: linear-gradient(120deg, #5a2d8a, #c43d8c, #7c49ff) !important;
+  background-size: 200% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  animation: mejGradientFlow 8s linear infinite;
+}
+
+/* ==========================================================
+   V2.9 · TARJETA DE FECHA SELECCIONADA
+   ========================================================== */
+.message-display:not(.empty) {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(252, 244, 255, 0.88)) !important;
+  border: 1px solid rgba(255, 95, 182, 0.22) !important;
+  box-shadow:
+    0 20px 44px rgba(124, 73, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+/* ==========================================================
+   V2.10 · SELECTED-DATE chip
+   ========================================================== */
+.selected-date {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(135deg, rgba(255, 95, 182, 0.14), rgba(124, 73, 255, 0.14)) !important;
+  border: 1px solid rgba(255, 95, 182, 0.28) !important;
+  color: #6b2dab !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* ==========================================================
+   V2.11 · MEMORY-MAP marco más cuidado
+   ========================================================== */
+.memory-map {
+  border-radius: 22px !important;
+  border: 1px solid rgba(124, 73, 255, 0.18) !important;
+  box-shadow:
+    0 26px 50px rgba(124, 73, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ==========================================================
+   V2.12 · INPUTS de la galería con foco más cariñoso
+   ========================================================== */
+.super-gallery-actions #filter-place:focus,
+.super-gallery-actions #search-caption:focus {
+  border-color: rgba(255, 95, 182, 0.55) !important;
+  box-shadow:
+    0 0 0 5px rgba(255, 95, 182, 0.14),
+    0 12px 28px rgba(124, 73, 255, 0.14) !important;
+  outline: none !important;
+}
+
+/* ==========================================================
+   V2.13 · SPECIAL MESSAGE BANNER · Más vivo cuando aparece
+   ========================================================== */
+.special-message-banner:not([style*="display: none"]):not([style*="display:none"]) {
+  background:
+    linear-gradient(135deg, rgba(255, 95, 182, 0.16), rgba(124, 73, 255, 0.16)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(252, 244, 255, 0.92)) !important;
+  border: 1px solid rgba(255, 95, 182, 0.30) !important;
+  box-shadow:
+    0 24px 50px rgba(124, 73, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+/* ==========================================================
+   V2.14 · BACK-TO-TOP con corazoncito en hover
+   ========================================================== */
+.back-to-top {
+  background: linear-gradient(135deg, #ff5fb6, #c46cff, #7c49ff) !important;
+  background-size: 200% 100% !important;
+}
+
+.back-to-top:hover {
+  background-position: 100% 50% !important;
+}
+
+/* ==========================================================
+   V2.15 · FOOTER más cariñoso
+   ========================================================== */
+.footer::after {
+  font-size: 2rem !important;
+  filter: drop-shadow(0 8px 18px rgba(255, 95, 182, 0.45)) !important;
+}
+
+/* ==========================================================
+   V2.16 · SECTION DIVIDER ICON más rosa
+   ========================================================== */
+.section-divider-icon {
+  border: 1px solid rgba(255, 95, 182, 0.32) !important;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.98), rgba(247, 240, 255, 0.85)),
+    linear-gradient(135deg, rgba(255, 95, 182, 0.22), rgba(124, 73, 255, 0.22)) !important;
+  box-shadow:
+    0 14px 28px rgba(255, 95, 182, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+}
+
+/* ==========================================================
+   V2.17 · NOTES FAB & login: mejor gradient ring
+   ========================================================== */
+.notes-fab,
+#btn-open-login-footer,
+#btn-push-settings {
+  transition: transform 0.3s var(--mej-bounce), box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* ==========================================================
+   V2.18 · TIPOGRAFÍA: refinos finales
+   ========================================================== */
+.title {
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.cards-section .card .desc,
+.extras .extra-card p {
+  line-height: 1.55 !important;
+  color: rgba(74, 36, 128, 0.78) !important;
+}
+
+/* ==========================================================
+   V2.19 · Acomodar el botón Quitar filtro para no chocar con el
+   contador (que ahora está a la derecha)
+   ========================================================== */
+@media (min-width: 561px) {
+  #btn-clear-filter.is-visible {
+    /* Ya está top:22px + center; ok */
+  }
+}
+
+/* ==========================================================
+   =============   V3 · FIXES RESPONSIVE + LIMPIEZA   ============
+   - Gallery-actions: WRAP y nunca se sale del contenedor
+   - Pestañita del contador: mucho más discreta, no choca con fotos
+   - Responsive limpio en todos los breakpoints
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   V3.1 · SUPER-GALLERY-ACTIONS · Nunca overflow
+   ---------------------------------------------------------- */
+.super-gallery-inner {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-left: clamp(14px, 3vw, 32px) !important;
+  padding-right: clamp(14px, 3vw, 32px) !important;
+  box-sizing: border-box !important;
+}
+
+.super-gallery-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 12px 14px !important;
+}
+
+.super-gallery-actions > * {
+  min-width: 0 !important; /* permite que se encojan */
+  box-sizing: border-box !important;
+  flex: 0 1 auto;
+}
+
+/* Botón "Subir recuerdo": tamaño humano, no gigante */
+.super-gallery-actions #btn-open-upload {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: 100% !important;
+  padding: 11px 18px !important;
+  font-size: 0.95rem !important;
+  white-space: nowrap !important;
+  border-radius: 14px !important;
+  min-height: 44px !important;
+}
+
+/* Select "Todos los lugares" */
+.super-gallery-actions #filter-place {
+  flex: 1 1 200px !important;
+  min-width: 0 !important;
+  max-width: 240px !important;
+  padding: 10px 14px !important;
+  font-size: 0.9rem !important;
+  border-radius: 14px !important;
+  min-height: 44px !important;
+}
+
+/* Search "Buscar..." */
+.super-gallery-actions #search-caption {
+  flex: 1 1 240px !important;
+  min-width: 0 !important;
+  max-width: 320px !important;
+  padding: 10px 38px 10px 14px !important;
+  font-size: 0.9rem !important;
+  border-radius: 14px !important;
+  min-height: 44px !important;
+  background-size: 100% 100%, 16px 16px !important;
+  background-position: center, calc(100% - 12px) center !important;
+}
+
+/* Móvil: TODO al ancho completo, en columna */
+@media (max-width: 640px) {
+  .super-gallery-actions {
+    gap: 8px !important;
+    padding: 10px 10px !important;
+    border-radius: 18px !important;
+  }
+  .super-gallery-actions #btn-open-upload,
+  .super-gallery-actions #filter-place,
+  .super-gallery-actions #search-caption {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    font-size: 0.92rem !important;
+  }
+  .super-gallery-actions #btn-open-upload {
+    order: -1; /* el botón principal arriba */
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.2 · PESTAÑITA del contador · Mucho más discreta
+   Antes era 34×102 y chocaba con las fotos.
+   Ahora: 22×64 px, semitransparente cuando hay scroll sobre
+   contenido, full opaque al hover/abierto.
+   ---------------------------------------------------------- */
+.love-counter .love-counter-toggle,
+aside.love-counter .love-counter-toggle {
+  width: 24px !important;
+  height: 70px !important;
+  border-radius: 14px 0 0 14px !important;
+  font-size: 0.95rem !important;
+  opacity: 0.78 !important;
+  /* Sombra más sutil */
+  box-shadow:
+    -8px 10px 22px rgba(86, 47, 124, 0.22),
+    -2px 4px 10px rgba(255, 95, 182, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+}
+
+/* OJO: la regla anterior aquí ponía opacity:1 al hover del aside,
+   pero AHORA queremos que el corazón DESAPAREZCA al abrirse el panel.
+   Por eso esa regla se eliminó. Sólo dejamos un hover SOBRE el toggle
+   mismo (pre-apertura) para subir el contraste un instante. */
+.love-counter .love-counter-toggle:focus-visible,
+aside.love-counter .love-counter-toggle:focus-visible {
+  opacity: 1 !important;
+}
+
+/* REGLA OCULTAR EL CORAZÓN cuando el panel está abierto (click sticky) */
+aside#love-counter.is-open #love-counter-toggle,
+.love-counter.is-open .love-counter-toggle {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateX(30px) !important;
+  transition:
+    opacity 0.22s ease,
+    transform 0.32s var(--mej-bounce),
+    visibility 0s linear 0.22s !important;
+  animation: none !important;
+}
+
+.love-counter .love-counter-toggle-heart {
+  font-size: 1.1rem !important;
+}
+
+/* Panel del contador: ancho cómodo para que se lean los números */
+.love-counter > .love-counter-panel,
+aside.love-counter > .love-counter-panel {
+  width: 122px !important;
+  padding: 38px 10px 14px !important; /* extra top para que la X no tape */
+  border-radius: 22px 0 0 22px !important; /* solo lado izquierdo redondeado */
+}
+
+@media (max-width: 760px) {
+  .love-counter .love-counter-toggle,
+  aside.love-counter .love-counter-toggle {
+    width: 22px !important;
+    height: 64px !important;
+    font-size: 0.9rem !important;
+  }
+  .love-counter .love-counter-toggle-heart {
+    font-size: 1rem !important;
+  }
+  .love-counter > .love-counter-panel,
+  aside.love-counter > .love-counter-panel {
+    width: 110px !important;
+    padding: 10px 8px !important;
+  }
+}
+
+/* (Puente eliminado — el panel ahora es fixed y maneja su propio hover) */
+
+/* La pestañita se baja un pelín cuando hay mucho contenido para
+   evitar que se solape con un FAB o un texto del centro */
+.love-counter,
+aside.love-counter {
+  top: 45% !important;
+}
+
+/* ----------------------------------------------------------
+   V3.3 · BTN-CLEAR-FILTER · Mejor en móvil
+   ---------------------------------------------------------- */
+@media (max-width: 480px) {
+  #btn-clear-filter {
+    top: 10px !important;
+    padding: 10px 16px !important;
+    font-size: 0.85rem !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+  #btn-clear-filter::before {
+    inset: -6px !important;
+    filter: blur(12px) !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.4 · GALLERY GRID responsive
+   ---------------------------------------------------------- */
+.super-gallery-grid {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 1100px) {
+  .super-gallery-grid {
+    column-count: 3 !important;
+  }
+}
+@media (max-width: 760px) {
+  .super-gallery-grid {
+    column-count: 2 !important;
+    column-gap: 10px !important;
+  }
+}
+@media (max-width: 480px) {
+  .super-gallery-grid {
+    column-count: 1 !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.5 · CARDS-SECTION responsive (3 columnas → 1)
+   ---------------------------------------------------------- */
+.cards-section {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: clamp(14px, 2.5vw, 24px) !important;
+}
+
+@media (max-width: 920px) {
+  .cards-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .cards-section {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.6 · HERO responsive (texto + foto)
+   ---------------------------------------------------------- */
+@media (max-width: 920px) {
+  .hero {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 28px !important;
+  }
+  .hero-content,
+  .hero-photo {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .hero-photo img {
+    max-width: min(360px, 80vw) !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.7 · EXTRAS responsive (calendario + mapa)
+   ---------------------------------------------------------- */
+@media (max-width: 760px) {
+  .extras .extra-card h3 {
+    font-size: clamp(1.4rem, 4.5vw, 1.8rem) !important;
+  }
+  .month-nav {
+    flex-wrap: wrap;
+    gap: 8px !important;
+  }
+  .month-nav .month-btn {
+    font-size: 0.78rem !important;
+    padding: 8px 12px !important;
+  }
+  .calendar-toggle-row {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+  .memory-map {
+    min-height: 280px !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.8 · MAP photo-pocket (la foto que sale junto al mapa)
+   se mueve abajo en móvil para no tapar el mapa
+   ---------------------------------------------------------- */
+@media (max-width: 760px) {
+  .map-photo-pocket {
+    position: static !important;
+    margin: 12px auto 0 !important;
+    width: min(280px, 90%) !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.9 · MODALES responsive
+   ---------------------------------------------------------- */
+@media (max-width: 560px) {
+  .modal-card,
+  .upload-card,
+  .calendar-unlock-card,
+  .push-settings-card,
+  .love-counter-modal-card {
+    max-width: calc(100vw - 24px) !important;
+    padding: 22px 18px !important;
+    border-radius: 22px !important;
+  }
+  .row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .row > .field {
+    width: 100% !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.10 · NOTES-LOGIN-ROW: que nunca tape contenido
+   ---------------------------------------------------------- */
+@media (max-width: 480px) {
+  .notes-login-row {
+    bottom: 14px !important;
+    right: 14px !important;
+    gap: 8px !important;
+  }
+  .notes-login-row > * {
+    width: 46px !important;
+    height: 46px !important;
+    min-width: 46px !important;
+    min-height: 46px !important;
+    max-width: 46px !important;
+    max-height: 46px !important;
+    flex: 0 0 46px !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.11 · SUPER-GALLERY HEAD responsive
+   ---------------------------------------------------------- */
+@media (max-width: 640px) {
+  .super-gallery-head h4 {
+    font-size: clamp(1.9rem, 8vw, 2.6rem) !important;
+  }
+  .super-gallery-title-row {
+    gap: 8px !important;
+  }
+  .super-gallery-count {
+    font-size: 0.72rem !important;
+    padding: 5px 10px !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.12 · FOOTER responsive
+   ---------------------------------------------------------- */
+@media (max-width: 560px) {
+  .footer p:first-child {
+    font-size: clamp(1.3rem, 5vw, 1.7rem) !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V3.13 · BODY/MAIN: prevenir overflow horizontal global
+   ---------------------------------------------------------- */
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+.page,
+main.page {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+/* ----------------------------------------------------------
+   V3.14 · Si el contador peek se solapa con la galería,
+   bajamos un poco más su opacidad para que no compita.
+   ---------------------------------------------------------- */
+.love-counter .love-counter-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ==========================================================
+   =====   V4 · PANTALLAS GRANDES + CALENDAR + MENSAJE   =====
+   - .page con max-width 1200px centrado (hero ya no se estira)
+   - Calendar cells con altura razonable (no enormes)
+   - Mensaje del día centrado con max-width
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   V4.1 · Constrain .page para que el hero deje de estirarse
+   en pantallas grandes. La super-gallery queda OUTSIDE .page
+   (es full-bleed) así que esto no afecta su ancho.
+   ---------------------------------------------------------- */
+main.page,
+.page {
+  max-width: 1200px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: clamp(16px, 3vw, 32px) !important;
+  padding-right: clamp(16px, 3vw, 32px) !important;
+  box-sizing: border-box !important;
+}
+
+/* ----------------------------------------------------------
+   V4.2 · HERO en pantallas grandes: contenido y foto
+   centrados como UN grupo, sin espacio vacío inmenso en el medio
+   ---------------------------------------------------------- */
+.hero {
+  max-width: 100% !important;
+  gap: clamp(32px, 5vw, 72px) !important;
+  justify-content: center !important;   /* antes era space-between */
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+}
+
+.hero-content {
+  /* No crecer hasta llenar, quedarse a tamaño natural */
+  flex: 0 1 auto !important;
+  width: auto !important;
+  max-width: 540px !important;
+  min-width: 0 !important;
+}
+
+.hero-photo {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  max-width: 360px !important;
+}
+
+.hero-photo img {
+  width: 100% !important;
+  max-width: 340px !important;
+  height: auto !important;
+}
+
+/* ----------------------------------------------------------
+   V4.3 · CALENDAR · cells más pequeñas y adaptadas
+   En desktop: max 84px de alto. En tablets: 70px. En móvil: 56px.
+   ---------------------------------------------------------- */
+.calendar-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: clamp(4px, 0.8vw, 8px) !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* (Reglas anteriores de .calendar-day movidas a V5.1 con redesign completo) */
+
+.calendar-header {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: clamp(4px, 0.8vw, 8px) !important;
+  margin-bottom: 6px !important;
+}
+
+.calendar-header-day {
+  padding: 6px 0 !important;
+  font-size: clamp(0.65rem, 1vw, 0.78rem) !important;
+}
+
+/* Reservar espacio para el badge "HOY" sin que rompa el grid */
+.calendar-day.available.today {
+  position: relative !important;
+}
+
+/* ----------------------------------------------------------
+   V4.4 · MENSAJE del DÍA · max-width centrado, no spanning
+   ---------------------------------------------------------- */
+.message-display {
+  max-width: 720px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.message-display:not(.empty) {
+  padding: 18px 22px !important;
+  border-radius: 18px !important;
+}
+
+/* El título "Día X" y el cuerpo bien jerarquizados */
+.message-display .message-day-number,
+.message-display strong:first-child,
+.message-display h4 {
+  font-family: "Sacramento", "Poppins", serif !important;
+  font-size: clamp(1.4rem, 3vw, 1.9rem) !important;
+  font-weight: 400 !important;
+  background: linear-gradient(120deg, #5a2d8a, #c43d8c, #7c49ff) !important;
+  background-size: 220% auto !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  margin-bottom: 8px !important;
+}
+
+/* ----------------------------------------------------------
+   V4.5 · CALENDAR TOGGLE ROW · centrado y compacto
+   ---------------------------------------------------------- */
+.calendar-toggle-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 16px 0 !important;
+}
+
+/* ----------------------------------------------------------
+   V4.6 · MONTH-NAV · más compacto
+   ---------------------------------------------------------- */
+.month-nav {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: clamp(8px, 1.5vw, 14px) !important;
+  margin-bottom: 12px !important;
+}
+
+.month-nav .month-btn {
+  flex: 0 1 auto !important;
+  max-width: 200px !important;
+  padding: 10px 16px !important;
+  font-size: clamp(0.78rem, 1.1vw, 0.92rem) !important;
+}
+
+.month-nav .current-month {
+  flex: 1 1 auto !important;
+  text-align: center !important;
+  font-size: clamp(1.3rem, 2.6vw, 1.8rem) !important;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* ----------------------------------------------------------
+   V4.7 · EXTRAS · constraints generales para no estirarse
+   ---------------------------------------------------------- */
+.extras {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.extras .extra-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* ----------------------------------------------------------
+   V4.8 · Hero responsive en pantallas medias (entre tablet
+   y desktop): foto un poco más chica
+   ---------------------------------------------------------- */
+@media (min-width: 920px) and (max-width: 1200px) {
+  .hero-content {
+    max-width: 480px !important;
+  }
+  .hero-photo {
+    max-width: 320px !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V4.9 · HERO ACTIONS · botones GEMELOS (100 razones + Sorpréndeme)
+   - Ambos al 100% del ancho del contenedor (max 420px)
+   - Misma altura, mismo padding, mismo border-radius
+   - Centrados verticalmente en columna con gap consistente
+   - Difieren SOLO en piel (gradient vs outline)
+   ---------------------------------------------------------- */
+.hero-content {
+  text-align: left;
+}
+
+/* Contenedor: columna centrada y limitada */
+.hero-content .hero-actions,
+.hero .hero-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 420px !important;
+  margin: 16px 0 0 !important;
+  padding: 0 !important;
+}
+
+/* REGLA GEMELA: aplica geometría idéntica a AMBOS botones
+   (primario .btn y secundario .surprise-btn) */
+.hero-content .hero-actions .btn,
+.hero-content .hero-actions .surprise-btn,
+.hero .hero-actions > button {
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 54px !important;
+  padding: 14px 22px !important;
+  margin: 0 !important;            /* mata margin-top:12px y margin-left:14px de polish.css */
+  border-radius: 16px !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: 0.98rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0.005em !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s var(--mej-bounce),
+    box-shadow 0.3s ease,
+    background-position 0.6s var(--mej-ease),
+    border-color 0.3s ease !important;
+}
+
+/* SKIN PRIMARIO: "100 razones" — gradient vivo, texto blanco */
+.hero-content .hero-actions #btn-random-bday,
+.hero-content .hero-actions .btn:not(.outline):not(.surprise-btn) {
+  background: linear-gradient(135deg, #ff5fb6 0%, #c46cff 50%, #7c49ff 100%) !important;
+  background-size: 220% 100% !important;
+  background-position: 0% 50% !important;
+  color: white !important;
+  border: 2px solid transparent !important; /* matchea el outline del secundario */
+  box-shadow:
+    0 18px 38px rgba(124, 73, 255, 0.34),
+    0 8px 20px rgba(255, 95, 182, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.hero-content .hero-actions #btn-random-bday:hover,
+.hero-content .hero-actions .btn:not(.outline):not(.surprise-btn):hover {
+  background-position: 100% 50% !important;
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow:
+    0 26px 52px rgba(124, 73, 255, 0.44),
+    0 12px 28px rgba(255, 95, 182, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.50) !important;
+}
+
+/* SKIN SECUNDARIO: "Sorpréndeme" — outline cariñoso */
+.hero-content .hero-actions .surprise-btn {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 244, 255, 0.94)) !important;
+  color: #6b2dab !important;
+  border: 2px solid rgba(255, 95, 182, 0.45) !important;
+  box-shadow:
+    0 12px 26px rgba(124, 73, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+  text-shadow: none;
+}
+
+.hero-content .hero-actions .surprise-btn:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 95, 182, 0.10), rgba(124, 73, 255, 0.10)),
+    linear-gradient(180deg, #ffffff, #fdf6ff) !important;
+  color: #c43d8c !important;
+  border-color: rgba(255, 95, 182, 0.75) !important;
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow:
+    0 20px 36px rgba(124, 73, 255, 0.20),
+    0 10px 22px rgba(255, 95, 182, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96) !important;
+}
+
+/* Emoji del Sorpréndeme: tamaño consistente */
+.hero-content .hero-actions .surprise-btn .surprise-btn-emoji {
+  font-size: 1.05rem !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+/* Active state: micro-press para ambos */
+.hero-content .hero-actions .btn:active,
+.hero-content .hero-actions .surprise-btn:active {
+  transform: translateY(0) scale(0.98) !important;
+}
+
+/* Neutraliza pseudo-elementos viejos (shimmer de polish.css) */
+.hero-content .hero-actions .btn::before,
+.hero-content .hero-actions .surprise-btn::before {
+  content: none !important;
+}
+
+/* Responsive: en móvil el contenedor ocupa todo el ancho disponible */
+@media (max-width: 480px) {
+  .hero-content .hero-actions,
+  .hero .hero-actions {
+    max-width: 100% !important;
+  }
+  .hero-content .hero-actions .btn,
+  .hero-content .hero-actions .surprise-btn {
+    min-height: 50px !important;
+    padding: 12px 18px !important;
+    font-size: 0.92rem !important;
+  }
+}
+
+@media (min-width: 921px) {
+  /* Desktop: alineado al inicio de la columna (no centrado) */
+  .hero-content .hero-actions {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+  }
+}
+
+/* ==========================================================
+   ============   V5 · CALENDAR & MENSAJE LIMPIO   ============
+   - Celdas del calendario tocándose (gap mínimo)
+   - Quitar el triángulo decorativo y la línea de la card del
+     mensaje del día (vienen de polish.css y se ven raras)
+   ========================================================== */
+
+/* ----------------------------------------------------------
+   V5.1 · CALENDAR · Diseño premium con celdas pegadas
+   ---------------------------------------------------------- */
+
+/* Wrapper del calendario: card unificada con padding */
+.calendar-wrapper:not(.calendar-hidden) {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(252, 244, 255, 0.92)) !important;
+  border: 1px solid rgba(255, 95, 182, 0.18) !important;
+  border-radius: 22px !important;
+  padding: 18px clamp(12px, 2vw, 22px) !important;
+  box-shadow:
+    0 22px 50px rgba(124, 73, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92) !important;
+  margin: 14px auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Header de días de la semana */
+.calendar-header {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  margin-bottom: 8px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid rgba(255, 95, 182, 0.16);
+}
+
+.calendar-header-day {
+  text-align: center !important;
+  font-weight: 800 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.14em !important;
+  font-size: clamp(0.6rem, 0.9vw, 0.72rem) !important;
+  color: #c43d8c !important;
+  padding: 4px 0 !important;
+  background: none !important;
+  position: relative;
+}
+
+.calendar-header-day::after {
+  display: none !important;
+}
+
+/* Grid: celdas pegadas, sin gap.
+   En desktop limitamos el ancho del grid para que las celdas no
+   se vuelvan gigantes (7 columnas × pantalla ancha = cells enormes) */
+.calendar-grid {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  width: 100% !important;
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 14px;
+  overflow: hidden;
+  box-sizing: border-box !important;
+}
+
+/* El header también se alinea con el grid */
+.calendar-header {
+  max-width: 760px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* CELDA · altura fija para que filas queden pegadas, sin aspect-ratio */
+.calendar-day {
+  position: relative !important;
+  aspect-ratio: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  height: 74px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: clamp(0.95rem, 1.4vw, 1.15rem) !important;
+  font-weight: 700 !important;
+  color: #4a2480 !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(250, 240, 255, 0.7)) !important;
+  /* Líneas finísimas entre celdas (efecto "rejilla") */
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 95, 182, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  cursor: pointer !important;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s var(--mej-bounce),
+    box-shadow 0.25s ease !important;
+}
+
+/* Hover: pop suave con gradient rosa */
+.calendar-day.available:not(.locked):hover {
+  z-index: 5 !important;
+  transform: scale(1.06) !important;
+  background:
+    linear-gradient(135deg, rgba(255, 95, 182, 0.18), rgba(124, 73, 255, 0.18)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(252, 240, 250, 0.95)) !important;
+  color: #5a2d8a !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 95, 182, 0.45),
+    0 14px 26px rgba(255, 95, 182, 0.24),
+    0 6px 14px rgba(124, 73, 255, 0.20) !important;
+}
+
+/* SELECCIONADO */
+.calendar-day.available.selected:not(.today-selected):not(.today) {
+  background: linear-gradient(135deg, #c46cff, #7c49ff) !important;
+  color: white !important;
+  box-shadow:
+    0 16px 30px rgba(124, 73, 255, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  z-index: 4 !important;
+}
+
+/* HOY (sin seleccionar) */
+.calendar-day.available.today:not(.selected):not(.today-selected) {
+  background: linear-gradient(135deg, #ff5fb6, #c46cff) !important;
+  color: white !important;
+  box-shadow:
+    0 14px 28px rgba(255, 95, 182, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  z-index: 4 !important;
+}
+
+/* HOY seleccionado */
+.calendar-day.available.today.selected,
+.calendar-day.available.today-selected {
+  background: linear-gradient(135deg, #ff5fb6 0%, #c46cff 50%, #7c49ff 100%) !important;
+  color: white !important;
+  box-shadow:
+    0 18px 38px rgba(255, 95, 182, 0.50),
+    0 0 0 2px rgba(255, 255, 255, 0.7) inset,
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+  z-index: 5 !important;
+}
+
+/* LOCKED: días bloqueados, sin color */
+.calendar-day.locked,
+.calendar-day:not(.available) {
+  background:
+    linear-gradient(180deg, rgba(248, 244, 252, 0.7), rgba(242, 234, 250, 0.5)) !important;
+  color: rgba(124, 73, 255, 0.30) !important;
+  cursor: not-allowed !important;
+  pointer-events: none !important;
+}
+
+/* Esquinas redondeadas SÓLO en las 4 esquinas extremas del grid */
+.calendar-grid .calendar-day:nth-child(1) {
+  border-top-left-radius: 14px !important;
+}
+.calendar-grid .calendar-day:nth-child(7) {
+  border-top-right-radius: 14px !important;
+}
+.calendar-grid .calendar-day:nth-last-child(7) {
+  /* heurística para esquina inferior izquierda: el primero de la última fila */
+}
+
+/* Badge "HOY" sobre la celda */
+.calendar-day.today::before {
+  z-index: 6 !important;
+}
+
+/* En pantallas anchas el grid se mantiene a 760px max y centrado.
+   En tablets/móvil ocupa todo el ancho disponible. */
+@media (max-width: 760px) {
+  .calendar-grid,
+  .calendar-header {
+    max-width: 100% !important;
+  }
+  .calendar-day {
+    height: 62px !important;
+    font-size: clamp(0.9rem, 3vw, 1.05rem) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-day {
+    height: 52px !important;
+    font-size: 0.9rem !important;
+  }
+}
+
+/* ----------------------------------------------------------
+   V5.2 · MENSAJE DEL DÍA · sin triángulos ni líneas raras
+   Quita el triángulo top-right (polish.css V2.11)
+   ---------------------------------------------------------- */
+.message-display:not(.empty)::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Quita el sobrecito 💌 que pintaba polish.css en el panel */
+.message-panel::before,
+.message-display .message-panel::before,
+.message-display:not(.empty) .message-panel::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* Quita la barrita vertical púrpura de la izquierda del panel */
+.message-display:not(.empty) .message-panel:first-child::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* También por si hay un pseudo del propio .message-display */
+.message-display:not(.empty)::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* ----------------------------------------------------------
+   V5.3 · MENSAJE DEL DÍA · estilo "carta abierta" minimalista
+   Card centrada, tipografía cariñosa, sin decoración recargada.
+   ---------------------------------------------------------- */
+.message-display:not(.empty) {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 28px 0 0 !important;
+  padding: clamp(28px, 3.5vw, 44px) clamp(28px, 4vw, 56px) clamp(32px, 3.5vw, 48px) !important;
+  border-radius: 4px 4px 22px 22px / 4px 4px 22px 22px !important;
+  background:
+    linear-gradient(180deg, #fffaf6 0%, #fff5f9 100%) !important;
+  border: 0 !important;
+  box-shadow:
+    0 1px 0 rgba(255, 95, 182, 0.22),
+    0 24px 50px rgba(124, 73, 255, 0.12),
+    0 8px 20px rgba(255, 95, 182, 0.08) !important;
+  position: relative !important;
+  overflow: visible !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  animation: mejMsgFadeIn 0.55s var(--mej-ease-out);
+}
+
+/* Cintita rosa en la parte superior (estilo cartita sellada) */
+.message-display:not(.empty)::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 60% !important;
+  max-width: 280px !important;
+  height: 4px !important;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #ff5fb6 30%,
+    #c46cff 50%,
+    #7c49ff 70%,
+    transparent 100%) !important;
+  border-radius: 0 0 4px 4px !important;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Sin sello redondo — se veía como un círculo random */
+.message-display:not(.empty)::after {
+  display: none !important;
+  content: none !important;
+}
+
+@keyframes mejMsgFadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.message-display:not(.empty) .message-panel {
+  position: relative !important;
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Quitamos el eyebrow pill que venía mal */
+.message-display:not(.empty) .message-panel:first-child::before {
+  display: none !important;
+  content: none !important;
+}
+
+.message-display:not(.empty) .message-panel:first-child::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* "Día 225" — en Sacramento elegante, gradiente sutil */
+.message-display strong:first-child,
+.message-display .message-day-number,
+.message-display .message-panel strong:first-child {
+  display: block !important;
+  font-family: "Sacramento", cursive !important;
+  font-size: clamp(2.4rem, 5vw, 3.4rem) !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  background: linear-gradient(120deg, #c43d8c 0%, #7c49ff 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  margin: 0 auto 18px !important;
+  letter-spacing: 0.01em !important;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+/* Adorno bajo el título: ─ ✿ ─ */
+.message-display strong:first-child::after,
+.message-display .message-panel strong:first-child::after {
+  content: "❀" !important;
+  display: block !important;
+  font-family: "Poppins", sans-serif !important;
+  font-size: 0.7rem !important;
+  margin: 6px auto 0 !important;
+  background: linear-gradient(90deg, transparent 0%, #ff5fb6 50%, transparent 100%) !important;
+  width: 80px !important;
+  height: 1.4rem !important;
+  line-height: 1.4rem !important;
+  text-align: center !important;
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  background-clip: initial !important;
+  -webkit-background-clip: initial !important;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255, 95, 182, 0.45) 35%, rgba(255, 95, 182, 0.45) 65%, transparent 100%) !important;
+  border-radius: 999px !important;
+  text-shadow: 0 1px 2px rgba(255, 95, 182, 0.4);
+}
+
+/* Cuerpo del mensaje · Playfair Display, romántico */
+.message-display p,
+.message-display .message-text,
+.message-display .message-panel p {
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-size: clamp(1.05rem, 1.6vw, 1.22rem) !important;
+  font-style: italic !important;
+  font-weight: 500 !important;
+  line-height: 1.65 !important;
+  color: #3b1b4a !important;
+  margin: 0 auto !important;
+  max-width: 62ch !important;
+  letter-spacing: 0.005em !important;
+  position: relative;
+  z-index: 1;
+  text-wrap: pretty;
+  text-align: center;
+}
+
+/* Firma sutil al final (vía pseudo en el panel) */
+.message-display:not(.empty) > p:last-child::after,
+.message-display:not(.empty) .message-panel > p:last-child::after {
+  content: "— con todo mi amor" !important;
+  display: block !important;
+  margin-top: 20px !important;
+  font-family: "Sacramento", cursive !important;
+  font-style: normal !important;
+  font-size: 1.15rem !important;
+  font-weight: 400 !important;
+  color: #c43d8c !important;
+  letter-spacing: 0.02em !important;
+  text-align: right;
+  max-width: 100%;
+}

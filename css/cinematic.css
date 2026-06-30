@@ -1,0 +1,662 @@
+/* ==========================================================
+   CINEMATIC LAYER · Premium upgrades
+   Se carga DESPUÉS de polish.css. Solo añade más cariño visual.
+   Nada de aquí toca la lógica.
+   ========================================================== */
+
+:root {
+  --cin-pink: #ff6fbf;
+  --cin-rose: #ff85c0;
+  --cin-violet: #7c49ff;
+  --cin-deep: #5a2d8a;
+  --cin-cream: #fff5fb;
+  --cin-soft: 0 24px 60px rgba(124, 73, 255, 0.14);
+  --cin-bloom: 0 0 60px rgba(255, 111, 191, 0.35);
+  --cin-glass: rgba(255, 255, 255, 0.55);
+  --cin-glass-border: rgba(255, 255, 255, 0.7);
+  --cin-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --cin-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ==========================================================
+   1. MESH GRADIENT BACKGROUND animado (capa extra)
+   ========================================================== */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -4;
+  pointer-events: none;
+  background:
+    radial-gradient(800px 600px at 12% 88%, rgba(255, 111, 191, 0.14), transparent 55%),
+    radial-gradient(700px 580px at 88% 12%, rgba(124, 73, 255, 0.13), transparent 55%),
+    radial-gradient(560px 460px at 50% 50%, rgba(255, 200, 230, 0.08), transparent 60%);
+  filter: blur(2px);
+  animation: meshDrift 36s ease-in-out infinite alternate;
+  mix-blend-mode: screen;
+}
+
+@keyframes meshDrift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  33%  { transform: translate3d(-24px, 16px, 0) scale(1.04); }
+  66%  { transform: translate3d(28px, -22px, 0) scale(0.98); }
+  100% { transform: translate3d(0, 0, 0) scale(1.02); }
+}
+
+/* ==========================================================
+   2. TÍTULO HERO con shimmer + reveal por letras
+   ========================================================== */
+.title {
+  position: relative;
+  text-shadow: 0 8px 30px rgba(124, 73, 255, 0.18);
+}
+
+.title .cin-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(28px) rotateX(-40deg);
+  animation: letterDrop 0.8s var(--cin-bounce) forwards;
+  transform-origin: center bottom;
+}
+
+.title .cin-letter.cin-space {
+  width: 0.28em;
+}
+
+@keyframes letterDrop {
+  0%   { opacity: 0; transform: translateY(28px) rotateX(-40deg); }
+  60%  { opacity: 1; transform: translateY(-4px) rotateX(8deg); }
+  100% { opacity: 1; transform: translateY(0) rotateX(0); }
+}
+
+/* Brillo que cruza el título cada cierto tiempo */
+.title::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    transparent 45%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 55%,
+    transparent 100%
+  );
+  background-size: 220% 100%;
+  background-position: -120% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  pointer-events: none;
+  animation: titleSweep 7s ease-in-out 3s infinite;
+  mix-blend-mode: overlay;
+}
+
+@keyframes titleSweep {
+  0%, 70%, 100% { background-position: -120% 0; }
+  85%           { background-position: 220% 0; }
+}
+
+/* ==========================================================
+   3. FOTO HERO con marco de gradiente cónico rotando
+   ========================================================== */
+.hero-photo {
+  position: relative;
+}
+
+.hero-photo::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 28px;
+  z-index: -1;
+  background: conic-gradient(
+    from 0deg,
+    #ff6fbf,
+    #ffd6ec,
+    #c46cff,
+    #7c49ff,
+    #ff85c0,
+    #ff6fbf
+  );
+  filter: blur(0.5px);
+  opacity: 0.55;
+  animation: conicSpin 12s linear infinite;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  padding: 4px;
+}
+
+@keyframes conicSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Reflejo sutil sobre la foto */
+.hero-photo img {
+  position: relative;
+}
+
+.hero-photo::before {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 111, 191, 0.4), transparent 55%),
+    radial-gradient(circle at 70% 70%, rgba(124, 73, 255, 0.36), transparent 55%) !important;
+}
+
+/* ==========================================================
+   4. CARDS · Glassmorphism + borde gradiente
+   ========================================================== */
+.cards-section .card {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(252, 244, 255, 0.55)) !important;
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--cin-glass-border) !important;
+  position: relative !important;
+}
+
+.cards-section .card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 111, 191, 0.5),
+    rgba(124, 73, 255, 0.5),
+    rgba(255, 200, 230, 0.3)
+  );
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s var(--cin-ease);
+}
+
+.cards-section .card:hover::before {
+  opacity: 1;
+}
+
+/* Reflejo sutil que cruza la card al pasar */
+.cards-section .card .card-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 42%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 58%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: -120% 0;
+  transition: background-position 0.7s var(--cin-ease);
+  z-index: 2;
+  mix-blend-mode: overlay;
+  border-radius: inherit;
+}
+
+.cards-section .card:hover .card-shine {
+  background-position: 220% 0;
+}
+
+/* ==========================================================
+   5. BOTONES · Magnético + ripple + glow
+   ========================================================== */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transform: translate(var(--cin-mx, 0), var(--cin-my, 0));
+  transition:
+    transform 0.35s var(--cin-ease),
+    box-shadow 0.35s var(--cin-ease),
+    background 0.3s ease,
+    border-color 0.3s ease !important;
+}
+
+.btn:not(.outline):hover {
+  box-shadow:
+    0 22px 48px rgba(124, 73, 255, 0.32),
+    0 0 0 4px rgba(255, 111, 191, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Ripple */
+.btn .cin-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 70%);
+  width: 200px;
+  height: 200px;
+  animation: ripple 700ms ease-out forwards;
+  mix-blend-mode: overlay;
+  z-index: 1;
+}
+
+@keyframes ripple {
+  to {
+    transform: translate(-50%, -50%) scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* ==========================================================
+   6. CURSOR PERSONALIZADO (solo desktop con puntero fino)
+   ========================================================== */
+.cin-cursor,
+.cin-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 99997;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.3s ease, width 0.3s var(--cin-ease), height 0.3s var(--cin-ease);
+}
+
+.cin-cursor {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 111, 191, 0.05);
+  backdrop-filter: blur(2px);
+}
+
+.cin-cursor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.cin-cursor.is-active,
+.cin-cursor-dot.is-active {
+  opacity: 1;
+}
+
+.cin-cursor.is-hover {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 111, 191, 0.15);
+  border-color: rgba(255, 200, 230, 0.95);
+}
+
+.cin-cursor.is-pressed {
+  width: 28px;
+  height: 28px;
+}
+
+/* En body con cursor activado escondemos el cursor real */
+body.cin-cursor-on,
+body.cin-cursor-on a,
+body.cin-cursor-on button,
+body.cin-cursor-on input,
+body.cin-cursor-on textarea,
+body.cin-cursor-on select,
+body.cin-cursor-on label {
+  cursor: none !important;
+}
+
+/* En móvil/touch escondemos el cursor custom */
+@media (hover: none), (pointer: coarse) {
+  .cin-cursor,
+  .cin-cursor-dot {
+    display: none !important;
+  }
+}
+
+/* Lo escondemos también dentro del lightbox o intro */
+body.lightbox-open .cin-cursor,
+body.lightbox-open .cin-cursor-dot,
+.page-intro ~ * .cin-cursor {
+  opacity: 0 !important;
+}
+
+/* ==========================================================
+   7. CALENDARIO · Días con efecto de carta + borde dorado
+   ========================================================== */
+.calendar-day {
+  position: relative;
+}
+
+.calendar-day.available:not(.locked):hover {
+  z-index: 5;
+  transform: translateY(-3px) scale(1.04) !important;
+  box-shadow:
+    0 18px 36px rgba(124, 73, 255, 0.25),
+    0 6px 16px rgba(255, 111, 191, 0.18) !important;
+}
+
+.calendar-day.available.selected {
+  animation: dayChosen 600ms var(--cin-bounce);
+}
+
+@keyframes dayChosen {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12) rotate(-2deg); }
+  70%  { transform: scale(0.96) rotate(1deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+/* Pequeño corazón flotante encima del día seleccionado */
+.calendar-day.available.selected::after,
+.calendar-day.available.today-selected::after {
+  content: "💗";
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  animation: dayHeart 700ms var(--cin-bounce) 100ms forwards;
+  filter: drop-shadow(0 4px 10px rgba(255, 111, 191, 0.5));
+  font-size: 0.95rem;
+  pointer-events: none;
+  z-index: 6;
+}
+
+@keyframes dayHeart {
+  0%   { transform: translateX(-50%) scale(0) rotate(-12deg); opacity: 0; }
+  60%  { transform: translateX(-50%) scale(1.25) rotate(10deg); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1) rotate(0); opacity: 0.95; }
+}
+
+/* ==========================================================
+   8. SUPER-GALERÍA · Polaroid sutil + lazy reveal
+   ========================================================== */
+.sg-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.sg-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 60%,
+    rgba(124, 73, 255, 0.18)
+  );
+  opacity: 0;
+  transition: opacity 0.4s var(--cin-ease);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sg-item:hover::after {
+  opacity: 1;
+}
+
+.sg-item img {
+  filter: saturate(1.05);
+}
+
+.sg-item img.cin-lazy {
+  filter: blur(12px) saturate(0.6);
+  opacity: 0.6;
+  transition: filter 0.7s var(--cin-ease), opacity 0.5s ease;
+}
+
+.sg-item img.cin-lazy.cin-loaded {
+  filter: blur(0) saturate(1.05);
+  opacity: 1;
+}
+
+/* ==========================================================
+   9. LOVE COUNTER · Halo discreto (sin tocar fondo ni texto)
+   ========================================================== */
+.love-counter-panel {
+  position: relative;
+}
+
+.love-counter-value {
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: -0.01em !important;
+}
+
+.love-counter-value.is-ticking {
+  animation: tickPop 360ms var(--cin-bounce);
+}
+
+@keyframes tickPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+/* ==========================================================
+   10. NOTAS FAB · Halo y respiración premium
+   ========================================================== */
+.notes-fab {
+  position: relative;
+}
+
+.notes-fab::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, #ff6fbf, #7c49ff, #ff85c0, #ff6fbf);
+  filter: blur(10px);
+  opacity: 0.5;
+  z-index: -1;
+  animation: conicSpin 8s linear infinite;
+}
+
+/* ==========================================================
+   11. EASTER EGG · "te amo" → fireworks layer
+   ========================================================== */
+.cin-fireworks {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99996;
+  overflow: hidden;
+}
+
+.cin-firework-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px currentColor);
+  animation: fireworkBurst 1.6s ease-out forwards;
+}
+
+@keyframes fireworkBurst {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  50%  { opacity: 1; }
+  100% {
+    transform:
+      translate(var(--fx, 0), var(--fy, 0))
+      scale(0.2);
+    opacity: 0;
+  }
+}
+
+.cin-love-message {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-family: "Sacramento", "Poppins", serif;
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  background: linear-gradient(120deg, #5a2d8a, #c43d8c, #7c49ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+  pointer-events: none;
+  z-index: 99998;
+  filter: drop-shadow(0 20px 40px rgba(255, 111, 191, 0.4));
+  animation: loveMessagePop 2.6s var(--cin-bounce) forwards;
+  white-space: nowrap;
+}
+
+@keyframes loveMessagePop {
+  0%   { transform: translate(-50%, -50%) scale(0) rotate(-8deg); opacity: 0; }
+  20%  { transform: translate(-50%, -50%) scale(1.15) rotate(3deg); opacity: 1; }
+  35%  { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  80%  { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.7) translateY(-30px); opacity: 0; }
+}
+
+/* ==========================================================
+   12. SECCIONES · Mejor jerarquía visual
+   ========================================================== */
+.extras .extra-card {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(252, 244, 255, 0.55)) !important;
+  backdrop-filter: blur(14px) saturate(135%);
+  -webkit-backdrop-filter: blur(14px) saturate(135%);
+  border: 1px solid var(--cin-glass-border) !important;
+}
+
+/* Nota: no aplicamos gradient-text a h3/h4 porque rompe los emojis
+   (se vuelven invisibles con -webkit-text-fill-color: transparent). */
+
+/* ==========================================================
+   13. INPUTS · Glow más cariñoso al focus
+   ========================================================== */
+.input,
+.textarea,
+.select {
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.25s var(--cin-ease) !important;
+}
+
+.input:hover:not(:focus),
+.textarea:hover:not(:focus),
+.select:hover:not(:focus) {
+  transform: translateY(-1px);
+}
+
+/* ==========================================================
+   14. PROGRESS BAR del scroll: más vibrante
+   ========================================================== */
+.scroll-progress {
+  height: 4px !important;
+  filter: drop-shadow(0 0 12px rgba(255, 111, 191, 0.65));
+}
+
+/* ==========================================================
+   15. BANNER especial: glow extra
+   ========================================================== */
+.special-message-banner:not([style*="display: none"]) {
+  box-shadow:
+    0 30px 60px rgba(124, 73, 255, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+    var(--cin-bloom);
+}
+
+/* ==========================================================
+   16. PHOTO-FRAME del mapa: parpadeo del marco al hover
+   ========================================================== */
+.print-gallery--embedded .photo-frame::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 111, 191, 0.7),
+    rgba(124, 73, 255, 0.7),
+    rgba(255, 200, 230, 0.4),
+    rgba(255, 111, 191, 0.7)
+  );
+  z-index: -1;
+  opacity: 0;
+  filter: blur(6px);
+  transition: opacity 0.5s var(--cin-ease);
+  animation: conicSpin 14s linear infinite;
+}
+
+.print-gallery--embedded .photo-frame:hover::before {
+  opacity: 0.6;
+}
+
+/* ==========================================================
+   17. MODAL upload: ambiente sutil
+   ========================================================== */
+.upload-card,
+.calendar-unlock-card,
+.push-settings-card {
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+}
+
+/* ==========================================================
+   18. LIGHTBOX · backdrop más cinematográfico
+   ========================================================== */
+.lightbox {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(60, 18, 80, 0.92) 0%,
+    rgba(20, 10, 32, 0.98) 100%
+  ) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.lightbox-figure {
+  filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.5));
+}
+
+/* ==========================================================
+   19. RESPONSIVE: ajuste fino del cursor y efectos
+   ========================================================== */
+@media (max-width: 820px) {
+  .title .cin-letter {
+    animation-duration: 0.6s;
+  }
+  .hero-photo::after {
+    inset: -4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title .cin-letter,
+  .calendar-day.available.selected,
+  .calendar-day.available.selected::after,
+  .calendar-day.available.today-selected::after,
+  body::after {
+    animation: none !important;
+  }
+}
+
+/* ==========================================================
+   20. PRINT-FRIENDLY: que se imprima bonito si alguien lo hace
+   ========================================================== */
+@media print {
+  body::before,
+  body::after,
+  .floating-hearts,
+  .scroll-progress,
+  .cursor-heart,
+  .cin-cursor,
+  .cin-cursor-dot,
+  .back-to-top,
+  .scroll-down,
+  .notes-fab,
+  .love-counter {
+    display: none !important;
+  }
+  .title,
+  .footer p:first-child {
+    -webkit-text-fill-color: #3b1b4a !important;
+    color: #3b1b4a !important;
+    background: none !important;
+  }
+}
+
+/* Los fixes específicos viven en css/fixes.css (capa posterior). */

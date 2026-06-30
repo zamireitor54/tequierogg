@@ -17,6 +17,16 @@
 
   <!-- CSS Principal -->
   <link rel="stylesheet" href="styles.css">
+  <!-- Capa de polish (mejoras visuales y micro-interacciones) -->
+  <link rel="stylesheet" href="css/polish.css">
+  <!-- Capa cinematográfica (premium upgrades) -->
+  <link rel="stylesheet" href="css/cinematic.css">
+  <!-- Fixes (correcciones tras revisión visual) -->
+  <link rel="stylesheet" href="css/fixes.css?v=4">
+  <!-- Mejoras (capa final: contador derecha + quitar filtro centrado + galería) -->
+  <link rel="stylesheet" href="css/mejoras.css?v=25">
+  <!-- Nuestro cielo (luna del día + constelación de estrellas-evento) -->
+  <link rel="stylesheet" href="css/nightsky.css?v=19">
 </head>
 <body>
   <main class="page">
@@ -114,26 +124,41 @@
       </div>
     </section>
 
-    <section class="memory-carousel full-bleed" aria-label="Carrusel de recuerdos">
-      <div class="memory-carousel-inner">
-        <div class="memory-carousel-head">
-          <span class="memory-carousel-eyebrow">Más de nosotros</span>
-          <h4>Un carrusel de nuestros momenticos 💗</h4>
-          <p class="muted">Un paseo de foticos lindas para seguir bajando y sonriendo.</p>
-        </div>
-
-        <div class="memory-carousel-shell">
-          <button id="memory-carousel-prev" class="memory-carousel-nav memory-carousel-nav--prev" type="button" aria-label="Foto anterior"><span class="memory-carousel-nav-icon" aria-hidden="true">←</span></button>
-          <div class="memory-carousel-viewport">
-            <div id="memory-carousel-track" class="memory-carousel-track"></div>
-          </div>
-          <button id="memory-carousel-next" class="memory-carousel-nav memory-carousel-nav--next" type="button" aria-label="Foto siguiente"><span class="memory-carousel-nav-icon" aria-hidden="true">→</span></button>
-        </div>
-      </div>
-    </section>
-
-    
   </main>
+
+  <!-- Nuestro cielo · luna del día + constelación de momentos -->
+  <section id="night-sky" class="night-sky full-bleed" aria-label="Nuestro cielo nocturno">
+    <div class="night-sky-inner">
+      <header class="night-sky-head">
+        <span class="night-sky-eyebrow">✨ Cielo de nosotros ✨</span>
+        <h2 class="night-sky-title">Nuestro cielo de hoy</h2>
+        <p class="night-sky-subtitle">La luna como se ve esta noche, y cada estrella es un pedacito nuestro.</p>
+      </header>
+
+      <div class="night-sky-canvas-wrap">
+        <!-- Columna del stage que contiene stage + stats centrados con el stage -->
+        <div class="night-sky-stage-col">
+          <div id="night-sky-stage" class="night-sky-stage" role="img" aria-label="Cielo nocturno con luna del día y estrellas de nuestros recuerdos">
+            <!-- JS inyecta: estrellas decorativas + estrellas de eventos + luna -->
+          </div>
+
+          <div id="night-sky-stats" class="night-sky-stats" aria-live="polite" role="group" aria-label="Filtrar estrellas por tipo">
+            <!-- JS inyecta: contadores filtrables -->
+          </div>
+        </div>
+        <!-- Photo slot vive AQUÍ (fuera del stage) para no tapar estrellas -->
+        <aside id="ns-photo-slot-anchor" class="ns-photo-slot-anchor" aria-label="Recuerdo del momento"></aside>
+      </div>
+
+      <p class="night-sky-hint">Toca una estrella para saber qué momento es 💫</p>
+    </div>
+
+    <!-- Tooltip flotante (oculto por defecto) -->
+    <div id="night-sky-tooltip" class="ns-tooltip hidden" role="dialog" aria-hidden="true">
+      <button class="ns-tooltip-close" aria-label="Cerrar">✕</button>
+      <div class="ns-tooltip-body"></div>
+    </div>
+  </section>
 
   <!-- Imagen de certificado a pantalla completa (coloca tu archivo en img/certificate.jpg) -->
   <!-- Super-gallery full-bleed (moved here) -->
@@ -179,7 +204,7 @@
 
       <div class="field">
         <span>Fotos</span>
-        <input id="upload-files" class="upload-input-native" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.avif,image/jpeg,image/png,image/webp,image/gif,image/bmp,image/avif" multiple>
+        <input id="upload-files" class="upload-input-native" type="file" accept="image/*" multiple>
         <label for="upload-files" id="upload-dropzone" class="upload-dropzone">
           <div class="upload-dropzone-icon">📸</div>
           <div class="upload-dropzone-title">Arrastra tus fotos</div>
@@ -541,7 +566,7 @@
     <option value="Guatapé"></option>
     <option value="Villa de Leyva"></option>
   </datalist>
-</footer>
+
   <!-- SDK de Supabase (debe cargarse SIN defer) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -551,11 +576,25 @@
   <script src="js/calendar.js" defer></script>
   <script src="js/printGallery.js" defer></script>
   <script src="js/map.js" defer></script>
-  <script src="js/gallery.js" defer></script>
+  <script src="js/gallery.js?v=2" defer></script>
   <script src="js/notifications.js" defer></script>
   <!-- Script principal de inicialización -->
   <script src="app.js" defer></script>
   <!-- Script de notas -->
   <script src="notes.js" defer></script>
+  <!-- Script de mejoras visuales (scroll reveals, partículas, back-to-top) -->
+  <script src="js/enhance.js" defer></script>
+  <!-- Capa cinematográfica (cursor custom, magnéticos, ripple, fireworks) -->
+  <script src="js/cinematic.js" defer></script>
+  <!-- Fixes (wrappeo de emojis, love-counter rewire) -->
+  <script src="js/fixes.js?v=4" defer></script>
+  <!-- Mejoras (devuelve contador a la derecha + asegura quitar filtro flotante) -->
+  <script src="js/mejoras.js?v=12" defer></script>
+  <!-- Cielo nocturno: luna del día + estrellas-evento -->
+  <script src="js/nightsky.js?v=17" defer></script>
+  <!-- HEIC → JPEG conversion (para fotos compartidas desde iPhone a Samsung).
+       Si no carga (red bloqueada), el upload sigue funcionando con su mensaje
+       de fallback original. -->
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js" defer></script>
 </body>
 </html>

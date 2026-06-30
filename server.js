@@ -7,6 +7,7 @@ const vm = require('vm');
 const cron = require('node-cron');
 const webPush = require('web-push');
 const { createClient } = require('@supabase/supabase-js');
+const Anthropic = require('@anthropic-ai/sdk');
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -54,6 +55,11 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabaseAdmin = supabaseUrl && supabaseServiceRoleKey
   ? createClient(supabaseUrl, supabaseServiceRoleKey, { auth: { persistSession: false } })
   : null;
+
+// Inicializar cliente de Claude
+const anthropicApiKey = process.env.ANTHROPIC_API_KEY || '';
+const claudeClient = anthropicApiKey ? new Anthropic({ apiKey: anthropicApiKey }) : null;
+
 const dataDir = path.join(__dirname, 'data');
 const pushStorePath = path.join(dataDir, 'push-subscriptions.json');
 
@@ -606,6 +612,42 @@ cron.schedule('* * * * *', async () => {
     console.error('Error en cron push diario:', error);
   }
 }, { timezone: TIMEZONE });
+
+// Endpoint para usar Claude
+app.post('/api/claude', async (req, res) => {
+  try {
+    if (!claudeClient) {
+      return res.status(503).json({ error: 'Claude no está configurado. Configura ANTHROPIC_API_KEY en .env' });
+    }
+
+    const { message, model = 'claude-3-5-sonnet-20241022' } = req.body;
+    
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Se requiere un campo "message" con texto' });
+    }
+
+    const response = await claudeClient.messages.create({
+      model,
+      max_tokens: 1024,
+      messages: [
+        {
+          role: 'user',
+          content: message
+        }
+      ]
+    });
+
+    const textContent = response.content.find(block => block.type === 'text');
+    res.json({
+      ok: true,
+      message: textContent?.text || '',
+      usage: response.usage
+    });
+  } catch (error) {
+    console.error('Error usando Claude:', error);
+    res.status(500).json({ error: 'Error al procesar con Claude', details: error.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Zamge backend corriendo en ${APP_URL}`);
