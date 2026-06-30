@@ -987,6 +987,84 @@
   animation: nsPsEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s both;
 }
 
+/* ==========================================================
+   MÓVIL PERF · desactiva efectos visuales pesados.
+   blur, mix-blend-mode, drop-shadow chain y animaciones globales
+   tumban el FPS en celulares. Sacrificamos pulido por fluidez.
+   ========================================================== */
+.night-sky.is-mobile-perf .night-sky-stage {
+  animation: none !important; /* sin universe breath en móvil */
+}
+
+.night-sky.is-mobile-perf .night-sky::after,
+.night-sky.is-mobile-perf .night-sky-stage::before,
+.night-sky.is-mobile-perf .night-sky-stage::after {
+  display: none !important; /* sin noise/grain ni atmósfera blendeada */
+}
+
+.night-sky.is-mobile-perf .ns-stat {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.night-sky.is-mobile-perf .ns-photo-slot-moon {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Halo activo: 1 capa simple en móvil */
+.night-sky.is-mobile-perf .ns-active-halo {
+  filter: none;
+  animation: nsActiveHaloIn 0.6s ease-out forwards;
+}
+
+/* Estrella activa: filter mucho más corto en móvil */
+.night-sky.is-mobile-perf .ns-star.is-active-now {
+  animation:
+    nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards !important;
+  filter:
+    drop-shadow(0 0 12px rgba(255, 240, 200, 0.9))
+    drop-shadow(0 0 24px rgba(255, 200, 230, 0.6)) !important;
+}
+
+.night-sky.is-mobile-perf .ns-star.is-active-now.has-image {
+  filter:
+    drop-shadow(0 0 12px rgba(196, 181, 253, 0.9))
+    drop-shadow(0 0 24px rgba(255, 130, 200, 0.6)) !important;
+}
+
+/* Sin partículas orbitales en móvil — eran 5 animaciones constantes */
+.night-sky.is-mobile-perf .ns-active-particle {
+  display: none !important;
+}
+
+/* Luna: glow simplificado (2 capas en lugar de 5) */
+.night-sky.is-mobile-perf .ns-moon-layer {
+  filter:
+    drop-shadow(0 0 14px rgba(220, 180, 255, 0.5))
+    drop-shadow(0 0 40px rgba(160, 110, 230, 0.3)) !important;
+}
+
+.night-sky.is-mobile-perf .ns-moon {
+  animation: none !important;
+}
+
+.night-sky.is-mobile-perf .ns-moon::before {
+  display: none !important; /* aura externa pesada */
+}
+
+/* Tarjeta de foto: sin float animation (mantiene visual estático) */
+.night-sky.is-mobile-perf .ns-photo-slot-frame {
+  animation: none !important;
+}
+
+/* Fondo del stage: simplificado, sin viñeta interna pesada */
+.night-sky.is-mobile-perf .night-sky-stage {
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 60px rgba(5, 1, 18, 0.5) !important;
+}
+
 /* Mobile: el wrap pasa a columna → stage arriba, tarjeta debajo (no encima).
    La tarjeta queda centrada con un ancho cómodo para móviles. */
 @media (max-width: 760px) {

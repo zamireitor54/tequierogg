@@ -1463,21 +1463,23 @@
     moonStack = createMoonStack(stage, phase);
 
     const isMobile = window.innerWidth < 760;
-    // Cientos de micro estrellas — la base del cielo (la mayor parte del
-    // universo real son puntos diminutos, no estrellas grandes)
-    spawnTinyDots(stage, isMobile ? 130 : 280);
-    // Vía Láctea procedural — banda diagonal sutil de micro estrellas
-    spawnMilkyWay(stage, isMobile ? 60 : 130);
-    // Estrellas decorativas con forma (5-puntas + 4-puntas sparkle, twinkle)
-    spawnDecorativeStars(stage, isMobile ? 40 : 90);
-    // Polvo cósmico — partículas que derivan lentamente
-    spawnParticles(stage, isMobile ? 12 : 22);
-    // Orbes de profundidad — primer plano desenfocado (3 esferas enormes)
-    spawnDepthOrbs(stage, isMobile ? 2 : 3);
-    // Estrellas fugaces — RARAS, 1.5-4min con skip
-    scheduleShootingStar(stage);
-    // Historias estelares — cascadas ocasionales de 3 estrellas
-    scheduleStarStory(section, stage);
+    // PERF: en móvil reducimos DRÁSTICAMENTE conteos y desactivamos efectos
+    // pesados (blur, mix-blend-mode, animaciones globales) para evitar lag.
+    if (isMobile) section.classList.add('is-mobile-perf');
+    else section.classList.remove('is-mobile-perf');
+
+    spawnTinyDots(stage, isMobile ? 60 : 280);
+    spawnMilkyWay(stage, isMobile ? 25 : 130);
+    spawnDecorativeStars(stage, isMobile ? 22 : 90);
+    spawnParticles(stage, isMobile ? 5 : 22);
+    // Orbes de profundidad: SOLO desktop. En móvil el blur(22px) es asesino.
+    if (!isMobile) spawnDepthOrbs(stage, 3);
+    // Estrellas fugaces: sí en móvil, pero solo en desktop arrancamos timer.
+    // En móvil dejamos solo el atmósfera estática + twinkle natural.
+    if (!isMobile) {
+      scheduleShootingStar(stage);
+      scheduleStarStory(section, stage);
+    }
 
     const stageW = stage.clientWidth;
     const stageH = stage.clientHeight;
