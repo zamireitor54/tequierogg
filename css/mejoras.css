@@ -1690,10 +1690,11 @@ aside.love-counter {
 }
 
 /* ----------------------------------------------------------
-   V3.8 · MAP photo-pocket (la foto que sale junto al mapa)
-   se mueve abajo en móvil para no tapar el mapa.
-   El caption TAMBIÉN se mueve a flujo estático para no quedar
-   encima del pocket (era el bug que ocultaba la foto en móvil).
+   V3.8 · MAP móvil — orden vertical:
+     1. Foto del recuerdo (arriba)
+     2. Mapa con marker + popup
+     3. Caption oscuro
+   Todo en flex column con order explícito, sin absolutas que se tapen.
    ---------------------------------------------------------- */
 @media (max-width: 760px) {
   .map-placeholder {
@@ -1702,28 +1703,37 @@ aside.love-counter {
     display: flex !important;
     flex-direction: column !important;
     gap: 12px !important;
-  }
-  #memory-map.memory-map {
-    height: 320px !important;
-    min-height: 320px !important;
-    border-radius: 22px !important;
+    padding: 8px !important;
   }
   .map-photo-pocket {
+    order: 1 !important;
     position: static !important;
     top: auto !important;
     right: auto !important;
     bottom: auto !important;
     margin: 0 auto !important;
-    width: min(300px, 92%) !important;
+    width: min(320px, 96%) !important;
     z-index: auto !important;
   }
+  #memory-map.memory-map {
+    order: 2 !important;
+    height: 320px !important;
+    min-height: 320px !important;
+    border-radius: 22px !important;
+    width: 100% !important;
+  }
   .map-placeholder-copy {
+    order: 3 !important;
     position: static !important;
     left: auto !important;
     right: auto !important;
     bottom: auto !important;
     margin: 0 auto !important;
-    width: min(320px, 94%) !important;
+    width: min(340px, 96%) !important;
+  }
+  /* La foto: que llene bien su contenedor (no se vea desproporcionada) */
+  .print-gallery--embedded .photo-frame {
+    height: 220px !important;
   }
 }
 
