@@ -1690,11 +1690,10 @@ aside.love-counter {
 }
 
 /* ----------------------------------------------------------
-   V3.8 · MAP móvil — orden vertical:
-     1. Foto del recuerdo (arriba)
+   V3.8 · MAP móvil — orden vertical bulletproof:
+     1. Foto del recuerdo (arriba, visible siempre, fondo de fallback)
      2. Mapa con marker + popup
      3. Caption oscuro
-   Todo en flex column con order explícito, sin absolutas que se tapen.
    ---------------------------------------------------------- */
 @media (max-width: 760px) {
   .map-placeholder {
@@ -1702,11 +1701,14 @@ aside.love-counter {
     min-height: auto !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
-    padding: 8px !important;
+    gap: 14px !important;
+    padding: 10px !important;
+    background: rgba(124, 73, 255, 0.06) !important;
   }
+
+  /* Pocket SIEMPRE visible arriba, con fondo de fallback aunque la foto falle */
   .map-photo-pocket {
-    order: 1 !important;
+    order: -1 !important; /* fuerza posición primera, antes de cualquier hijo */
     position: static !important;
     top: auto !important;
     right: auto !important;
@@ -1714,14 +1716,63 @@ aside.love-counter {
     margin: 0 auto !important;
     width: min(320px, 96%) !important;
     z-index: auto !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: linear-gradient(135deg, rgba(255, 230, 200, 0.18), rgba(196, 130, 255, 0.18)) !important;
+    border-radius: 22px !important;
+    border: 1px solid rgba(255, 200, 230, 0.35) !important;
+    padding: 10px !important;
+    box-shadow: 0 10px 28px rgba(36, 19, 50, 0.25) !important;
   }
+
+  .map-photo-pocket .print-gallery,
+  .map-photo-pocket .print-gallery--embedded {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 8px !important;
+    background: transparent !important;
+  }
+
+  /* Photo frame: tamaño cómodo, FONDO sólido para fallback */
+  .map-photo-pocket .photo-frame,
+  .print-gallery--embedded .photo-frame {
+    width: 100% !important;
+    height: 220px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    box-shadow: 0 8px 20px rgba(36, 19, 50, 0.22) !important;
+    background: linear-gradient(135deg, #ffd6ec, #c4b5fd) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+  }
+
+  /* La imagen llena el frame */
+  .map-photo-pocket .photo-frame img,
+  .print-gallery--embedded .photo-frame img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+  }
+
   #memory-map.memory-map {
     order: 2 !important;
-    height: 320px !important;
-    min-height: 320px !important;
-    border-radius: 22px !important;
+    height: 280px !important;
+    min-height: 280px !important;
+    border-radius: 18px !important;
     width: 100% !important;
   }
+
   .map-placeholder-copy {
     order: 3 !important;
     position: static !important;
@@ -1730,10 +1781,6 @@ aside.love-counter {
     bottom: auto !important;
     margin: 0 auto !important;
     width: min(340px, 96%) !important;
-  }
-  /* La foto: que llene bien su contenedor (no se vea desproporcionada) */
-  .print-gallery--embedded .photo-frame {
-    height: 220px !important;
   }
 }
 
