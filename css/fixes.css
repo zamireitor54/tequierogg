@@ -628,3 +628,34 @@ html.tab-hidden *::after {
     transition-duration: 0.001s !important;
   }
 }
+
+/* ==========================================================
+   PERF · Restaurar cursor normal + esconder cualquier resto
+   del custom cursor cinematográfico (que causaba lag en scroll)
+   ========================================================== */
+html,
+body,
+body.cin-cursor-on,
+body.cin-cursor-on * {
+  cursor: auto !important;
+}
+
+/* Botones y links: cursor pointer nativo */
+a,
+button,
+.btn,
+[role="button"],
+.calendar-day.available,
+.sg-item,
+.notes-fab,
+label,
+input[type="button"],
+input[type="submit"] {
+  cursor: pointer !important;
+}
+
+/* Ocultar los elementos del custom cursor si quedaran en el DOM */
+.cin-cursor,
+.cin-cursor-dot {
+  display: none !important;
+}

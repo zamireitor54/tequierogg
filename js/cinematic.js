@@ -30,7 +30,9 @@
     safe(setupButtonRipple, 'button-ripple');
     safe(setupLazyGalleryImages, 'lazy-images');
     safe(setupEasterEgg, 'easter-egg');
-    if (isFinePointer && !prefersReducedMotion) {
+    // PERF: cursor custom desactivado. Estaba corriendo un RAF loop constante
+    // + 4 event listeners de mouse. Causaba lag notable en scroll y movimiento.
+    if (false && isFinePointer && !prefersReducedMotion) {
       safe(setupCustomCursor, 'custom-cursor');
     }
   }

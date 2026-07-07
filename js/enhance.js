@@ -25,8 +25,10 @@
     decorateHeroPhoto();
     setupScrollDown();
     setupCalendarConfetti();
-    if (!prefersReducedMotion) setupHeroParallax();
-    if (!prefersReducedMotion && isFinePointer) setupCursorTrail();
+    // PERF: hero parallax y cursor trail desactivados. Ambos usan listeners
+    // continuos (scroll + pointermove) que compiten con el scroll nativo.
+    // if (!prefersReducedMotion) setupHeroParallax();
+    // if (!prefersReducedMotion && isFinePointer) setupCursorTrail();
     // === V3 additions ===
     setupTimeGreeting();
     setupTitleUnderline();
