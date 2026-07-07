@@ -1765,12 +1765,23 @@ aside.love-counter {
     inset: 0 !important;
   }
 
-  #memory-map.memory-map {
+  /* CRÍTICO: .memory-map en styles.css es position: absolute inset: 0.
+     Eso hace que el mapa cubra TODO el placeholder tapando la foto card.
+     Forzamos static para que respete el flex column. */
+  #memory-map.memory-map,
+  .memory-map {
     order: 2 !important;
+    position: static !important;
+    inset: auto !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
     height: 280px !important;
     min-height: 280px !important;
     border-radius: 18px !important;
     width: 100% !important;
+    flex: 0 0 auto !important;
   }
 
   .map-placeholder-copy {
