@@ -1696,25 +1696,46 @@ aside.love-counter {
      3. Caption oscuro
    ---------------------------------------------------------- */
 @media (max-width: 760px) {
+  /* CRÍTICO: styles.css tiene min-height 430-520px con !important en varias
+     media queries — esas ganaban sobre el height inline del JS. Aquí las
+     anulamos definitivamente + fijamos altura exacta. */
   .map-placeholder {
     overflow: visible !important;
-    min-height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    height: auto !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 14px !important;
     padding: 10px !important;
+    padding-bottom: 10px !important;
     background: rgba(124, 73, 255, 0.06) !important;
   }
+  /* Padding lateral extra en el card wrapper para más aire visual */
+  .extra-card--map-full {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
 
-  /* Pocket SIEMPRE visible arriba, con fondo de fallback aunque la foto falle */
-  .map-photo-pocket {
-    order: -1 !important; /* fuerza posición primera, antes de cualquier hijo */
+  /* Pocket SIEMPRE arriba, static (styles.css la ponía position:absolute
+     bottom:92px que la clavaba al fondo del mapa). Sobrescribimos TODO. */
+  .map-photo-pocket,
+  .map-photo-pocket.is-caption-tall {
+    order: -1 !important;
     position: static !important;
     top: auto !important;
     right: auto !important;
     bottom: auto !important;
+    left: auto !important;
+    inset: auto !important;
+    transform: none !important;
     margin: 0 auto !important;
     width: min(320px, 96%) !important;
+    max-width: 96% !important;
     z-index: auto !important;
     display: block !important;
     visibility: visible !important;
@@ -1724,6 +1745,7 @@ aside.love-counter {
     border: 1px solid rgba(255, 200, 230, 0.35) !important;
     padding: 10px !important;
     box-shadow: 0 10px 28px rgba(36, 19, 50, 0.25) !important;
+    box-sizing: border-box !important;
   }
 
   .map-photo-pocket .print-gallery,
@@ -1765,9 +1787,10 @@ aside.love-counter {
     inset: 0 !important;
   }
 
-  /* CRÍTICO: .memory-map en styles.css es position: absolute inset: 0.
-     Eso hace que el mapa cubra TODO el placeholder tapando la foto card.
-     Forzamos static para que respete el flex column. */
+  /* CRÍTICO: styles.css tenía TODOS estos problemas simultáneos:
+       .memory-map { position: absolute; inset: 0; min-height: 420-500px }
+     y varias @media que refuerzan min-height entre 430-520px con !important.
+     Aquí forzamos altura FIJA (min-height + max-height + height = 280px). */
   #memory-map.memory-map,
   .memory-map {
     order: 2 !important;
@@ -1779,9 +1802,12 @@ aside.love-counter {
     bottom: auto !important;
     height: 280px !important;
     min-height: 280px !important;
+    max-height: 280px !important;
     border-radius: 18px !important;
     width: 100% !important;
-    flex: 0 0 auto !important;
+    max-width: 100% !important;
+    flex: 0 0 280px !important;
+    box-sizing: border-box !important;
   }
 
   .map-placeholder-copy {

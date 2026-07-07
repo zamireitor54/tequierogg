@@ -707,6 +707,19 @@
     const mapEl = document.getElementById('memory-map');
     if (!mapEl) return;
 
+    // PRE-INIT móvil: Leaflet cachea clientHeight sincronamente en L.map()
+    // → si el contenedor mide 500-700px en ese instante (por CSS heredado),
+    // panes/tiles quedan cacheados con esa altura hasta invalidateSize().
+    // Forzamos 280px inline con !important ANTES de instanciar.
+    if (window.innerWidth < 760) {
+      try {
+        mapEl.style.setProperty('height', '280px', 'important');
+        mapEl.style.setProperty('min-height', '280px', 'important');
+        mapEl.style.setProperty('max-height', '280px', 'important');
+        mapEl.style.setProperty('position', 'static', 'important');
+      } catch (_) {}
+    }
+
     memoryMap = L.map(mapEl, { zoomControl: true, attributionControl: false }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19
@@ -722,13 +735,31 @@
         mapPicker?.invalidateSize();
         if (memoryMap?._popup) syncMemoryPopupLayout(memoryMap._popup);
       });
+      window.addEventListener('orientationchange', () => {
+        setTimeout(() => memoryMap?.invalidateSize(), 200);
+      });
+    }
+
+    // ResizeObserver: cuando fixes.js mute el height del contenedor, Leaflet
+    // recalcula sus panes automáticamente. Cierra el race condition sin
+    // depender de timers arbitrarios.
+    if (typeof ResizeObserver === 'function') {
+      try {
+        const ro = new ResizeObserver(() => {
+          try { memoryMap?.invalidateSize(); } catch (_) {}
+        });
+        ro.observe(mapEl);
+      } catch (_) {}
     }
 
     memoryMap.on('popupopen', (event) => {
       syncMemoryPopupLayout(event.popup);
     });
 
-    setTimeout(() => memoryMap.invalidateSize(), 120);
+    // Multi-invalidateSize escalonado (cubre red lenta / init tardío)
+    [120, 400, 1000, 2500].forEach((ms) => {
+      setTimeout(() => { try { memoryMap.invalidateSize(); } catch (_) {} }, ms);
+    });
   }
 
   function bindMapPickerUi() {
@@ -823,6 +854,9 @@
     getStoredPhotoMapLocation,
     setStoredPhotoMapLocation,
     getStoredPhotoMapPoint,
-    setStoredPhotoMapPoint
+    setStoredPhotoMapPoint,
+    // Getter para que fixes.js pueda hacer invalidateSize() desde afuera
+    get map() { return memoryMap; },
+    invalidateSize() { try { memoryMap?.invalidateSize(); } catch (_) {} }
   };
 })();

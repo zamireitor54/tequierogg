@@ -29,7 +29,18 @@ function initPrintGallery() {
     const mapCopy = document.querySelector('.map-placeholder-copy');
     if (!pocket || !mapCopy) return;
 
-    if (window.matchMedia('(max-width: 768px)').matches) {
+    // GUARD MÓVIL STACK: en <760px la pocket es STATIC (foto arriba, mapa medio,
+    // caption abajo). Esta función asume layout overlay (pocket absolute flotando
+    // sobre el mapa) y estaba peleando con el fix móvil cada 10s al rotar foto,
+    // en cada resize por URL bar, y en el ResizeObserver del caption. Salimos temprano.
+    if (window.innerWidth < 760) {
+      pocket.style.top = '';
+      pocket.style.bottom = '';
+      pocket.classList.remove('is-caption-tall');
+      return;
+    }
+
+    if (window.matchMedia('(min-width: 760px) and (max-width: 1024px)').matches) {
       const copyHeight = Math.ceil(mapCopy.getBoundingClientRect().height) || 0;
       const copyStyle = window.getComputedStyle(mapCopy);
       const lineHeight = parseFloat(copyStyle.lineHeight) || 22;

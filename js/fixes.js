@@ -18,6 +18,12 @@
   // - Fuerza .map-placeholder a flex column, sin overflow:hidden
   // - Escucha resize para reaplicar
   // ====================================================
+  // Helper: setProperty con !important (gana contra cualquier CSS)
+  function forceStyle(el, key, value) {
+    if (!el) return;
+    try { el.style.setProperty(key, value, 'important'); } catch (_) {}
+  }
+
   function applyMobileMapLayout() {
     const isMobile = window.innerWidth < 760;
     const placeholder = document.querySelector('.map-placeholder');
@@ -27,57 +33,84 @@
     if (!placeholder) return;
 
     if (isMobile) {
-      // Estructura DOM: pocket primero, luego mapa, luego copy
-      if (pocket && pocket.parentElement === placeholder) {
+      // DOM: pocket como primer hijo (usar contains() no === directo, por si
+      // hay wrappers intermedios como .print-gallery)
+      if (pocket && placeholder.contains(pocket) && placeholder.firstElementChild !== pocket) {
         placeholder.insertBefore(pocket, placeholder.firstChild);
       }
-      // Forzar estilos inline (ganan siempre)
-      Object.assign(placeholder.style, {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        minHeight: 'auto',
-        overflow: 'visible',
-        padding: '10px',
-      });
+
+      // .map-placeholder: flex column con altura auto (styles.css tenía
+      // min-height 430-520px !important que dominaba antes)
+      forceStyle(placeholder, 'display', 'flex');
+      forceStyle(placeholder, 'flex-direction', 'column');
+      forceStyle(placeholder, 'gap', '12px');
+      forceStyle(placeholder, 'min-height', '0');
+      forceStyle(placeholder, 'max-height', 'none');
+      forceStyle(placeholder, 'height', 'auto');
+      forceStyle(placeholder, 'overflow', 'visible');
+      forceStyle(placeholder, 'padding', '10px');
+      forceStyle(placeholder, 'padding-bottom', '10px');
+      forceStyle(placeholder, 'width', '100%');
+      forceStyle(placeholder, 'max-width', '100%');
+      forceStyle(placeholder, 'box-sizing', 'border-box');
+      forceStyle(placeholder, 'margin', '0 auto');
+
       if (pocket) {
-        Object.assign(pocket.style, {
-          position: 'static',
-          top: 'auto', right: 'auto', bottom: 'auto', left: 'auto',
-          width: 'min(320px, 96%)',
-          margin: '0 auto',
-          zIndex: 'auto',
-          order: '',
-        });
+        // Pocket: static !important gana contra el @media 768px de styles.css
+        // que la ponía position:absolute bottom:92px
+        forceStyle(pocket, 'position', 'static');
+        forceStyle(pocket, 'top', 'auto');
+        forceStyle(pocket, 'right', 'auto');
+        forceStyle(pocket, 'bottom', 'auto');
+        forceStyle(pocket, 'left', 'auto');
+        forceStyle(pocket, 'transform', 'none');
+        forceStyle(pocket, 'width', 'min(320px, 96%)');
+        forceStyle(pocket, 'max-width', '96%');
+        forceStyle(pocket, 'margin', '0 auto');
+        forceStyle(pocket, 'z-index', 'auto');
+        forceStyle(pocket, 'order', '-1');
+        // Sacar clase que podría reforzar overlay
+        pocket.classList.remove('is-caption-tall');
       }
+
       if (mapEl) {
-        Object.assign(mapEl.style, {
-          position: 'static',
-          inset: 'auto',
-          top: 'auto', right: 'auto', bottom: 'auto', left: 'auto',
-          height: '280px',
-          minHeight: '280px',
-          width: '100%',
+        // CRÍTICO: setProperty con 'important' — styles.css tiene min-height
+        // 430-520px !important en varias @media que ganaban sobre inline sin important
+        forceStyle(mapEl, 'position', 'static');
+        forceStyle(mapEl, 'inset', 'auto');
+        forceStyle(mapEl, 'top', 'auto');
+        forceStyle(mapEl, 'right', 'auto');
+        forceStyle(mapEl, 'bottom', 'auto');
+        forceStyle(mapEl, 'left', 'auto');
+        forceStyle(mapEl, 'height', '280px');
+        forceStyle(mapEl, 'min-height', '280px');
+        forceStyle(mapEl, 'max-height', '280px');
+        forceStyle(mapEl, 'width', '100%');
+        forceStyle(mapEl, 'max-width', '100%');
+        forceStyle(mapEl, 'box-sizing', 'border-box');
+        forceStyle(mapEl, 'flex', '0 0 280px');
+
+        // Leaflet: invalidateSize múltiples veces para que recalcule tras
+        // el cambio de tamaño (staggered: 60ms + 300ms + 900ms cubre casos
+        // de red lenta o init tardío). NO disparar 'resize' que causa loop.
+        [60, 300, 900].forEach((ms) => {
+          window.setTimeout(() => {
+            try { window.memoryMapModule?.map?.invalidateSize?.(); } catch (_) {}
+          }, ms);
         });
-        // Leaflet necesita recalcular su tamaño interno tras el cambio
-        window.setTimeout(() => {
-          try { window.memoryMapModule?.map?.invalidateSize?.(); } catch (_) {}
-          try {
-            const evt = new Event('resize');
-            window.dispatchEvent(evt);
-          } catch (_) {}
-        }, 60);
       }
+
       if (copy) {
-        Object.assign(copy.style, {
-          position: 'static',
-          left: 'auto', right: 'auto', bottom: 'auto',
-          margin: '0 auto',
-          width: 'min(340px, 96%)',
-        });
+        forceStyle(copy, 'position', 'static');
+        forceStyle(copy, 'left', 'auto');
+        forceStyle(copy, 'right', 'auto');
+        forceStyle(copy, 'bottom', 'auto');
+        forceStyle(copy, 'margin', '0 auto');
+        forceStyle(copy, 'width', 'min(340px, 96%)');
+        forceStyle(copy, 'max-width', '96%');
       }
     } else {
-      // Desktop: limpiar todos los inline styles para que vuelvan a las reglas de styles.css
+      // Desktop: limpiar todos los inline (vuelve a CSS normal)
       placeholder.style.cssText = '';
       if (pocket) pocket.style.cssText = '';
       if (mapEl) mapEl.style.cssText = '';
@@ -86,26 +119,32 @@
   }
 
   let mapLayoutTimer = null;
+  let mapLayoutRunning = false;
   function scheduleMapLayout() {
+    if (mapLayoutRunning) return; // evita loops si algo dispara desde dentro
     if (mapLayoutTimer) clearTimeout(mapLayoutTimer);
-    mapLayoutTimer = setTimeout(applyMobileMapLayout, 40);
+    mapLayoutTimer = setTimeout(() => {
+      mapLayoutRunning = true;
+      try { applyMobileMapLayout(); } finally { mapLayoutRunning = false; }
+    }, 40);
   }
 
   window.addEventListener('resize', scheduleMapLayout, { passive: true });
+  window.addEventListener('orientationchange', scheduleMapLayout, { passive: true });
   // Re-aplicar cuando el mapa/fotos terminen de cargar
   window.addEventListener('superGallery:items', scheduleMapLayout);
   window.addEventListener('memory-map:spotlight-photo', scheduleMapLayout);
 
-  // Aplicar en cuanto el DOM esté listo, y de nuevo tras un breve delay
-  // (para pillar el momento después de que Leaflet inicialice)
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      applyMobileMapLayout();
-      setTimeout(applyMobileMapLayout, 500);
-    });
-  } else {
+  // Aplicar en cuanto el DOM esté listo + múltiples pasadas para pillar
+  // Leaflet post-init sin importar cuánto tarde (red lenta, tiles remotos)
+  function runInitialSequence() {
     applyMobileMapLayout();
-    setTimeout(applyMobileMapLayout, 500);
+    [200, 700, 1500].forEach((ms) => setTimeout(applyMobileMapLayout, ms));
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runInitialSequence);
+  } else {
+    runInitialSequence();
   }
 
   // ====================================================
