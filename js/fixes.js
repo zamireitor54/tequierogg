@@ -12,6 +12,103 @@
   'use strict';
 
   // ====================================================
+  // -1. MAP MÓVIL · fuerza layout via inline styles (imposible sobreescribir)
+  // - Mueve .map-photo-pocket como primer hijo de .map-placeholder
+  // - Fuerza .memory-map a position:static + height:280px
+  // - Fuerza .map-placeholder a flex column, sin overflow:hidden
+  // - Escucha resize para reaplicar
+  // ====================================================
+  function applyMobileMapLayout() {
+    const isMobile = window.innerWidth < 760;
+    const placeholder = document.querySelector('.map-placeholder');
+    const pocket = document.querySelector('.map-photo-pocket');
+    const mapEl = document.getElementById('memory-map');
+    const copy = document.querySelector('.map-placeholder-copy');
+    if (!placeholder) return;
+
+    if (isMobile) {
+      // Estructura DOM: pocket primero, luego mapa, luego copy
+      if (pocket && pocket.parentElement === placeholder) {
+        placeholder.insertBefore(pocket, placeholder.firstChild);
+      }
+      // Forzar estilos inline (ganan siempre)
+      Object.assign(placeholder.style, {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        minHeight: 'auto',
+        overflow: 'visible',
+        padding: '10px',
+      });
+      if (pocket) {
+        Object.assign(pocket.style, {
+          position: 'static',
+          top: 'auto', right: 'auto', bottom: 'auto', left: 'auto',
+          width: 'min(320px, 96%)',
+          margin: '0 auto',
+          zIndex: 'auto',
+          order: '',
+        });
+      }
+      if (mapEl) {
+        Object.assign(mapEl.style, {
+          position: 'static',
+          inset: 'auto',
+          top: 'auto', right: 'auto', bottom: 'auto', left: 'auto',
+          height: '280px',
+          minHeight: '280px',
+          width: '100%',
+        });
+        // Leaflet necesita recalcular su tamaño interno tras el cambio
+        window.setTimeout(() => {
+          try { window.memoryMapModule?.map?.invalidateSize?.(); } catch (_) {}
+          try {
+            const evt = new Event('resize');
+            window.dispatchEvent(evt);
+          } catch (_) {}
+        }, 60);
+      }
+      if (copy) {
+        Object.assign(copy.style, {
+          position: 'static',
+          left: 'auto', right: 'auto', bottom: 'auto',
+          margin: '0 auto',
+          width: 'min(340px, 96%)',
+        });
+      }
+    } else {
+      // Desktop: limpiar todos los inline styles para que vuelvan a las reglas de styles.css
+      placeholder.style.cssText = '';
+      if (pocket) pocket.style.cssText = '';
+      if (mapEl) mapEl.style.cssText = '';
+      if (copy) copy.style.cssText = '';
+    }
+  }
+
+  let mapLayoutTimer = null;
+  function scheduleMapLayout() {
+    if (mapLayoutTimer) clearTimeout(mapLayoutTimer);
+    mapLayoutTimer = setTimeout(applyMobileMapLayout, 40);
+  }
+
+  window.addEventListener('resize', scheduleMapLayout, { passive: true });
+  // Re-aplicar cuando el mapa/fotos terminen de cargar
+  window.addEventListener('superGallery:items', scheduleMapLayout);
+  window.addEventListener('memory-map:spotlight-photo', scheduleMapLayout);
+
+  // Aplicar en cuanto el DOM esté listo, y de nuevo tras un breve delay
+  // (para pillar el momento después de que Leaflet inicialice)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      applyMobileMapLayout();
+      setTimeout(applyMobileMapLayout, 500);
+    });
+  } else {
+    applyMobileMapLayout();
+    setTimeout(applyMobileMapLayout, 500);
+  }
+
+  // ====================================================
   // 0. PERF · Pausar todas las animaciones cuando la pestaña oculta.
   // Marca la <html> con .tab-hidden → CSS aplica animation-play-state: paused
   // a TODOS los elementos con animación. Cero CPU cuando el usuario está en
