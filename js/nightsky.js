@@ -283,7 +283,12 @@
   function buildMessageEvents() {
     const today = new Date();
     const daysDone = Math.max(0, Math.floor((today - CALENDAR_START) / 86400000)) + 1;
-    const cap = Math.min(daysDone, 365);
+    // PERF: capamos mucho más bajo. Antes se creaban 232 msg stars, cada una
+    // con clip-path polygon + filter drop-shadow + twinkle infinito.
+    // Ahora máximo 80 desktop / 40 móvil (aún cielo denso, sin drenar CPU).
+    const isMobile = window.innerWidth < 760;
+    const hardCap = isMobile ? 40 : 80;
+    const cap = Math.min(daysDone, hardCap);
     const events = [];
     const dailyMessages = window.messagesModule?.dailyMessages || [];
     for (let i = 0; i < cap; i++) {
@@ -513,7 +518,7 @@
     layer.setAttribute('aria-hidden', 'true');
 
     const isMobile = window.innerWidth < 760;
-    const count = isMobile ? 20 : 50;
+    const count = isMobile ? 12 : 25;
     const frag = document.createDocumentFragment();
 
     // Clusters EN PORCENTAJES sobre la sección entera (no necesitamos px reales)
@@ -1052,7 +1057,10 @@
     else if (delta < -0.5) delta += 1;
 
     const TOTAL_MS = 1800;
-    const FRAME_MS = 70; // ~14fps · SVG morph no necesita 60fps
+    const FRAME_MS = 220; // ~4-5fps · SVG morph "de calidad time-lapse"
+                          // Antes 14fps → recompilaba SVG con cráteres 25 veces
+                          // por transición. 4-5fps es suficiente para percepción
+                          // continua y baja el coste ~5x.
     const startTime = performance.now();
     const layers = moonStack.wrap.querySelectorAll('.ns-moon-layer');
     const active = layers[moonStack.currentLayer];
@@ -1470,10 +1478,10 @@
     else section.classList.remove('is-mobile-perf');
     section.classList.add('is-eco'); // modo eficiente por defecto
 
-    spawnTinyDots(stage, isMobile ? 45 : 110);
-    spawnMilkyWay(stage, isMobile ? 20 : 55);
-    spawnDecorativeStars(stage, isMobile ? 18 : 42);
-    spawnParticles(stage, isMobile ? 4 : 9);
+    spawnTinyDots(stage, isMobile ? 30 : 65);
+    spawnMilkyWay(stage, isMobile ? 15 : 30);
+    spawnDecorativeStars(stage, isMobile ? 12 : 24);
+    spawnParticles(stage, isMobile ? 3 : 6);
     // Estrellas fugaces + historias: solo desktop, ya rarísimas (1.5-4 min)
     if (!isMobile) {
       scheduleShootingStar(stage);

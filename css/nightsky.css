@@ -234,6 +234,13 @@
   max-width: 900px;
   aspect-ratio: 16 / 10;
   border-radius: 28px;
+  /* PERF: hints al browser para saltar layout/paint fuera de pantalla.
+     content-visibility=auto: el browser puede omitir el render completo
+     cuando la sección está fuera de viewport (mucho mejor que solo pausar).
+     contain: strict → aísla layout+paint del resto del document. */
+  content-visibility: auto;
+  contain-intrinsic-size: 900px 560px;
+  contain: layout paint style;
   /* UNIVERSO PROCEDURAL POR CAPAS — sin imagen, todo CSS.
      Capas (de adelante hacia atrás):
        1. Bañado de luz lunar central (cálido, tenue) → la luna ilumina
@@ -434,12 +441,13 @@
   cursor: pointer;
   z-index: 4;
   opacity: 0;
-  filter:
-    drop-shadow(0 0 var(--ns-glow, 5px) var(--ns-color, #ffffff))
-    drop-shadow(0 0 calc(var(--ns-glow, 5px) * 1.6) var(--ns-color, #ffffff));
-  animation:
-    nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards,
-    nsStarTwinkle var(--ns-twinkle-dur, 3s) ease-in-out var(--ns-twinkle-delay, 0s) infinite;
+  /* PERF: 2 drop-shadow → 1. Cada drop-shadow es un composite-pass separado
+     por elemento. Con 300+ stars eso es 600+ passes por frame. */
+  filter: drop-shadow(0 0 var(--ns-glow, 5px) var(--ns-color, #ffffff));
+  /* PERF: twinkle infinito eliminado de la base. Solo .ns-decor (decorativas)
+     lo mantienen abajo. Antes las ~150 event stars también titilaban → drenaba
+     CPU aunque el usuario estuviera solo mirando. */
+  animation: nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards;
   transition: transform 0.25s var(--mej-bounce, cubic-bezier(0.34, 1.56, 0.64, 1)), filter 0.2s ease;
 }
 
@@ -504,12 +512,16 @@
   );
 }
 
-/* Estrellas DECORATIVAS de fondo · 4 tiers de profundidad */
+/* Estrellas DECORATIVAS de fondo · 4 tiers de profundidad.
+   SOLO éstas mantienen twinkle infinito (~24 elementos en desktop). */
 .ns-star.ns-decor {
   cursor: default;
   pointer-events: none;
   background: rgba(255, 252, 240, 0.95);
   filter: drop-shadow(0 0 var(--ns-glow, 3px) rgba(255, 250, 235, 0.6));
+  animation:
+    nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards,
+    nsStarTwinkle var(--ns-twinkle-dur, 3s) ease-in-out var(--ns-twinkle-delay, 0s) infinite;
 }
 
 /* Estrellas medianas con ligero desenfoque → sensación de "están más lejos" */
