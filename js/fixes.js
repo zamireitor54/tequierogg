@@ -12,6 +12,18 @@
   'use strict';
 
   // ====================================================
+  // 0. PERF · Pausar todas las animaciones cuando la pestaña oculta.
+  // Marca la <html> con .tab-hidden → CSS aplica animation-play-state: paused
+  // a TODOS los elementos con animación. Cero CPU cuando el usuario está en
+  // otra pestaña. Se activa/desactiva vía visibilitychange.
+  // ====================================================
+  const applyVisibility = () => {
+    document.documentElement.classList.toggle('tab-hidden', document.hidden);
+  };
+  document.addEventListener('visibilitychange', applyVisibility, { passive: true });
+  applyVisibility();
+
+  // ====================================================
   // 1. Wrappear emojis en headers con gradiente
   // ====================================================
   // Regex que captura emojis (incluye compuestos como 💞, banderas, etc.)

@@ -110,6 +110,8 @@
      Corazoncitos y sparkles flotantes (fondo)
      ==================================================== */
   function setupFloatingHearts() {
+    // PERF: 16→6 en desktop, 10→3 en móvil. Duración más larga para menos
+    // frames por segundo por corazón.
     const container = document.createElement('div');
     container.className = 'floating-hearts';
     container.setAttribute('aria-hidden', 'true');
@@ -117,16 +119,16 @@
 
     const symbols = ['💗', '💖', '✨', '🌸', '💫', '🤍'];
     const isMobile = window.matchMedia('(max-width: 640px)').matches;
-    const count = isMobile ? 10 : 16;
+    const count = isMobile ? 3 : 6;
 
     for (let i = 0; i < count; i++) {
       const heart = document.createElement('span');
       heart.className = 'heart';
       heart.textContent = symbols[Math.floor(Math.random() * symbols.length)];
       heart.style.setProperty('--size', `${0.7 + Math.random() * 1.1}rem`);
-      heart.style.setProperty('--duration', `${18 + Math.random() * 14}s`);
-      heart.style.setProperty('--delay', `${Math.random() * 22}s`);
-      heart.style.setProperty('--max-opacity', `${0.10 + Math.random() * 0.12}`);
+      heart.style.setProperty('--duration', `${28 + Math.random() * 20}s`);
+      heart.style.setProperty('--delay', `${Math.random() * 30}s`);
+      heart.style.setProperty('--max-opacity', `${0.12 + Math.random() * 0.12}`);
       heart.style.left = `${Math.random() * 100}%`;
       container.appendChild(heart);
     }
@@ -406,20 +408,19 @@
      Cursor trail (corazoncitos siguiendo el mouse)
      ==================================================== */
   function setupCursorTrail() {
+    // PERF: throttle mucho más agresivo (250ms + 30% probabilidad).
+    // Antes: 110ms + 45% = ~4 corazones/segundo si mueves el mouse rápido.
+    // Ahora: 250ms + 30% = ~1.2 corazones/segundo máximo.
     const symbols = ['💗', '✨', '💖'];
     let lastTime = 0;
-    const minDelay = 110; // ms
+    const minDelay = 250;
 
     document.addEventListener('pointermove', (e) => {
-      // Solo eventos de mouse, no touch ni pen
       if (e.pointerType && e.pointerType !== 'mouse') return;
-
       const now = performance.now();
       if (now - lastTime < minDelay) return;
       lastTime = now;
-
-      // 50% de las veces saltamos para que no sea exagerado
-      if (Math.random() > 0.55) return;
+      if (Math.random() > 0.30) return;
 
       const heart = document.createElement('span');
       heart.className = 'cursor-heart';
@@ -428,7 +429,6 @@
       heart.style.top = `${e.clientY}px`;
       heart.style.fontSize = `${0.65 + Math.random() * 0.45}rem`;
       document.body.appendChild(heart);
-
       window.setTimeout(() => heart.remove(), 1000);
     }, { passive: true });
   }

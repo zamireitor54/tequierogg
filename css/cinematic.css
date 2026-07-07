@@ -103,34 +103,22 @@ body::after {
   position: relative;
 }
 
+/* PERF: conic-gradient rotando eliminado — era el efecto más caro.
+   Reemplazado con gradiente lineal estático (mismo look, cero GPU). */
 .hero-photo::after {
   content: "";
   position: absolute;
-  inset: -6px;
+  inset: -3px;
   border-radius: 28px;
   z-index: -1;
-  background: conic-gradient(
-    from 0deg,
-    #ff6fbf,
-    #ffd6ec,
-    #c46cff,
-    #7c49ff,
-    #ff85c0,
-    #ff6fbf
-  );
-  filter: blur(0.5px);
-  opacity: 0.55;
-  animation: conicSpin 12s linear infinite;
+  background: linear-gradient(135deg, #ff6fbf, #c46cff, #7c49ff, #ff85c0);
+  opacity: 0.6;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
           mask-composite: exclude;
-  padding: 4px;
-}
-
-@keyframes conicSpin {
-  to { transform: rotate(360deg); }
+  padding: 3px;
 }
 
 /* Reflejo sutil sobre la foto */

@@ -579,3 +579,52 @@
 .hero-photo .heart-counter {
   display: none !important;
 }
+
+/* ==========================================================
+   PERF LAYER · Optimizaciones globales de rendimiento
+   Aplican DESPUÉS de todas las capas de estilos.
+   ========================================================== */
+
+/* MÓVIL: mata backdrop-filter en todos lados. En styles.css hay ~94
+   elementos con blur() y cada uno es un composite-pass. En móvil el
+   costo es demasiado alto vs. el beneficio visual. */
+@media (max-width: 760px) {
+  *,
+  *::before,
+  *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* DESKTOP + MÓVIL: cortar animaciones cuando la pestaña no es visible.
+   Complementa el pausado por sección del cielo. */
+html.tab-hidden *,
+html.tab-hidden *::before,
+html.tab-hidden *::after {
+  animation-play-state: paused !important;
+}
+
+/* PERF · Reducir aspectos costosos comunes:
+   - box-shadow con blur enorme en elementos que scrollean
+   - conic-gradient rotando (asesino) */
+@media (max-width: 760px) {
+  /* Sombras profundas → sombras planas */
+  .card,
+  .extra-card,
+  .modal-card,
+  .upload-card {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+/* Motion: si el usuario prefiere reduce-motion, sí respetarlo */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+  }
+}
