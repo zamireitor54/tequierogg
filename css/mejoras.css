@@ -1696,11 +1696,9 @@ aside.love-counter {
      3. Caption oscuro
    ---------------------------------------------------------- */
 @media (max-width: 760px) {
-  /* CRÍTICO: styles.css tiene min-height 430-520px con !important en varias
-     media queries — esas ganaban sobre el height inline del JS. Aquí las
-     anulamos definitivamente + fijamos altura exacta. */
+  /* CARD contenedor — pinta el recuadro y clipa lo que se salga */
   .map-placeholder {
-    overflow: visible !important;
+    overflow: hidden !important;             /* clipa tiles Leaflet cacheadas */
     min-height: 0 !important;
     max-height: none !important;
     height: auto !important;
@@ -1710,15 +1708,20 @@ aside.love-counter {
     box-sizing: border-box !important;
     display: flex !important;
     flex-direction: column !important;
+    align-items: center !important;          /* centrado horizontal de hijos */
     gap: 14px !important;
-    padding: 10px !important;
-    padding-bottom: 10px !important;
-    background: rgba(124, 73, 255, 0.06) !important;
+    padding: 12px !important;
+    padding-bottom: 12px !important;
+    background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(244,238,255,0.90)) !important;
+    border: 1px solid rgba(124, 73, 255, 0.18) !important;
+    border-radius: 22px !important;
+    box-shadow: 0 12px 32px rgba(36, 19, 50, 0.14) !important;
   }
-  /* Padding lateral extra en el card wrapper para más aire visual */
+  /* Padding lateral del card wrapper */
   .extra-card--map-full {
     padding-left: 14px !important;
     padding-right: 14px !important;
+    padding-bottom: 14px !important;
   }
 
   /* Pocket SIEMPRE arriba, static (styles.css la ponía position:absolute
@@ -1787,10 +1790,7 @@ aside.love-counter {
     inset: 0 !important;
   }
 
-  /* CRÍTICO: styles.css tenía TODOS estos problemas simultáneos:
-       .memory-map { position: absolute; inset: 0; min-height: 420-500px }
-     y varias @media que refuerzan min-height entre 430-520px con !important.
-     Aquí forzamos altura FIJA (min-height + max-height + height = 280px). */
+  /* Mapa contenido dentro del card, altura FIJA, borde propio para ver el recuadro */
   #memory-map.memory-map,
   .memory-map {
     order: 2 !important;
@@ -1803,11 +1803,28 @@ aside.love-counter {
     height: 280px !important;
     min-height: 280px !important;
     max-height: 280px !important;
-    border-radius: 18px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(124, 73, 255, 0.14) !important;
     width: 100% !important;
     max-width: 100% !important;
     flex: 0 0 280px !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  /* Leaflet internal container: forzar a 100% del padre + clip.
+     Leaflet añade .leaflet-container class al elemento — targetamos ambos. */
+  #memory-map.leaflet-container,
+  .memory-map.leaflet-container,
+  .map-placeholder .leaflet-container {
+    height: 280px !important;
+    min-height: 280px !important;
+    max-height: 280px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    border-radius: 16px !important;
   }
 
   .map-placeholder-copy {

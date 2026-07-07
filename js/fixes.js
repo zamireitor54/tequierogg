@@ -39,21 +39,22 @@
         placeholder.insertBefore(pocket, placeholder.firstChild);
       }
 
-      // .map-placeholder: flex column con altura auto (styles.css tenía
-      // min-height 430-520px !important que dominaba antes)
+      // .map-placeholder: card contenedor — overflow:hidden clipa tiles
+      // Leaflet cacheadas al tamaño viejo. align-items:center → hijos centrados
       forceStyle(placeholder, 'display', 'flex');
       forceStyle(placeholder, 'flex-direction', 'column');
+      forceStyle(placeholder, 'align-items', 'center');
       forceStyle(placeholder, 'gap', '12px');
       forceStyle(placeholder, 'min-height', '0');
       forceStyle(placeholder, 'max-height', 'none');
       forceStyle(placeholder, 'height', 'auto');
-      forceStyle(placeholder, 'overflow', 'visible');
-      forceStyle(placeholder, 'padding', '10px');
-      forceStyle(placeholder, 'padding-bottom', '10px');
+      forceStyle(placeholder, 'overflow', 'hidden');
+      forceStyle(placeholder, 'padding', '12px');
       forceStyle(placeholder, 'width', '100%');
       forceStyle(placeholder, 'max-width', '100%');
       forceStyle(placeholder, 'box-sizing', 'border-box');
       forceStyle(placeholder, 'margin', '0 auto');
+      forceStyle(placeholder, 'border-radius', '22px');
 
       if (pocket) {
         // Pocket: static !important gana contra el @media 768px de styles.css
