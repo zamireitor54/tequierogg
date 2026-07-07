@@ -121,18 +121,8 @@
   50%      { opacity: calc(var(--bs-op, 0.5) * 0.32); }
 }
 
-/* Capa de ruido sutil sobre el cielo → quita la sensación "plana" */
-.night-sky::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' seed='4'/><feColorMatrix values='0 0 0 0 0.92  0 0 0 0 0.85  0 0 0 0 1  0 0 0 0.22 0'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
-  background-size: 220px 220px;
-  opacity: 0.38;
-  mix-blend-mode: screen;
-  z-index: 0;
-  pointer-events: none;
-}
+/* PERF: noise SVG y mix-blend-mode eliminados */
+.night-sky::after { content: none; }
 
 @keyframes nsNebula {
   0%   { transform: translate3d(0, 0, 0) scale(1);    opacity: 0.78; }
@@ -303,20 +293,8 @@
    mezcla en modo screen → todo lo que está cerca de la luna recibe un tinte
    cálido aditivo. Es lo que da la sensación de un solo universo coherente
    y no elementos sueltos apilados. */
-.night-sky-stage::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 50% 50%,
-      rgba(255, 230, 200, 0.07) 0%,
-      rgba(220, 180, 255, 0.05) 18%,
-      rgba(140, 100, 220, 0.04) 35%,
-      transparent 65%);
-  pointer-events: none;
-  z-index: 2;
-  mix-blend-mode: screen;
-}
+/* PERF: atmósfera con mix-blend-mode eliminada */
+.night-sky-stage::after { content: none; }
 
 @media (max-width: 640px) {
   .night-sky-stage {
@@ -345,17 +323,11 @@
   position: absolute;
   inset: 0;
   opacity: 0;
-  /* Transición LARGA y suave: 2s, sigmoide simétrica → la fase morfea sin saltos */
   transition: opacity 2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
-  /* Glow cinematográfico: cremoso muy tenue → violeta → azul nocturno.
-     ANTES había mucho blanco-blanco. Ahora la mayoría del brillo es violeta
-     y azul, como fotografía real del espacio. */
+  /* PERF: 5 drop-shadow → 2. Cada drop-shadow es un render-pass entero. */
   filter:
-    drop-shadow(0 0 14px rgba(255, 230, 210, 0.38))
-    drop-shadow(0 0 38px rgba(220, 180, 255, 0.42))
-    drop-shadow(0 0 80px rgba(160, 110, 230, 0.36))
-    drop-shadow(0 0 150px rgba(100, 70, 200, 0.28))
-    drop-shadow(0 0 240px rgba(60, 40, 160, 0.20));
+    drop-shadow(0 0 20px rgba(220, 180, 255, 0.5))
+    drop-shadow(0 0 55px rgba(140, 100, 220, 0.32));
 }
 
 .ns-moon-layer.is-front {
@@ -368,48 +340,18 @@
   display: block;
 }
 
-/* Aura externa: la luna ilumina el universo a su alrededor.
-   Menos blanco/ámbar, más violeta/azul → cinematográfico, no fluorescente. */
-.ns-moon::before {
-  content: "";
-  position: absolute;
-  inset: -240%;
-  background:
-    radial-gradient(circle at 50% 50%,
-      rgba(255, 235, 215, 0.16) 0%,
-      rgba(230, 195, 240, 0.13) 7%,
-      rgba(190, 150, 240, 0.11) 16%,
-      rgba(150, 110, 230, 0.09) 27%,
-      rgba(110, 80, 210, 0.06) 42%,
-      rgba(70, 50, 180, 0.04) 58%,
-      transparent 75%);
-  pointer-events: none;
-  z-index: -1;
-  border-radius: 50%;
-  animation: nsMoonAura 11s ease-in-out infinite alternate;
-}
+/* Aura externa REMOVIDA por perf. El drop-shadow del layer basta. */
+.ns-moon::before { content: none; }
 
 @keyframes nsMoonAura {
   0%   { opacity: 0.82; transform: scale(0.94); }
   100% { opacity: 1;    transform: scale(1.08); }
 }
 
+/* PERF: keyframe simplificado a 2 capas (era 5), sin filter continuo animándose */
 @keyframes nsMoonGlow {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 16px rgba(255, 230, 210, 0.38))
-      drop-shadow(0 0 44px rgba(220, 180, 255, 0.42))
-      drop-shadow(0 0 90px rgba(160, 110, 230, 0.34))
-      drop-shadow(0 0 170px rgba(100, 70, 200, 0.24));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 24px rgba(255, 230, 210, 0.54))
-      drop-shadow(0 0 64px rgba(220, 180, 255, 0.55))
-      drop-shadow(0 0 130px rgba(160, 110, 230, 0.45))
-      drop-shadow(0 0 230px rgba(100, 70, 200, 0.32))
-      drop-shadow(0 0 320px rgba(60, 40, 160, 0.22));
-  }
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(220, 180, 255, 0.5)); }
+  50%      { filter: drop-shadow(0 0 30px rgba(220, 180, 255, 0.7)); }
 }
 
 /* Cuando hay un slot activo (foto rotando), la luna brilla más */
@@ -666,8 +608,7 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 200, 230, 0.20);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* PERF: backdrop-filter blur eliminado (era 10-18px por chip) */
   color: var(--ns-text);
   font-family: "Poppins", sans-serif;
   font-size: 0.85rem;
@@ -985,6 +926,24 @@
   align-items: center;
   gap: 10px;
   animation: nsPsEnter 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s both;
+}
+
+/* ==========================================================
+   PAUSAR ANIMACIONES cuando el cielo NO está en viewport.
+   IntersectionObserver setea data-in-view="0" en la sección.
+   Sin esto, los ~200 elementos animados siguen consumiendo CPU
+   aunque el usuario esté leyendo otra parte de la página.
+   ========================================================== */
+.night-sky[data-in-view="0"] .ns-star,
+.night-sky[data-in-view="0"] .ns-bg-star,
+.night-sky[data-in-view="0"] .ns-particle,
+.night-sky[data-in-view="0"] .ns-moon,
+.night-sky[data-in-view="0"] .ns-active-halo,
+.night-sky[data-in-view="0"] .ns-active-particle,
+.night-sky[data-in-view="0"] .ns-photo-slot-frame,
+.night-sky[data-in-view="0"] .ns-photo-slot-progress > span,
+.night-sky[data-in-view="0"] .night-sky-title {
+  animation-play-state: paused !important;
 }
 
 /* ==========================================================
@@ -1306,8 +1265,7 @@
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.01em;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* PERF: backdrop-filter eliminado */
 }
 
 .ns-photo-slot-moon .ns-stat-moon-icon {
@@ -1389,23 +1347,18 @@
     nsActiveBreathe 3.2s ease-in-out infinite !important;
 }
 
+/* PERF: 5 drop-shadow → 2 */
 @keyframes nsActiveBreathe {
   0%, 100% {
     filter:
       drop-shadow(0 0 14px rgba(255, 255, 245, 0.95))
-      drop-shadow(0 0 30px rgba(255, 240, 200, 0.9))
-      drop-shadow(0 0 60px rgba(255, 215, 175, 0.78))
-      drop-shadow(0 0 110px rgba(255, 180, 220, 0.5))
-      drop-shadow(0 0 180px rgba(196, 130, 255, 0.35));
+      drop-shadow(0 0 36px rgba(255, 215, 175, 0.7));
   }
   50% {
     filter:
       drop-shadow(0 0 20px rgba(255, 255, 245, 1))
-      drop-shadow(0 0 42px rgba(255, 240, 200, 1))
-      drop-shadow(0 0 80px rgba(255, 215, 175, 0.95))
-      drop-shadow(0 0 145px rgba(255, 180, 220, 0.7))
-      drop-shadow(0 0 220px rgba(196, 130, 255, 0.5))
-      brightness(1.12);
+      drop-shadow(0 0 52px rgba(255, 215, 175, 0.9))
+      brightness(1.08);
   }
 }
 
@@ -1461,23 +1414,18 @@
     nsActiveBreathePhoto 3.2s ease-in-out infinite !important;
 }
 
+/* PERF: 5 drop-shadow → 2 */
 @keyframes nsActiveBreathePhoto {
   0%, 100% {
     filter:
       drop-shadow(0 0 14px rgba(255, 255, 245, 0.95))
-      drop-shadow(0 0 30px rgba(255, 230, 200, 0.92))
-      drop-shadow(0 0 60px rgba(196, 181, 253, 0.85))
-      drop-shadow(0 0 110px rgba(255, 130, 200, 0.55))
-      drop-shadow(0 0 180px rgba(124, 73, 255, 0.4));
+      drop-shadow(0 0 40px rgba(196, 181, 253, 0.75));
   }
   50% {
     filter:
-      drop-shadow(0 0 20px rgba(255, 255, 245, 1))
-      drop-shadow(0 0 42px rgba(255, 230, 200, 1))
-      drop-shadow(0 0 80px rgba(196, 181, 253, 0.98))
-      drop-shadow(0 0 150px rgba(255, 130, 200, 0.75))
-      drop-shadow(0 0 230px rgba(124, 73, 255, 0.55))
-      brightness(1.12);
+      drop-shadow(0 0 22px rgba(255, 255, 245, 1))
+      drop-shadow(0 0 60px rgba(196, 181, 253, 0.95))
+      brightness(1.08);
   }
 }
 
@@ -1534,21 +1482,7 @@
   .ns-active-particle { animation: none !important; opacity: 0 !important; }
 }
 
-/* ==========================================================
-   GRANO de película sutil sobre el stage → quita aspecto plástico
-   ========================================================== */
-.night-sky-stage::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch' seed='7'/><feColorMatrix values='0 0 0 0 0.95  0 0 0 0 0.88  0 0 0 0 1  0 0 0 0.20 0'/></filter><rect width='160' height='160' filter='url(%23g)'/></svg>");
-  background-size: 200px 200px;
-  opacity: 0.45;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  z-index: 1;
-  border-radius: inherit;
-}
+/* PERF: grano SVG y mix-blend-mode eliminados (muy caro). */
 
 /* ==========================================================
    CONSTELACIÓN · líneas finas entre la estrella activa
@@ -1705,24 +1639,8 @@
   z-index: 6 !important;
 }
 
-/* ==========================================================
-   RESPIRACIÓN DEL UNIVERSO · pulso muy lento que recorre todo
-   el stage. 16s ease-in-out alternate → ningún sentido predecible.
-   El cambio es del 4% en brillo, casi imperceptible, pero suficiente
-   para sentir que el cielo entero pertenece a un mismo universo vivo.
-   ========================================================== */
-.night-sky-stage {
-  animation: nsUniverseBreath 16s ease-in-out infinite alternate;
-}
-
-@keyframes nsUniverseBreath {
-  0%   { filter: brightness(1) saturate(1); }
-  100% { filter: brightness(1.045) saturate(1.04); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .night-sky-stage { animation: none; }
-}
+/* PERF: universe breath eliminado. Animar filter: brightness sobre
+   cientos de children era el mayor coste de la sección. */
 
 /* ==========================================================
    MODO CONTEMPLACIÓN · 22s sin actividad → la UI baja opacidad

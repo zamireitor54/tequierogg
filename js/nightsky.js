@@ -513,7 +513,7 @@
     layer.setAttribute('aria-hidden', 'true');
 
     const isMobile = window.innerWidth < 760;
-    const count = isMobile ? 45 : 110;
+    const count = isMobile ? 20 : 50;
     const frag = document.createDocumentFragment();
 
     // Clusters EN PORCENTAJES sobre la sección entera (no necesitamos px reales)
@@ -757,7 +757,7 @@
   }
 
   function spawnActiveOrbitParticles(stage, x, y) {
-    const count = 5;
+    const count = 3;
     for (let i = 0; i < count; i++) {
       const wrap = document.createElement('span');
       wrap.className = 'ns-active-particle';
@@ -1463,22 +1463,32 @@
     moonStack = createMoonStack(stage, phase);
 
     const isMobile = window.innerWidth < 760;
-    // PERF: en móvil reducimos DRÁSTICAMENTE conteos y desactivamos efectos
-    // pesados (blur, mix-blend-mode, animaciones globales) para evitar lag.
+    // PERF: conteos MUY reducidos incluso en desktop. La densidad visual
+    // no compensa el coste de paint/animation. Depth orbs eliminados
+    // (blur 22px es asesino en cualquier device).
     if (isMobile) section.classList.add('is-mobile-perf');
     else section.classList.remove('is-mobile-perf');
+    section.classList.add('is-eco'); // modo eficiente por defecto
 
-    spawnTinyDots(stage, isMobile ? 60 : 280);
-    spawnMilkyWay(stage, isMobile ? 25 : 130);
-    spawnDecorativeStars(stage, isMobile ? 22 : 90);
-    spawnParticles(stage, isMobile ? 5 : 22);
-    // Orbes de profundidad: SOLO desktop. En móvil el blur(22px) es asesino.
-    if (!isMobile) spawnDepthOrbs(stage, 3);
-    // Estrellas fugaces: sí en móvil, pero solo en desktop arrancamos timer.
-    // En móvil dejamos solo el atmósfera estática + twinkle natural.
+    spawnTinyDots(stage, isMobile ? 45 : 110);
+    spawnMilkyWay(stage, isMobile ? 20 : 55);
+    spawnDecorativeStars(stage, isMobile ? 18 : 42);
+    spawnParticles(stage, isMobile ? 4 : 9);
+    // Estrellas fugaces + historias: solo desktop, ya rarísimas (1.5-4 min)
     if (!isMobile) {
       scheduleShootingStar(stage);
       scheduleStarStory(section, stage);
+    }
+
+    // IntersectionObserver: cuando el cielo NO está en viewport,
+    // pausamos animaciones vía data attribute que el CSS respeta.
+    if ('IntersectionObserver' in window && !section.dataset.visibilityBound) {
+      section.dataset.visibilityBound = '1';
+      const io = new IntersectionObserver(([entry]) => {
+        if (!entry) return;
+        section.dataset.inView = entry.isIntersecting ? '1' : '0';
+      }, { threshold: 0.05 });
+      io.observe(section);
     }
 
     const stageW = stage.clientWidth;
