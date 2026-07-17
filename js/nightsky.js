@@ -65,7 +65,54 @@
   // SVG DE LA LUNA · región BRILLANTE como path sobre disco oscuro
   // Más cráteres, halo, mejor textura
   // ====================================================
+  // ====================================================
+  // MOON PHOTOS (opcional) · si el usuario coloca fotos reales de luna
+  // en img/moon/N.png (N = 0-29 para cada fase del ciclo sinódico), las
+  // usa en vez del SVG. Look 10x más real + rendering 20x más barato
+  // (solo swap de <img>). Fallback automático al SVG si no cargan.
+  //
+  // Convención esperada:
+  //   img/moon/0.png  → luna nueva
+  //   img/moon/7.png  → cuarto creciente
+  //   img/moon/15.png → llena
+  //   img/moon/22.png → cuarto menguante
+  //   img/moon/29.png → casi luna nueva otra vez
+  // ====================================================
+  const MOON_PHOTOS_ENABLED = true;
+  const MOON_PHOTO_FRAMES = 30; // cuántas fotos hay en img/moon/
+  const MOON_PHOTOS_BASE = 'img/moon/';
+  let _moonPhotosSupported = null; // null = no probado; true/false = resultado
+
+  function phaseToMoonPhotoIndex(phase) {
+    // Mapea phase (0..1) al índice del frame más cercano
+    return Math.round(phase * MOON_PHOTO_FRAMES) % MOON_PHOTO_FRAMES;
+  }
+
+  function probeMoonPhotos() {
+    // Prueba una vez si existen las fotos. Guarda resultado.
+    return new Promise((resolve) => {
+      if (_moonPhotosSupported !== null) { resolve(_moonPhotosSupported); return; }
+      if (!MOON_PHOTOS_ENABLED) { _moonPhotosSupported = false; resolve(false); return; }
+      const testImg = new Image();
+      testImg.onload = () => { _moonPhotosSupported = true; resolve(true); };
+      testImg.onerror = () => { _moonPhotosSupported = false; resolve(false); };
+      testImg.src = `${MOON_PHOTOS_BASE}0.png`;
+    });
+  }
+
+  function buildMoonPhotoHTML(phase, opts = {}) {
+    if (_moonPhotosSupported !== true) return null;
+    const idx = phaseToMoonPhotoIndex(phase);
+    const size = opts.size || 100;
+    return `<img class="ns-moon-photo" src="${MOON_PHOTOS_BASE}${idx}.png" alt="" style="width:100%;height:100%;object-fit:contain;display:block;" />`;
+  }
+
   function buildMoonSVG(phase, opts = {}) {
+    // Si las fotos existen, úsalas
+    const photoHTML = buildMoonPhotoHTML(phase, opts);
+    if (photoHTML) return photoHTML;
+
+    // Fallback: SVG procedural
     const size = opts.size || 100;
     const R = 47;
     const cx = 50, cy = 50;
@@ -628,6 +675,87 @@
     }
   }
 
+  // CONSTELACIONES ESTÁTICAS · líneas sutiles que conectan grupos de
+  // estrellas decorativas → dan la sensación de constelaciones reales del
+  // cielo. Son estáticas (no animan), muy tenues, generadas una sola vez.
+  function spawnStaticConstellations(stage, count) {
+    // Recogemos posiciones de decorativas ya spawneadas
+    const decor = Array.from(stage.querySelectorAll('.ns-star.ns-decor'));
+    if (decor.length < 4) return;
+
+    const positions = decor.map((el) => ({
+      x: parseFloat(el.style.left) || 0,
+      y: parseFloat(el.style.top) || 0,
+    }));
+
+    // Contenedor SVG para las líneas (una capa, no una por línea)
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'ns-constellation-bg');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.style.position = 'absolute';
+    svg.style.top = '0';
+    svg.style.left = '0';
+    svg.style.pointerEvents = 'none';
+    svg.style.zIndex = '2';
+
+    // Construimos `count` constelaciones. Cada una es 3-5 estrellas conectadas
+    // en cadena, seleccionadas por proximidad para verse naturales.
+    const usedIndexes = new Set();
+    for (let c = 0; c < count; c++) {
+      // Pick starting star
+      let startIdx = -1;
+      let attempts = 0;
+      while (attempts < 20) {
+        const cand = Math.floor(Math.random() * positions.length);
+        if (!usedIndexes.has(cand)) { startIdx = cand; break; }
+        attempts++;
+      }
+      if (startIdx === -1) break;
+
+      const chainLength = 3 + Math.floor(Math.random() * 3); // 3-5 estrellas
+      const chain = [startIdx];
+      usedIndexes.add(startIdx);
+
+      for (let s = 1; s < chainLength; s++) {
+        const last = positions[chain[chain.length - 1]];
+        // Buscar el siguiente más cercano no usado, en un rango 40-160px
+        let bestIdx = -1;
+        let bestDist = Infinity;
+        for (let i = 0; i < positions.length; i++) {
+          if (usedIndexes.has(i)) continue;
+          const d = Math.hypot(positions[i].x - last.x, positions[i].y - last.y);
+          if (d > 40 && d < 200 && d < bestDist) {
+            bestIdx = i;
+            bestDist = d;
+          }
+        }
+        if (bestIdx === -1) break;
+        chain.push(bestIdx);
+        usedIndexes.add(bestIdx);
+      }
+
+      // Dibujar líneas del chain
+      for (let i = 1; i < chain.length; i++) {
+        const p1 = positions[chain[i - 1]];
+        const p2 = positions[chain[i]];
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', String(p1.x));
+        line.setAttribute('y1', String(p1.y));
+        line.setAttribute('x2', String(p2.x));
+        line.setAttribute('y2', String(p2.y));
+        line.setAttribute('stroke', 'rgba(255, 245, 220, 0.18)');
+        line.setAttribute('stroke-width', '0.6');
+        line.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(line);
+      }
+    }
+
+    stage.appendChild(svg);
+  }
+
   // MODO CONTEMPLACIÓN · después de N segundos sin actividad, la UI baja
   // opacidad y el universo queda como protagonista absoluto.
   // Cualquier interacción la restaura suavemente.
@@ -1027,81 +1155,43 @@
   function transitionMoonTo(moonStack, newPhase) {
     if (Math.abs(newPhase - moonStack.currentPhase) < 0.00001) return;
 
-    // Cancela cualquier morph anterior en curso
+    // Cancela cualquier morph anterior
     if (moonStack.morphRaf) {
       cancelAnimationFrame(moonStack.morphRaf);
       moonStack.morphRaf = null;
     }
 
+    const layers = moonStack.wrap.querySelectorAll('.ns-moon-layer');
+    const active = layers[moonStack.currentLayer];
+    const nextIdx = 1 - moonStack.currentLayer;
+    const next = layers[nextIdx];
+
     // Reduce-motion: cambio instantáneo
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const layers0 = moonStack.wrap.querySelectorAll('.ns-moon-layer');
-      const a0 = layers0[moonStack.currentLayer];
-      a0.innerHTML = buildMoonSVG(newPhase, { idSuffix: `-i${Date.now()}` });
+      active.innerHTML = buildMoonSVG(newPhase, { idSuffix: `-i${Date.now()}` });
       moonStack.currentPhase = newPhase;
       moonStack.currentDisplayPhase = newPhase;
       moonStack.wrap.dataset.phase = newPhase.toFixed(4);
       return;
     }
 
-    // Punto de partida: la fase mostrada actualmente (que puede ser intermedia
-    // si un morph anterior fue cancelado a la mitad)
-    const oldPhase = (typeof moonStack.currentDisplayPhase === 'number')
-      ? moonStack.currentDisplayPhase
-      : moonStack.currentPhase;
-
-    // Ruta más corta del ciclo (no atravesar la luna nueva al revés)
-    let delta = newPhase - oldPhase;
-    if (delta > 0.5) delta -= 1;
-    else if (delta < -0.5) delta += 1;
-
-    const TOTAL_MS = 1800;
-    const FRAME_MS = 220; // ~4-5fps · SVG morph "de calidad time-lapse"
-                          // Antes 14fps → recompilaba SVG con cráteres 25 veces
-                          // por transición. 4-5fps es suficiente para percepción
-                          // continua y baja el coste ~5x.
-    const startTime = performance.now();
-    const layers = moonStack.wrap.querySelectorAll('.ns-moon-layer');
-    const active = layers[moonStack.currentLayer];
-    const other = layers[1 - moonStack.currentLayer];
-
-    // Aseguramos que SOLO el active esté visible. Sin transition CSS porque
-    // ahora controlamos el morph nosotros — no queremos opacity crossfade.
-    active.style.transition = 'none';
-    other.style.transition = 'none';
-    other.classList.remove('is-front');
-    active.classList.add('is-front');
-    void active.offsetWidth;
-
-    let lastUpdate = 0;
-    function frame(now) {
-      const elapsed = now - startTime;
-      const t = Math.min(elapsed / TOTAL_MS, 1);
-      if (now - lastUpdate >= FRAME_MS || t === 1) {
-        lastUpdate = now;
-        // Easing sigmoidal (smooth in-out)
-        const eased = 0.5 - Math.cos(Math.PI * t) / 2;
-        let p = oldPhase + delta * eased;
-        if (p < 0) p += 1;
-        if (p > 1) p -= 1;
-        active.innerHTML = buildMoonSVG(p, { idSuffix: `-m${Math.floor(now)}` });
-        moonStack.currentDisplayPhase = p;
-      }
-      if (t < 1) {
-        moonStack.morphRaf = requestAnimationFrame(frame);
-      } else {
-        moonStack.morphRaf = null;
-        moonStack.currentDisplayPhase = newPhase;
-        // Restaurar transiciones para hover/otros efectos
-        setTimeout(() => {
-          active.style.transition = '';
-          other.style.transition = '';
-        }, 120);
-      }
-    }
-
-    moonStack.morphRaf = requestAnimationFrame(frame);
+    // CROSSFADE LIMPIO:
+    // 1. Renderizar la nueva fase en la capa "next" (invisible ahora)
+    // 2. Fade out la vieja + fade in la nueva simultáneamente (CSS transition)
+    // 3. Al terminar el fade, currentLayer apunta a la que ya está visible
+    // Ventaja: NO hay morph frame-by-frame (que causaba las paradas/saltos).
+    // La transición se ve continua porque el compositor la maneja en GPU.
+    next.innerHTML = buildMoonSVG(newPhase, { idSuffix: `-x${Date.now()}` });
+    // Aseguramos transiciones activas
+    next.style.transition = '';
+    active.style.transition = '';
+    // Force reflow para que la nueva luna se pinte antes del fade
+    void next.offsetWidth;
+    next.classList.add('is-front');
+    active.classList.remove('is-front');
+    moonStack.currentLayer = nextIdx;
     moonStack.currentPhase = newPhase;
+    moonStack.currentDisplayPhase = newPhase;
     moonStack.wrap.dataset.phase = newPhase.toFixed(4);
   }
 
@@ -1481,6 +1571,9 @@
     spawnMilkyWay(stage, isMobile ? 12 : 24);
     spawnDecorativeStars(stage, isMobile ? 8 : 15);
     spawnParticles(stage, isMobile ? 2 : 4);
+    // Constelaciones estáticas de fondo — conectan grupos de decorativas
+    // dan la sensación de constelaciones reales del cielo
+    spawnStaticConstellations(stage, isMobile ? 2 : 4);
     // Estrellas fugaces + historias: solo desktop, ya rarísimas (1.5-4 min)
     if (!isMobile) {
       scheduleShootingStar(stage);
@@ -1551,7 +1644,14 @@
   function init() {
     const section = document.getElementById('night-sky');
     if (section) setupContemplationMode(section);
-    render().then(() => { _lastDataSig = dataSignature(); });
+    // Prueba si hay fotos de luna. Cuando resuelva, si están disponibles,
+    // re-renderea para usarlas. Si no, sigue con SVG (ya renderizado).
+    probeMoonPhotos().then((hasPhotos) => {
+      render().then(() => { _lastDataSig = dataSignature(); });
+      if (hasPhotos) {
+        console.log('[nightsky] fotos de luna detectadas en img/moon/ — usando fotos reales.');
+      }
+    });
 
     // Refresca al cambiar galería o notas (sin trabar la UI), PERO solo si
     // los datos realmente cambiaron. Algunos módulos disparan el evento al
