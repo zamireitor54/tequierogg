@@ -39,12 +39,13 @@
         placeholder.insertBefore(pocket, placeholder.firstChild);
       }
 
-      // CSS GRID inline — imposible de perder contra flex/position/absolute
+      // Grid 2 filas + placeholder relative para anclar el pocket overlay
+      forceStyle(placeholder, 'position', 'relative');
       forceStyle(placeholder, 'display', 'grid');
       forceStyle(placeholder, 'grid-template-columns', '1fr');
-      forceStyle(placeholder, 'grid-template-rows', 'auto 280px auto');
-      forceStyle(placeholder, 'grid-template-areas', '"photo" "map" "caption"');
-      forceStyle(placeholder, 'gap', '14px');
+      forceStyle(placeholder, 'grid-template-rows', '300px auto');
+      forceStyle(placeholder, 'grid-template-areas', '"map" "caption"');
+      forceStyle(placeholder, 'gap', '12px');
       forceStyle(placeholder, 'min-height', '0');
       forceStyle(placeholder, 'max-height', 'none');
       forceStyle(placeholder, 'height', 'auto');
@@ -57,23 +58,24 @@
       forceStyle(placeholder, 'border-radius', '22px');
 
       if (pocket) {
-        // Grid area photo (arriba). z-index alto para nunca quedar detrás del map
-        forceStyle(pocket, 'grid-area', 'photo');
-        forceStyle(pocket, 'position', 'static');
-        forceStyle(pocket, 'top', 'auto');
-        forceStyle(pocket, 'right', 'auto');
+        // Overlay absolute en esquina superior derecha del mapa
+        forceStyle(pocket, 'position', 'absolute');
+        forceStyle(pocket, 'top', '22px');
+        forceStyle(pocket, 'right', '22px');
         forceStyle(pocket, 'bottom', 'auto');
         forceStyle(pocket, 'left', 'auto');
         forceStyle(pocket, 'transform', 'none');
-        forceStyle(pocket, 'width', '100%');
-        forceStyle(pocket, 'max-width', '100%');
+        forceStyle(pocket, 'width', '120px');
+        forceStyle(pocket, 'max-width', '40%');
+        forceStyle(pocket, 'height', 'auto');
         forceStyle(pocket, 'margin', '0');
-        forceStyle(pocket, 'z-index', '3');
+        forceStyle(pocket, 'z-index', '10');
+        forceStyle(pocket, 'grid-area', 'unset');
         pocket.classList.remove('is-caption-tall');
       }
 
       if (mapEl) {
-        // Grid area map (medio). z-index bajo para nunca quedar encima del pocket
+        // Grid area map, altura 300px (más grande porque ya no comparte fila con foto)
         forceStyle(mapEl, 'grid-area', 'map');
         forceStyle(mapEl, 'position', 'static');
         forceStyle(mapEl, 'inset', 'auto');
@@ -81,16 +83,15 @@
         forceStyle(mapEl, 'right', 'auto');
         forceStyle(mapEl, 'bottom', 'auto');
         forceStyle(mapEl, 'left', 'auto');
-        forceStyle(mapEl, 'height', '280px');
-        forceStyle(mapEl, 'min-height', '280px');
-        forceStyle(mapEl, 'max-height', '280px');
+        forceStyle(mapEl, 'height', '300px');
+        forceStyle(mapEl, 'min-height', '300px');
+        forceStyle(mapEl, 'max-height', '300px');
         forceStyle(mapEl, 'width', '100%');
         forceStyle(mapEl, 'max-width', '100%');
         forceStyle(mapEl, 'box-sizing', 'border-box');
         forceStyle(mapEl, 'z-index', '1');
         forceStyle(mapEl, 'overflow', 'hidden');
 
-        // Leaflet: multi invalidateSize
         [60, 300, 900].forEach((ms) => {
           window.setTimeout(() => {
             try { window.memoryMapModule?.map?.invalidateSize?.(); } catch (_) {}

@@ -1696,9 +1696,10 @@ aside.love-counter {
      3. Caption oscuro
    ---------------------------------------------------------- */
 @media (max-width: 760px) {
-  /* CSS GRID: ignora DOM order y position:absolute, imposible de fallar.
-     3 filas fijas: photo (auto), map (280px), caption (auto). */
+  /* Card container: mapa lleno + foto en esquina (overlay estilo desktop).
+     Grid con solo 2 filas (map + caption). La foto va absoluta encima. */
   .map-placeholder {
+    position: relative !important;             /* ancla para el pocket absoluto */
     overflow: hidden !important;
     min-height: 0 !important;
     max-height: none !important;
@@ -1709,49 +1710,69 @@ aside.love-counter {
     box-sizing: border-box !important;
     display: grid !important;
     grid-template-columns: 1fr !important;
-    grid-template-rows: auto 280px auto !important;
+    grid-template-rows: 300px auto !important;
     grid-template-areas:
-      "photo"
       "map"
       "caption" !important;
-    gap: 14px !important;
+    gap: 12px !important;
     padding: 12px !important;
     background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(244,238,255,0.90)) !important;
     border: 1px solid rgba(124, 73, 255, 0.18) !important;
     border-radius: 22px !important;
     box-shadow: 0 12px 32px rgba(36, 19, 50, 0.14) !important;
   }
-  /* Padding lateral del card wrapper */
   .extra-card--map-full {
     padding-left: 14px !important;
     padding-right: 14px !important;
     padding-bottom: 14px !important;
   }
 
-  /* POCKET: grid-area photo (arriba). position: static para participar en grid. */
+  /* POCKET: overlay absolute en la esquina superior derecha del mapa,
+     como el estilo desktop pero adaptado a móvil. */
   .map-photo-pocket,
   .map-photo-pocket.is-caption-tall {
-    grid-area: photo !important;
-    position: static !important;
-    top: auto !important;
-    right: auto !important;
+    position: absolute !important;
+    top: 22px !important;
+    right: 22px !important;
     bottom: auto !important;
     left: auto !important;
     inset: auto !important;
     transform: none !important;
-    margin: 0 auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    z-index: 3 !important;
+    margin: 0 !important;
+    width: 120px !important;
+    max-width: 40% !important;
+    height: auto !important;
+    z-index: 10 !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    background: linear-gradient(135deg, rgba(255, 230, 200, 0.18), rgba(196, 130, 255, 0.18)) !important;
-    border-radius: 18px !important;
-    border: 1px solid rgba(255, 200, 230, 0.35) !important;
-    padding: 8px !important;
-    box-shadow: 0 6px 18px rgba(36, 19, 50, 0.18) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 14px !important;
+    border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    padding: 4px !important;
+    box-shadow: 0 6px 20px rgba(36, 19, 50, 0.35), 0 0 0 1px rgba(124, 73, 255, 0.20) !important;
     box-sizing: border-box !important;
+  }
+  /* Photo frame dentro del pocket: aspect ratio cuadrado, chico */
+  .map-photo-pocket .photo-frame,
+  .map-photo-pocket .print-gallery--embedded .photo-frame {
+    width: 100% !important;
+    height: 140px !important;
+    min-height: 140px !important;
+    max-height: 140px !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+  }
+  /* Hint text: ocultar en el overlay móvil (poco espacio) */
+  .map-photo-pocket .print-gallery-hint {
+    display: none !important;
+  }
+  .map-photo-pocket .print-gallery {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+  .map-photo-pocket .print-gallery--embedded {
+    padding: 0 !important;
   }
 
   .map-photo-pocket .print-gallery,
@@ -1793,7 +1814,7 @@ aside.love-counter {
     inset: 0 !important;
   }
 
-  /* MAPA: grid-area map (medio). position:static para grid. z-index bajo. */
+  /* MAPA: grid-area map (fila completa arriba, 300px). */
   #memory-map.memory-map,
   .memory-map {
     grid-area: map !important;
@@ -1803,9 +1824,9 @@ aside.love-counter {
     left: auto !important;
     right: auto !important;
     bottom: auto !important;
-    height: 280px !important;
-    min-height: 280px !important;
-    max-height: 280px !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    max-height: 300px !important;
     border-radius: 16px !important;
     border: 1px solid rgba(124, 73, 255, 0.14) !important;
     width: 100% !important;
@@ -1819,9 +1840,9 @@ aside.love-counter {
   #memory-map.leaflet-container,
   .memory-map.leaflet-container,
   .map-placeholder .leaflet-container {
-    height: 280px !important;
-    min-height: 280px !important;
-    max-height: 280px !important;
+    height: 300px !important;
+    min-height: 300px !important;
+    max-height: 300px !important;
     width: 100% !important;
     max-width: 100% !important;
     overflow: hidden !important;
