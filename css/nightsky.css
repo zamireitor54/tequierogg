@@ -424,40 +424,42 @@
   height: var(--ns-size, 12px);
   border: 0;
   padding: 0;
-  border-radius: 50%;
-  /* PERF WIN GIGANTE: quitamos clip-path polygon Y filter drop-shadow.
-     - clip-path polygon: creaba paint area extra por star
-     - filter drop-shadow: PROMOCIONABA cada star a su propia capa del
-       compositor → 150+ stars = 150+ layers. Devastador.
-     Ahora usamos:
-     - background radial-gradient: da forma "estrella distante" (punto
-       blanco brillante con halo de color), más realista que polygon
-     - box-shadow: da el glow externo SIN promover a capa (mucho más barato).
-     Las estrellas "protagonistas" (is-today, is-active-now) sí conservan
-     clip-path + filter — son pocas y merecen el gasto. */
-  background: radial-gradient(circle at 50% 45%,
+  /* Estrella de 5 puntas real */
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  /* Background sólido con highlight interno para look brillante */
+  background: radial-gradient(circle at 50% 40%,
     #fff 0%,
-    var(--ns-color, #fff) 35%,
-    color-mix(in srgb, var(--ns-color, #fff) 60%, transparent) 100%);
-  box-shadow:
-    0 0 var(--ns-glow, 5px) var(--ns-color, #fff),
-    0 0 calc(var(--ns-glow, 5px) * 2) color-mix(in srgb, var(--ns-color, #fff) 40%, transparent);
+    var(--ns-color, #fff) 50%,
+    var(--ns-color, #fff) 100%);
   transform: translate(-50%, -50%);
   cursor: pointer;
   z-index: 4;
   opacity: 0;
+  /* PERF: SIN filter drop-shadow (evita promover a compositor layer).
+     El look brillante viene del radial-gradient con blanco al centro.
+     Solo VIP (is-today, is-active-now, hover) reciben glow externo. */
   animation: nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards;
 }
 
 .ns-star:hover,
 .ns-star:focus-visible {
-  transform: translate(-50%, -50%) scale(1.6);
+  transform: translate(-50%, -50%) scale(1.7);
   outline: none;
-  box-shadow:
-    0 0 calc(var(--ns-glow, 5px) * 2) var(--ns-color, #fff),
-    0 0 calc(var(--ns-glow, 5px) * 4) var(--ns-color, #fff);
+  filter: drop-shadow(0 0 6px var(--ns-color, #fff))
+          drop-shadow(0 0 12px var(--ns-color, #fff));
   z-index: 6;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 @keyframes nsStarFadeIn {
@@ -510,16 +512,15 @@
   );
 }
 
-/* Estrellas DECORATIVAS · titilan pero SIN filter (usan box-shadow heredado
-   del base). ~15 elementos en desktop. */
+/* Decorativas · misma forma estrella + titilan. SIN filter (box-shadow
+   clipped por polygon no serviría). El glow perceptivo viene del gradient. */
 .ns-star.ns-decor {
   cursor: default;
   pointer-events: none;
   background: radial-gradient(circle at 50% 40%,
     #fff 0%,
-    rgba(255, 250, 235, 0.9) 50%,
-    rgba(255, 250, 235, 0.2) 100%);
-  box-shadow: 0 0 var(--ns-glow, 3px) rgba(255, 250, 235, 0.7);
+    rgba(255, 250, 240, 0.98) 55%,
+    rgba(255, 250, 240, 0.85) 100%);
   animation:
     nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards,
     nsStarTwinkle var(--ns-twinkle-dur, 3s) ease-in-out var(--ns-twinkle-delay, 0s) infinite;
@@ -563,21 +564,19 @@
 }
 
 /* Estrella de FOTO con imagen recortada en forma de estrella */
+/* Photo star: la foto se clipa a la forma de estrella (por el clip-path
+   heredado del base). SIN filter drop-shadow — el ojo distingue la foto
+   igual gracias al background-image. Solo hover añade filter puntual. */
 .ns-star-photo.has-image {
   background: var(--ns-photo-url) center/cover no-repeat,
               radial-gradient(circle, var(--ns-star-photo), var(--ns-star-photo));
   background-blend-mode: normal;
-  filter:
-    drop-shadow(0 0 8px rgba(196, 181, 253, 0.85))
-    drop-shadow(0 0 18px rgba(196, 181, 253, 0.55))
-    brightness(1.08) saturate(1.15);
 }
 
 .ns-star-photo.has-image:hover {
   filter:
-    drop-shadow(0 0 12px rgba(255, 95, 182, 0.9))
-    drop-shadow(0 0 24px rgba(196, 181, 253, 0.8))
-    brightness(1.18) saturate(1.25);
+    drop-shadow(0 0 8px rgba(196, 181, 253, 0.85))
+    brightness(1.15) saturate(1.2);
 }
 
 /* Estrella "HOY" — más grande y con pulse */
