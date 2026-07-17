@@ -655,10 +655,28 @@
     }
   }
 
+  // Helper: en móvil desplaza el centro del mapa hacia la DERECHA para que
+  // el marcador aparezca a la IZQUIERDA de la vista (no debajo del overlay
+  // de foto que está en la esquina superior derecha).
+  function computeMobileOffsetLatLng(latlng, zoom) {
+    if (window.innerWidth >= 760 || !memoryMap) return latlng;
+    try {
+      const point = memoryMap.project(L.latLng(latlng), zoom);
+      // Shift center 55px derecha → marker aparece 55px izquierda del centro
+      // Y también un poco hacia abajo para que no quede tapado por foto en top
+      point.x += 55;
+      point.y -= 18;
+      return memoryMap.unproject(point, zoom);
+    } catch (_) {
+      return latlng;
+    }
+  }
+
   async function focusMemoryMapPlace(place) {
     const resolved = await resolvePlaceToCoords(place);
     if (!resolved || !memoryMap) return;
-    memoryMap.flyTo([resolved.lat, resolved.lng], 14, { duration: 1.2 });
+    const target = computeMobileOffsetLatLng([resolved.lat, resolved.lng], 14);
+    memoryMap.flyTo(target, 14, { duration: 1.2 });
   }
 
   async function spotlightPhoto(item) {
@@ -698,7 +716,10 @@
       </div>
     `);
     marker.addTo(memorySpotlightLayer);
-    memoryMap.flyTo([resolved.lat, resolved.lng], 14, { duration: 1.35 });
+    // Móvil: centro del mapa desplazado a la derecha → marker aparece a la
+    // izquierda (no debajo del overlay de foto en la esquina superior derecha).
+    const target = computeMobileOffsetLatLng([resolved.lat, resolved.lng], 14);
+    memoryMap.flyTo(target, 14, { duration: 1.35 });
     setTimeout(() => marker.openPopup(), 420);
   }
 

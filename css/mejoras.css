@@ -1727,40 +1727,40 @@ aside.love-counter {
     padding-bottom: 14px !important;
   }
 
-  /* POCKET: overlay absolute en la esquina superior derecha del mapa,
-     como el estilo desktop pero adaptado a móvil. */
+  /* POCKET: overlay absolute PEGADO a la esquina superior derecha,
+     más chico para no tapar el marcador del mapa. */
   .map-photo-pocket,
   .map-photo-pocket.is-caption-tall {
     position: absolute !important;
-    top: 22px !important;
-    right: 22px !important;
+    top: 14px !important;
+    right: 14px !important;
     bottom: auto !important;
     left: auto !important;
     inset: auto !important;
     transform: none !important;
     margin: 0 !important;
-    width: 120px !important;
-    max-width: 40% !important;
+    width: 92px !important;
+    max-width: 32% !important;
     height: auto !important;
     z-index: 10 !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     background: rgba(255, 255, 255, 0.95) !important;
-    border-radius: 14px !important;
+    border-radius: 12px !important;
     border: 2px solid rgba(255, 255, 255, 0.9) !important;
-    padding: 4px !important;
-    box-shadow: 0 6px 20px rgba(36, 19, 50, 0.35), 0 0 0 1px rgba(124, 73, 255, 0.20) !important;
+    padding: 3px !important;
+    box-shadow: 0 4px 14px rgba(36, 19, 50, 0.32), 0 0 0 1px rgba(124, 73, 255, 0.18) !important;
     box-sizing: border-box !important;
   }
-  /* Photo frame dentro del pocket: aspect ratio cuadrado, chico */
+  /* Photo frame chico */
   .map-photo-pocket .photo-frame,
   .map-photo-pocket .print-gallery--embedded .photo-frame {
     width: 100% !important;
-    height: 140px !important;
-    min-height: 140px !important;
-    max-height: 140px !important;
-    border-radius: 10px !important;
+    height: 108px !important;
+    min-height: 108px !important;
+    max-height: 108px !important;
+    border-radius: 9px !important;
     box-sizing: border-box !important;
   }
   /* Hint text: ocultar en el overlay móvil (poco espacio) */
