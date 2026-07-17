@@ -1696,9 +1696,10 @@ aside.love-counter {
      3. Caption oscuro
    ---------------------------------------------------------- */
 @media (max-width: 760px) {
-  /* CARD contenedor — pinta el recuadro y clipa lo que se salga */
+  /* CSS GRID: ignora DOM order y position:absolute, imposible de fallar.
+     3 filas fijas: photo (auto), map (280px), caption (auto). */
   .map-placeholder {
-    overflow: hidden !important;             /* clipa tiles Leaflet cacheadas */
+    overflow: hidden !important;
     min-height: 0 !important;
     max-height: none !important;
     height: auto !important;
@@ -1706,12 +1707,15 @@ aside.love-counter {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;          /* centrado horizontal de hijos */
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto 280px auto !important;
+    grid-template-areas:
+      "photo"
+      "map"
+      "caption" !important;
     gap: 14px !important;
     padding: 12px !important;
-    padding-bottom: 12px !important;
     background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(244,238,255,0.90)) !important;
     border: 1px solid rgba(124, 73, 255, 0.18) !important;
     border-radius: 22px !important;
@@ -1724,11 +1728,10 @@ aside.love-counter {
     padding-bottom: 14px !important;
   }
 
-  /* Pocket SIEMPRE arriba, static (styles.css la ponía position:absolute
-     bottom:92px que la clavaba al fondo del mapa). Sobrescribimos TODO. */
+  /* POCKET: grid-area photo (arriba). position: static para participar en grid. */
   .map-photo-pocket,
   .map-photo-pocket.is-caption-tall {
-    order: -1 !important;
+    grid-area: photo !important;
     position: static !important;
     top: auto !important;
     right: auto !important;
@@ -1737,17 +1740,17 @@ aside.love-counter {
     inset: auto !important;
     transform: none !important;
     margin: 0 auto !important;
-    width: min(320px, 96%) !important;
-    max-width: 96% !important;
-    z-index: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    z-index: 3 !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     background: linear-gradient(135deg, rgba(255, 230, 200, 0.18), rgba(196, 130, 255, 0.18)) !important;
-    border-radius: 22px !important;
+    border-radius: 18px !important;
     border: 1px solid rgba(255, 200, 230, 0.35) !important;
-    padding: 10px !important;
-    box-shadow: 0 10px 28px rgba(36, 19, 50, 0.25) !important;
+    padding: 8px !important;
+    box-shadow: 0 6px 18px rgba(36, 19, 50, 0.18) !important;
     box-sizing: border-box !important;
   }
 
@@ -1790,10 +1793,10 @@ aside.love-counter {
     inset: 0 !important;
   }
 
-  /* Mapa contenido dentro del card, altura FIJA, borde propio para ver el recuadro */
+  /* MAPA: grid-area map (medio). position:static para grid. z-index bajo. */
   #memory-map.memory-map,
   .memory-map {
-    order: 2 !important;
+    grid-area: map !important;
     position: static !important;
     inset: auto !important;
     top: auto !important;
@@ -1807,13 +1810,12 @@ aside.love-counter {
     border: 1px solid rgba(124, 73, 255, 0.14) !important;
     width: 100% !important;
     max-width: 100% !important;
-    flex: 0 0 280px !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
+    z-index: 1 !important;
   }
 
-  /* Leaflet internal container: forzar a 100% del padre + clip.
-     Leaflet añade .leaflet-container class al elemento — targetamos ambos. */
+  /* Leaflet internal container */
   #memory-map.leaflet-container,
   .memory-map.leaflet-container,
   .map-placeholder .leaflet-container {
@@ -1825,6 +1827,22 @@ aside.love-counter {
     overflow: hidden !important;
     box-sizing: border-box !important;
     border-radius: 16px !important;
+  }
+
+  /* CAPTION: grid-area caption (abajo). */
+  .map-placeholder-copy {
+    grid-area: caption !important;
+    position: static !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    inset: auto !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    z-index: 2 !important;
   }
 
   .map-placeholder-copy {

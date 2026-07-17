@@ -39,12 +39,12 @@
         placeholder.insertBefore(pocket, placeholder.firstChild);
       }
 
-      // .map-placeholder: card contenedor — overflow:hidden clipa tiles
-      // Leaflet cacheadas al tamaño viejo. align-items:center → hijos centrados
-      forceStyle(placeholder, 'display', 'flex');
-      forceStyle(placeholder, 'flex-direction', 'column');
-      forceStyle(placeholder, 'align-items', 'center');
-      forceStyle(placeholder, 'gap', '12px');
+      // CSS GRID inline — imposible de perder contra flex/position/absolute
+      forceStyle(placeholder, 'display', 'grid');
+      forceStyle(placeholder, 'grid-template-columns', '1fr');
+      forceStyle(placeholder, 'grid-template-rows', 'auto 280px auto');
+      forceStyle(placeholder, 'grid-template-areas', '"photo" "map" "caption"');
+      forceStyle(placeholder, 'gap', '14px');
       forceStyle(placeholder, 'min-height', '0');
       forceStyle(placeholder, 'max-height', 'none');
       forceStyle(placeholder, 'height', 'auto');
@@ -57,26 +57,24 @@
       forceStyle(placeholder, 'border-radius', '22px');
 
       if (pocket) {
-        // Pocket: static !important gana contra el @media 768px de styles.css
-        // que la ponía position:absolute bottom:92px
+        // Grid area photo (arriba). z-index alto para nunca quedar detrás del map
+        forceStyle(pocket, 'grid-area', 'photo');
         forceStyle(pocket, 'position', 'static');
         forceStyle(pocket, 'top', 'auto');
         forceStyle(pocket, 'right', 'auto');
         forceStyle(pocket, 'bottom', 'auto');
         forceStyle(pocket, 'left', 'auto');
         forceStyle(pocket, 'transform', 'none');
-        forceStyle(pocket, 'width', 'min(320px, 96%)');
-        forceStyle(pocket, 'max-width', '96%');
-        forceStyle(pocket, 'margin', '0 auto');
-        forceStyle(pocket, 'z-index', 'auto');
-        forceStyle(pocket, 'order', '-1');
-        // Sacar clase que podría reforzar overlay
+        forceStyle(pocket, 'width', '100%');
+        forceStyle(pocket, 'max-width', '100%');
+        forceStyle(pocket, 'margin', '0');
+        forceStyle(pocket, 'z-index', '3');
         pocket.classList.remove('is-caption-tall');
       }
 
       if (mapEl) {
-        // CRÍTICO: setProperty con 'important' — styles.css tiene min-height
-        // 430-520px !important en varias @media que ganaban sobre inline sin important
+        // Grid area map (medio). z-index bajo para nunca quedar encima del pocket
+        forceStyle(mapEl, 'grid-area', 'map');
         forceStyle(mapEl, 'position', 'static');
         forceStyle(mapEl, 'inset', 'auto');
         forceStyle(mapEl, 'top', 'auto');
@@ -89,11 +87,10 @@
         forceStyle(mapEl, 'width', '100%');
         forceStyle(mapEl, 'max-width', '100%');
         forceStyle(mapEl, 'box-sizing', 'border-box');
-        forceStyle(mapEl, 'flex', '0 0 280px');
+        forceStyle(mapEl, 'z-index', '1');
+        forceStyle(mapEl, 'overflow', 'hidden');
 
-        // Leaflet: invalidateSize múltiples veces para que recalcule tras
-        // el cambio de tamaño (staggered: 60ms + 300ms + 900ms cubre casos
-        // de red lenta o init tardío). NO disparar 'resize' que causa loop.
+        // Leaflet: multi invalidateSize
         [60, 300, 900].forEach((ms) => {
           window.setTimeout(() => {
             try { window.memoryMapModule?.map?.invalidateSize?.(); } catch (_) {}
@@ -102,13 +99,17 @@
       }
 
       if (copy) {
+        forceStyle(copy, 'grid-area', 'caption');
         forceStyle(copy, 'position', 'static');
         forceStyle(copy, 'left', 'auto');
         forceStyle(copy, 'right', 'auto');
         forceStyle(copy, 'bottom', 'auto');
-        forceStyle(copy, 'margin', '0 auto');
-        forceStyle(copy, 'width', 'min(340px, 96%)');
-        forceStyle(copy, 'max-width', '96%');
+        forceStyle(copy, 'top', 'auto');
+        forceStyle(copy, 'inset', 'auto');
+        forceStyle(copy, 'margin', '0');
+        forceStyle(copy, 'width', '100%');
+        forceStyle(copy, 'max-width', '100%');
+        forceStyle(copy, 'z-index', '2');
       }
     } else {
       // Desktop: limpiar todos los inline (vuelve a CSS normal)
