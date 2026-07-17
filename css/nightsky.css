@@ -424,47 +424,45 @@
   height: var(--ns-size, 12px);
   border: 0;
   padding: 0;
-  background: var(--ns-color, #ffffff);
-  clip-path: polygon(
-    50% 0%,
-    61% 35%,
-    98% 35%,
-    68% 57%,
-    79% 91%,
-    50% 70%,
-    21% 91%,
-    32% 57%,
-    2% 35%,
-    39% 35%
-  );
-  transform: translate(-50%, -50%) rotate(var(--ns-rot, 0deg));
+  border-radius: 50%;
+  /* PERF WIN GIGANTE: quitamos clip-path polygon Y filter drop-shadow.
+     - clip-path polygon: creaba paint area extra por star
+     - filter drop-shadow: PROMOCIONABA cada star a su propia capa del
+       compositor → 150+ stars = 150+ layers. Devastador.
+     Ahora usamos:
+     - background radial-gradient: da forma "estrella distante" (punto
+       blanco brillante con halo de color), más realista que polygon
+     - box-shadow: da el glow externo SIN promover a capa (mucho más barato).
+     Las estrellas "protagonistas" (is-today, is-active-now) sí conservan
+     clip-path + filter — son pocas y merecen el gasto. */
+  background: radial-gradient(circle at 50% 45%,
+    #fff 0%,
+    var(--ns-color, #fff) 35%,
+    color-mix(in srgb, var(--ns-color, #fff) 60%, transparent) 100%);
+  box-shadow:
+    0 0 var(--ns-glow, 5px) var(--ns-color, #fff),
+    0 0 calc(var(--ns-glow, 5px) * 2) color-mix(in srgb, var(--ns-color, #fff) 40%, transparent);
+  transform: translate(-50%, -50%);
   cursor: pointer;
   z-index: 4;
   opacity: 0;
-  /* PERF: 2 drop-shadow → 1. Cada drop-shadow es un composite-pass separado
-     por elemento. Con 300+ stars eso es 600+ passes por frame. */
-  filter: drop-shadow(0 0 var(--ns-glow, 5px) var(--ns-color, #ffffff));
-  /* PERF: twinkle infinito eliminado de la base. Solo .ns-decor (decorativas)
-     lo mantienen abajo. Antes las ~150 event stars también titilaban → drenaba
-     CPU aunque el usuario estuviera solo mirando. */
   animation: nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards;
-  transition: transform 0.25s var(--mej-bounce, cubic-bezier(0.34, 1.56, 0.64, 1)), filter 0.2s ease;
 }
 
 .ns-star:hover,
 .ns-star:focus-visible {
-  transform: translate(-50%, -50%) rotate(var(--ns-rot, 0deg)) scale(2);
+  transform: translate(-50%, -50%) scale(1.6);
   outline: none;
-  filter:
-    drop-shadow(0 0 calc(var(--ns-glow, 5px) * 1.5) var(--ns-color, #fff))
-    drop-shadow(0 0 calc(var(--ns-glow, 5px) * 2.5) var(--ns-color, #fff))
-    brightness(1.25);
+  box-shadow:
+    0 0 calc(var(--ns-glow, 5px) * 2) var(--ns-color, #fff),
+    0 0 calc(var(--ns-glow, 5px) * 4) var(--ns-color, #fff);
   z-index: 6;
+  transition: transform 0.2s ease;
 }
 
 @keyframes nsStarFadeIn {
-  from { opacity: 0; transform: translate(-50%, -50%) rotate(var(--ns-rot, 0deg)) scale(0.2); }
-  to   { opacity: 1; transform: translate(-50%, -50%) rotate(var(--ns-rot, 0deg)) scale(1); }
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 @keyframes nsStarTwinkle {
@@ -512,13 +510,16 @@
   );
 }
 
-/* Estrellas DECORATIVAS de fondo · 4 tiers de profundidad.
-   SOLO éstas mantienen twinkle infinito (~24 elementos en desktop). */
+/* Estrellas DECORATIVAS · titilan pero SIN filter (usan box-shadow heredado
+   del base). ~15 elementos en desktop. */
 .ns-star.ns-decor {
   cursor: default;
   pointer-events: none;
-  background: rgba(255, 252, 240, 0.95);
-  filter: drop-shadow(0 0 var(--ns-glow, 3px) rgba(255, 250, 235, 0.6));
+  background: radial-gradient(circle at 50% 40%,
+    #fff 0%,
+    rgba(255, 250, 235, 0.9) 50%,
+    rgba(255, 250, 235, 0.2) 100%);
+  box-shadow: 0 0 var(--ns-glow, 3px) rgba(255, 250, 235, 0.7);
   animation:
     nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards,
     nsStarTwinkle var(--ns-twinkle-dur, 3s) ease-in-out var(--ns-twinkle-delay, 0s) infinite;
@@ -580,14 +581,21 @@
 }
 
 /* Estrella "HOY" — más grande y con pulse */
+/* VIP: solo la estrella "hoy" recupera clip-path polygon + filter drop-shadow.
+   Es UNA sola por render, no promociona toda la sección. */
 .ns-star.is-today {
   --ns-size: 22px;
   --ns-glow: 9px;
+  clip-path: polygon(
+    50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
+    50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+  );
   background: radial-gradient(circle at 50% 35%, #fff 0%, #ffd6ec 50%, #ff95cf 100%);
+  box-shadow: none;
+  filter: drop-shadow(0 0 9px #ffd6ec) drop-shadow(0 0 18px #ff95cf);
   animation:
     nsStarFadeIn 0.6s ease-out var(--ns-delay, 0s) forwards,
-    nsStarTodayPulse 2.2s ease-in-out infinite,
-    nsStarSpin 24s linear infinite;
+    nsStarTodayPulse 2.2s ease-in-out infinite;
 }
 
 @keyframes nsStarTodayPulse {
@@ -1087,13 +1095,8 @@
     0 0 30px rgba(124, 73, 255, 0.18),
     0 0 60px rgba(196, 130, 255, 0.10),
     0 0 0 1px rgba(255, 220, 230, 0.30) inset;
-  /* Flotación sutil — la tarjeta respira como el cielo */
-  animation: nsCardFloat 7s ease-in-out infinite;
-}
-
-@keyframes nsCardFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-5px); }
+  /* PERF: float animation eliminada. Animar transform en un elemento con
+     box-shadow grande recomputa la sombra cada frame → costoso durante scroll. */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1351,7 +1354,15 @@
    ========================================================== */
 .ns-star.is-active-now {
   z-index: 9 !important;
-  transform: translate(-50%, -50%) rotate(var(--ns-rot, 0deg)) scale(1.55) !important;
+  /* VIP: recupera clip-path polygon + filter drop-shadow.
+     Es UNA sola a la vez, no impacta perf global. */
+  clip-path: polygon(
+    50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
+    50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
+  ) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  transform: translate(-50%, -50%) scale(1.55) !important;
   transition: transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1),
               filter 0.9s ease !important;
   animation:

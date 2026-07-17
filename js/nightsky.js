@@ -283,11 +283,10 @@
   function buildMessageEvents() {
     const today = new Date();
     const daysDone = Math.max(0, Math.floor((today - CALENDAR_START) / 86400000)) + 1;
-    // PERF: capamos mucho más bajo. Antes se creaban 232 msg stars, cada una
-    // con clip-path polygon + filter drop-shadow + twinkle infinito.
-    // Ahora máximo 80 desktop / 40 móvil (aún cielo denso, sin drenar CPU).
+    // PERF: cap MUY agresivo. 232 → 50/25. Con box-shadow en vez de filter
+    // ya no promocionan a layer, pero cada uno sigue teniendo su paint.
     const isMobile = window.innerWidth < 760;
-    const hardCap = isMobile ? 40 : 80;
+    const hardCap = isMobile ? 25 : 50;
     const cap = Math.min(daysDone, hardCap);
     const events = [];
     const dailyMessages = window.messagesModule?.dailyMessages || [];
@@ -1478,10 +1477,10 @@
     else section.classList.remove('is-mobile-perf');
     section.classList.add('is-eco'); // modo eficiente por defecto
 
-    spawnTinyDots(stage, isMobile ? 30 : 65);
-    spawnMilkyWay(stage, isMobile ? 15 : 30);
-    spawnDecorativeStars(stage, isMobile ? 12 : 24);
-    spawnParticles(stage, isMobile ? 3 : 6);
+    spawnTinyDots(stage, isMobile ? 22 : 50);
+    spawnMilkyWay(stage, isMobile ? 12 : 24);
+    spawnDecorativeStars(stage, isMobile ? 8 : 15);
+    spawnParticles(stage, isMobile ? 2 : 4);
     // Estrellas fugaces + historias: solo desktop, ya rarísimas (1.5-4 min)
     if (!isMobile) {
       scheduleShootingStar(stage);
